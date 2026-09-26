@@ -11,11 +11,17 @@ jobs:
   repository-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - name: Checkout Engineering Compass
-        uses: actions/checkout@v4
+      - name: Checkout exact Engineering Compass Head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ env.EXPECTED_HEAD }}
           persist-credentials: false
+
+      - name: Prove exact-Head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
 
       - name: Verify repository/runtime contract
         run: python3 scripts/verify_repo.py
@@ -23,18 +29,52 @@ jobs:
       - name: Run runtime unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py'
 
+      - name: Smoke read-only GitHub repository evidence collector
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          request = {
+              "target": {
+                  "kind": "REPOSITORY_SCOPE",
+                  "repository": os.environ["GITHUB_REPOSITORY"],
+                  "ref": os.environ["EXPECTED_HEAD"],
+              },
+              "review_intent": "CI smoke test for exact-target read-only evidence collection.",
+              "inspection_profile": "focused",
+          }
+          Path('/tmp/ec-request.json').write_text(json.dumps(request), encoding='utf-8')
+          PY
+          python3 -m engineering_compass collect --request /tmp/ec-request.json --out /tmp/ec-evidence.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          evidence = json.loads(Path('/tmp/ec-evidence.json').read_text(encoding='utf-8'))
+          assert evidence['identity']['head_sha'] == os.environ['EXPECTED_HEAD']
+          assert evidence['target']['kind'] == 'REPOSITORY_SCOPE'
+          assert evidence['freshness'] == 'CURRENT'
+          PY
+
   prompt-pipeline-integration:
     needs: repository-runtime
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - name: Checkout Engineering Compass
-        uses: actions/checkout@v4
+      - name: Checkout exact Engineering Compass Head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ env.EXPECTED_HEAD }}
           persist-credentials: false
 
+      - name: Prove exact-Head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+
       - name: Checkout locked Prompt-Pipeline
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: rezahh107/Prompt-Pipeline
           ref: 488499d9008b325264159f6c7fc5dbffe4a9e7b2
@@ -59,7 +99,7 @@ jobs:
           PY
 
       - name: Setup Node for locked Prompt-Pipeline
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20.20.0'
 
