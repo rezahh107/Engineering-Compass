@@ -1,0 +1,43 @@
+{
+  "repository": {
+    "owner": "rezahh107",
+    "name": "Engineering-Compass",
+    "phase": "INITIAL_FOUNDATION",
+    "canonical_platform": "GitHub",
+    "default_branch": "main"
+  },
+  "acceptance": {
+    "current_authority_branch": "main",
+    "candidate_branches_are_authoritative": false,
+    "baseline_rule": "The first human-approved main commit containing this foundation is the accepted baseline."
+  },
+  "mission": "Guide LLMs to choose, sequence, adapt, and stop engineering reasoning methods without re-teaching general engineering knowledge.",
+  "canonical_surfaces": {
+    "mission": "docs/core/MISSION.md",
+    "reasoning_model": "docs/core/REASONING_MODEL.md",
+    "authority": "docs/governance/AUTHORITY.md",
+    "review_protocol": "docs/governance/REVIEW_PROTOCOL.md",
+    "verification": "docs/governance/VERIFICATION.md",
+    "research_basis": "docs/research/RESEARCH_BASIS.md"
+  },
+  "agent_entrypoints": {
+    "cross_agent": "AGENTS.md",
+    "selective_runtime": "AGENT_ENTRYPOINT.md"
+  },
+  "verification": {
+    "canonical_command": "python3 scripts/verify_repo.py",
+    "ci_workflow": ".github/workflows/verify.yml",
+    "semantic_reasoning_quality_mechanically_proven": false
+  },
+  "fixtures": {
+    "semantic_regression": [
+      "fixtures/gravity-flow-version-coupling.json"
+    ]
+  },
+  "current_limits": [
+    "No executable review engine is implemented.",
+    "No claim is made that Markdown guidance mechanically controls an LLM.",
+    "Structural CI does not prove semantic review quality.",
+    "No universal language/framework checklist is part of the core."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "EC-RR-001_GRAVITY_FLOW_VERSION_COUPLING",
+  "authority": "NON_CANONICAL_TEST_SPEC",
+  "purpose": "Regression fixture for detecting an architectural upstream-evolution problem without pre-teaching the exact bug.",
+  "scope": "PR_OR_REPOSITORY_REVIEW",
+  "scenario": {
+    "product": "A maintained WordPress integration plugin adds presentation behavior on top of Gravity Flow.",
+    "upstream": {
+      "name": "Gravity Flow",
+      "properties": [
+        "externally maintained",
+        "independently versioned",
+        "updatable",
+        "implementation not controlled by the integration plugin"
+      ]
+    },
+    "implementation_decisions": [
+      "use a Gravity Flow internal seam",
+      "admit the host only when an exact supported version matches",
+      "hash several upstream files and require exact fingerprints",
+      "fail closed for unknown host implementations"
+    ],
+    "local_performance_detail": "the same upstream files are hashed repeatedly across requests"
+  },
+  "expected_reasoning": [
+    "Identify upstream independent evolution as a material system property.",
+    "Create a change scenario for an upstream version/update.",
+    "Derive a structural obligation for an explicit compatibility/evolution strategy without inventing a requirement to support every version.",
+    "Extract exact-version admission and file fingerprinting as material engineering decisions.",
+    "Question whether compatibility is coupled to behavioral capability or exact implementation identity.",
+    "Treat repeated hashing/caching as a local optimization, not automatically as the root-cause repair.",
+    "Search for same-level alternatives such as supported public seams, capability/behavior detection, bounded compatibility adapters, or evidence-backed version ranges before recommending a method.",
+    "Allow exact-build admission to remain a JUSTIFIED_DEVIATION if inspection shows no safer sufficient alternative and fail-closed safety materially requires it."
+  ],
+  "forbidden_shortcuts": [
+    "Do not invent 'support all future Gravity Flow versions' as an explicit project requirement.",
+    "Do not stop at 'cache the file hashes' if the architecture coupling remains unexplored.",
+    "Do not declare fingerprinting wrong without inspecting whether a stable/supported alternative exists."
+  ],
+  "acceptable_final_states": [
+    "CONFIRMED_FINDING",
+    "JUSTIFIED_DEVIATION",
+    "NOT_PROVEN"
+  ]
+}
