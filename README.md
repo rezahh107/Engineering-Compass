@@ -71,4 +71,4 @@ This verifies repository structure, machine-readable artifacts, and local docume
 
 Material reasoning/governance changes should be proposed on a branch, reviewed as a pull request, verified on the exact resulting Head, and accepted only when merged to `main`.
 
-The first human-approved `main` commit containing this foundation becomes the accepted repository baseline.
+The initial Foundation baseline has already been accepted by the human-approved merge of PR #1 to `main`. Its historical commit/tree identity is recorded in `repository.manifest.json`; later repository changes do not rewrite that baseline identity.

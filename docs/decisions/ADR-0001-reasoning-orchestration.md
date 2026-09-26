@@ -1,6 +1,6 @@
 # ADR-0001 — Reasoning Orchestration Instead of an Engineering Checklist
 
-- Status: Accepted design direction; repository authority begins on human-approved merge to `main`.
+- Status: Accepted; repository authority was established by the human-approved merge of PR #1 to `main`.
 - Decision scope: Engineering Compass core architecture.
 
 ## Context
