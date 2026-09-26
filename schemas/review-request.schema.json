@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-compass.review-request.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["target", "review_intent"],
+  "properties": {
+    "target": {
+      "type": "object",
+      "required": ["kind", "repository"],
+      "properties": {
+        "kind": {"enum": ["PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"]},
+        "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+        "pr_number": {"type": "integer", "minimum": 1},
+        "base_ref": {"type": "string", "minLength": 1},
+        "target_ref": {"type": "string", "minLength": 1},
+        "ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "review_intent": {"type": "string", "minLength": 1},
+    "inspection_profile": {"enum": ["focused", "deep"], "default": "deep"}
+  }
+}

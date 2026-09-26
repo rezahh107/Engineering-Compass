@@ -16,33 +16,60 @@
       "acceptance_source": "human-approved merge of PR #1"
     }
   },
-  "mission": "Guide LLMs to choose, sequence, adapt, and stop engineering reasoning methods without re-teaching general engineering knowledge.",
+  "mission": "Guide LLMs to choose, sequence, adapt, stop, and safely operationalize engineering reasoning without re-teaching general engineering knowledge.",
   "canonical_surfaces": {
     "mission": "docs/core/MISSION.md",
     "reasoning_model": "docs/core/REASONING_MODEL.md",
     "authority": "docs/governance/AUTHORITY.md",
     "review_protocol": "docs/governance/REVIEW_PROTOCOL.md",
     "verification": "docs/governance/VERIFICATION.md",
-    "research_basis": "docs/research/RESEARCH_BASIS.md"
+    "research_basis": "docs/research/RESEARCH_BASIS.md",
+    "runtime_architecture": "docs/runtime/ARCHITECTURE.md",
+    "root_cause_repair": "docs/runtime/ROOT_CAUSE_REPAIR.md",
+    "action_model": "docs/runtime/ACTION_MODEL.md",
+    "prompt_pipeline_integration": "docs/runtime/PROMPT_PIPELINE.md",
+    "llm_assessment_contract": "docs/runtime/LLM_ASSESSMENT_CONTRACT.md"
   },
   "agent_entrypoints": {
     "cross_agent": "AGENTS.md",
     "selective_runtime": "AGENT_ENTRYPOINT.md"
   },
+  "runtime": {
+    "package": "engineering_compass",
+    "version": "0.1.0",
+    "python_requires": ">=3.11",
+    "target_modes": ["PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"],
+    "github_evidence_collector": "read_only",
+    "root_cause_repair_gate": "executable_contract_validation",
+    "action_projection": "deterministic_from_validated_evidence_and_assessment",
+    "prompt_pipeline_mode": "external_ssot_locked_checkout",
+    "prompt_pipeline_lock": "integrations/prompt-pipeline.lock.json",
+    "automatic_remote_writes": false,
+    "automatic_merge_or_deploy": false
+  },
   "verification": {
     "canonical_command": "python3 scripts/verify_repo.py",
+    "unit_test_command": "python3 -m unittest discover -s tests -p 'test_*.py'",
     "ci_workflow": ".github/workflows/verify.yml",
-    "semantic_reasoning_quality_mechanically_proven": false
+    "semantic_reasoning_quality_mechanically_proven": false,
+    "prompt_pipeline_cross_repo_lock_checked_in_ci": true
   },
   "fixtures": {
-    "semantic_regression": [
-      "fixtures/gravity-flow-version-coupling.json"
-    ]
+    "semantic_regression": ["fixtures/gravity-flow-version-coupling.json"],
+    "runtime_regression": ["fixtures/runtime/repair-full.json", "fixtures/runtime/root-cause-unproven.json"]
   },
+  "schemas": [
+    "schemas/review-request.schema.json",
+    "schemas/evidence-bundle.schema.json",
+    "schemas/assessment.schema.json",
+    "schemas/action-projection.schema.json",
+    "schemas/prompt-handoff.schema.json"
+  ],
   "current_limits": [
-    "No executable review engine is implemented.",
-    "No claim is made that Markdown guidance mechanically controls an LLM.",
-    "Structural CI does not prove semantic review quality.",
+    "LLM semantic judgment remains probabilistic and is not proven correct by structural/runtime validation.",
+    "GitHub evidence collection is read-only and bounded by API access, pagination, and available surfaces.",
+    "Prompt-Pipeline remains an external SSOT; Engineering Compass fails closed on locked-checkout drift.",
+    "Prompt-Pipeline generation is not auto-approval and does not prove downstream execution.",
     "No universal language/framework checklist is part of the core."
   ]
 }

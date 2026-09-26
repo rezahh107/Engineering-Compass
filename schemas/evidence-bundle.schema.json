@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-compass.evidence-bundle.v1",
+  "type": "object",
+  "required": ["schema_version", "target", "identity", "freshness", "completeness", "evidence_records"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "target": {"type": "object"},
+    "identity": {"type": "object"},
+    "freshness": {"enum": ["CURRENT", "STALE", "UNKNOWN"]},
+    "completeness": {
+      "type": "object",
+      "required": ["full_coverage", "material_gaps"],
+      "properties": {
+        "full_coverage": {"type": "boolean"},
+        "material_gaps": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "evidence_records": {"type": "array", "items": {"type": "object"}}
+  }
+}

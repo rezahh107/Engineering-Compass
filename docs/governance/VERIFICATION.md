@@ -1,66 +1,82 @@
 # Repository Verification Contract
 
-## Canonical command
+## Canonical commands
 
 ```bash
 python3 scripts/verify_repo.py
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Humans, agents, and CI should use the same underlying verifier.
+Humans, agents, and CI should use these same underlying contracts.
 
-## What the verifier checks
+## What the repository verifier checks
 
-The current structural verifier checks:
+The canonical verifier checks:
 
-- required Foundation files exist;
-- `repository.manifest.json` is valid JSON;
-- the canonical repository phase is `BASELINE_COMPLETE`;
-- accepted-baseline metadata is present and SHA-shaped when the baseline is complete;
-- `AGENT_ENTRYPOINT.md` reports the same repository phase as the canonical manifest;
-- canonical manifest paths exist;
-- semantic regression fixtures are valid JSON and contain required contract fields;
-- local Markdown links resolve to repository files/directories;
-- the agent entrypoints point to the canonical verification command.
+- required Foundation + runtime files exist;
+- `repository.manifest.json` is valid and lifecycle metadata is consistent;
+- canonical manifest surfaces resolve;
+- machine-readable schemas, fixtures, and integration lock are valid JSON;
+- Prompt-Pipeline lock identity is SHA-shaped and declares the current inspected integration boundary;
+- semantic regression fixture retains its non-canonical test-spec authority;
+- executable runtime fixtures can be validated and produce the expected guarded actions;
+- local Markdown links resolve;
+- agent instructions reference the canonical verification commands.
 
-## What it does not prove
+## What unit tests check
 
-A structural PASS does **not** prove:
+The runtime unit suite exercises deterministic transition invariants, including:
 
-- the recorded accepted-baseline metadata corresponds to remote GitHub history;
-- an LLM will follow the guidance;
-- the reasoning model is complete;
-- a review will find every architecture defect;
-- a fixture has been successfully executed against multiple models;
-- production/runtime behavior of a reviewed external project;
-- platform controls beyond what the workflow actually runs.
+- caller intent cannot inject authoritative target facts;
+- a confirmed Finding without a confirmed root cause cannot route to code modification;
+- materially competing methods force FULL comparison semantics;
+- pseudo-alternatives with the same decision signature are rejected;
+- numeric scoring/weights are rejected;
+- equivalent finalists can route to owner decision instead of a fabricated winner;
+- implementation handoff binds root cause, selected method, Conformance Lock, falsification obligations, and selected-method infeasibility behavior;
+- no prompt is produced when the canonical action does not require one.
 
-Guidance is `prompt_level_influence`; CI is deterministic only for the structural checks it executes.
+## Cross-repository Prompt-Pipeline check
+
+CI separately checks out the Prompt-Pipeline commit recorded in `integrations/prompt-pipeline.lock.json` and runs the Engineering Compass lock verifier against the actual external Git tree.
+
+When the integration smoke job executes, Engineering Compass builds canonical Prompt-Pipeline intake and invokes Prompt-Pipeline through its `--request` path. A generated artifact keeps the authority state reported by Prompt-Pipeline; generation is not auto-approval.
+
+## What PASS does not prove
+
+A repository/runtime PASS does **not** prove:
+
+- an LLM will discover every material system property;
+- a structured root-cause statement is objectively correct merely because its contract validates;
+- the selected repair method is globally optimal;
+- a generated Prompt-Pipeline artifact was owner-approved unless that external state is actually observed;
+- an implementation was performed;
+- proposed tests or CI passed unless actually executed and inspected;
+- a fresh exact-Head engineering rereview has completed;
+- merge/deploy authorization exists.
 
 ## Semantic regression boundary
 
-Fixtures under `fixtures/` define review behaviors that should be preserved.
+`fixtures/gravity-flow-version-coupling.json` remains a `NON_CANONICAL_TEST_SPEC` for LLM semantic behavior. Runtime fixtures are executable **control-plane** tests; they do not convert the semantic fixture into a model-evaluation harness.
 
-In the current baseline-complete repository state they are **test specifications**, not an executable LLM evaluation harness.
-
-A future model-evaluation runner may consume them, but until such a runner exists, report semantic regression as `NOT_EXECUTED` unless a human/model evaluation was actually performed.
+Report model semantic regression as `NOT_EXECUTED` unless a real model evaluation was performed.
 
 ## Exact-target qualification
 
 For a repository change:
 
-1. run the canonical command on the exact resulting tree/Head;
-2. record actual output/exit status;
-3. if CI is relevant, inspect the workflow result for the same commit;
-4. do not call skipped/unavailable checks PASS;
-5. report structural verification separately from semantic reasoning evaluation.
+1. run the canonical verifier and unit tests on the exact resulting tree/Head;
+2. inspect CI for the same Head when relevant;
+3. distinguish local runtime tests, external Prompt-Pipeline lock checks, Prompt-Pipeline generation state, target implementation tests, and fresh rereview;
+4. do not call skipped/unavailable stages PASS.
 
-## Definition of Done for Foundation changes
+## Definition of Done for runtime changes
 
-A Foundation/document-governance change is structurally complete when:
+A runtime/governance change is structurally complete when:
 
-- the canonical verifier passes on the exact candidate;
-- internal links are valid;
-- machine-readable artifacts parse;
-- changed canonical semantics have been reflected in relevant fixtures or a reason is documented for no fixture change;
-- agent instructions remain concise pointers rather than duplicated manuals;
-- claims stay within the verification boundary.
+- canonical verifier passes;
+- runtime unit tests pass;
+- machine-readable contracts remain valid;
+- changed transitions have focused regression fixtures/tests;
+- Prompt-Pipeline lock drift is absent or deliberately reconciled from an inspected source;
+- claims stay within the stage actually verified.

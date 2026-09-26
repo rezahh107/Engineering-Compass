@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-compass.assessment.v1",
+  "type": "object",
+  "required": ["assessment_version", "target_binding", "method_coverage", "findings", "root_cause_groups", "unverified_areas", "stop_reason"],
+  "properties": {
+    "assessment_version": {"const": 1},
+    "target_binding": {"type": "object"},
+    "method_coverage": {"type": "array"},
+    "findings": {"type": "array"},
+    "root_cause_groups": {"type": "array"},
+    "unverified_areas": {"type": "array", "items": {"type": "string"}},
+    "owner_policy_decision_required": {"type": "boolean"},
+    "specialist_review_required": {"type": "boolean"},
+    "stop_reason": {"type": "string", "minLength": 1}
+  }
+}

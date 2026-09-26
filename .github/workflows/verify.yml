@@ -8,12 +8,84 @@ permissions:
   contents: read
 
 jobs:
-  repository-foundation:
+  repository-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Checkout
+      - name: Checkout Engineering Compass
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Verify repository contract
+      - name: Verify repository/runtime contract
         run: python3 scripts/verify_repo.py
+
+      - name: Run runtime unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+  prompt-pipeline-integration:
+    needs: repository-runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Engineering Compass
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout locked Prompt-Pipeline
+        uses: actions/checkout@v4
+        with:
+          repository: rezahh107/Prompt-Pipeline
+          ref: 488499d9008b325264159f6c7fc5dbffe4a9e7b2
+          path: .prompt-pipeline
+          persist-credentials: false
+
+      - name: Verify Prompt-Pipeline compatibility lock
+        run: |
+          python3 -m engineering_compass prompt-check \
+            --prompt-pipeline-root .prompt-pipeline \
+            --out /tmp/prompt-pipeline-check.json
+          cat /tmp/prompt-pipeline-check.json
+
+      - name: Build Prompt-Pipeline intake from runtime fixture
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake, write_intake
+          data = json.loads(Path('fixtures/runtime/repair-full.json').read_text(encoding='utf-8'))
+          write_intake('/tmp/engineering-compass-prompt-intake.json', build_prompt_pipeline_intake(data['evidence'], data['assessment']))
+          PY
+
+      - name: Setup Node for locked Prompt-Pipeline
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.20.0'
+
+      - name: Install locked Prompt-Pipeline dependencies
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.13.1 --activate
+          cd .prompt-pipeline
+          pnpm install --frozen-lockfile
+
+      - name: Invoke Prompt-Pipeline canonical request path
+        run: |
+          python3 -m engineering_compass compile-prompt \
+            --intake /tmp/engineering-compass-prompt-intake.json \
+            --prompt-pipeline-root .prompt-pipeline \
+            --out /tmp/prompt-generation-result.json
+          cat /tmp/prompt-generation-result.json
+
+      - name: Enforce Prompt-Pipeline authority boundary
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/prompt-generation-result.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'GENERATED'
+          assert result['authority_state'] in {'review_pending', 'authorized'}
+          if result['authority_state'] == 'review_pending':
+              assert result['downstream_use_allowed'] is False
+          PY

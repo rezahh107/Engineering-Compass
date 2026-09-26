@@ -1,0 +1,30 @@
+{
+  "evidence": {
+    "schema_version": 1,
+    "target": {"kind": "PR_SCOPE", "repository": "acme/example", "pr_number": 7},
+    "identity": {"repository_id": "123", "base_ref": "main", "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "head_ref": "feature/bug", "head_sha": "dddddddddddddddddddddddddddddddddddddddd", "merge_base_sha": "cccccccccccccccccccccccccccccccccccccccc"},
+    "freshness": "CURRENT",
+    "completeness": {"full_coverage": true, "material_gaps": [], "surfaces": {"changed_files": true}},
+    "evidence_records": [{"evidence_id": "EVD-1", "kind": "CODE", "source": "src/x.py", "payload": "symptom only", "limitations": []}]
+  },
+  "assessment": {
+    "assessment_version": 1,
+    "target_binding": {"repository": "acme/example", "kind": "PR_SCOPE", "head_sha": "dddddddddddddddddddddddddddddddddddddddd"},
+    "method_coverage": [{"method": "failure_recovery_analysis", "trigger": "runtime failure", "status": "BLOCKED", "evidence_refs": ["EVD-1"], "outcome": "Causal mechanism not yet established."}],
+    "findings": [{"finding_id": "EC-FND-002", "title": "Observed failure requires diagnosis", "qualification": "CONFIRMED_FINDING", "capability_class": null, "severity": "HIGH", "repair_disposition": "REPAIR", "evidence_refs": ["EVD-1"], "root_cause_group_id": "RC-2"}],
+    "root_cause_groups": [{
+      "group_id": "RC-2",
+      "finding_ids": ["EC-FND-002"],
+      "anchor": {"state": "NOT_PROVEN", "observed_symptom": "Feature fails under an observed condition.", "confirmed_root_cause": "unknown", "root_cause_evidence": ["EVD-1"], "affected_invariants": ["feature remains available under supported conditions"], "correct_enforcement_boundary": "unknown", "same_root_cause_instances": [], "valid_behavior_to_preserve": [], "explicit_unknowns": ["causal mechanism", "correct enforcement boundary"]},
+      "material_change_flags": {"authority_or_ssot_change": false, "public_contract_or_schema_migration": false, "runtime_topology_change": false, "external_consumer_migration": false, "competing_material_methods": false},
+      "methods": [],
+      "selection": {"state": "INSUFFICIENT_EVIDENCE", "selected_method_id": null, "rationale": "Root cause is not established."},
+      "conformance_lock": null,
+      "falsification_obligations": []
+    }],
+    "unverified_areas": [],
+    "owner_policy_decision_required": false,
+    "specialist_review_required": false,
+    "stop_reason": "Verification is required before method selection."
+  }
+}

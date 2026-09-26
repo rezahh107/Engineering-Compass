@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_repository": "rezahh107/Prompt-Pipeline",
+  "source_branch": "main",
+  "source_commit_sha": "488499d9008b325264159f6c7fc5dbffe4a9e7b2",
+  "integration_mode": "external_ssot_locked_checkout",
+  "domain": "prompt_generation",
+  "domain_version": "2026.3",
+  "contract_version": "1.1",
+  "drift_policy": "fail_closed_until_reinspected",
+  "authority_note": "Prompt-Pipeline remains the external prompt-generation SSOT. Engineering Compass stores only an inspected compatibility lock and canonical intake builder; it does not vendor or reinterpret Prompt-Pipeline rules.",
+  "governing_files": [
+    {
+      "path": "pipeline/intake.schema.json",
+      "blob_sha": "ff7c891f9111d0ea7ea5613305f6d4013ff5578d"
+    },
+    {
+      "path": "domains/prompt_generation/route.yaml",
+      "blob_sha": "81be26340324a12526d321569e5a0ade91ed3c02"
+    },
+    {
+      "path": "domains/prompt_generation/input.contract.yaml",
+      "blob_sha": "2c8cffb7d226da11b5cd68781ee5b48afaf4b63a"
+    },
+    {
+      "path": "domains/prompt_generation/templates/master-prompt.j2",
+      "blob_sha": "461d9c3d096de62cf414fc269b73f2d6d5a556db"
+    },
+    {
+      "path": "scripts/peac-generate.ts",
+      "blob_sha": "7bd74d4c05b66898ba5d1cd16472eb8cb422093a"
+    }
+  ]
+}

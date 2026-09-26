@@ -1,0 +1,97 @@
+{
+  "evidence": {
+    "schema_version": 1,
+    "target": {"kind": "PR_SCOPE", "repository": "acme/example", "pr_number": 42},
+    "identity": {"repository_id": "123", "base_ref": "main", "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "head_ref": "feature/fix", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "merge_base_sha": "cccccccccccccccccccccccccccccccccccccccc"},
+    "freshness": "CURRENT",
+    "completeness": {"full_coverage": true, "material_gaps": [], "surfaces": {"changed_files": true, "checks": true}},
+    "evidence_records": [
+      {"evidence_id": "EVD-1", "kind": "CODE", "source": "src/integration.py:compatibility_guard", "payload": "exact implementation identity gates capability", "limitations": []},
+      {"evidence_id": "EVD-2", "kind": "UPSTREAM_CONTRACT", "source": "supported capability seam", "payload": "stable public capability probe is available", "limitations": []}
+    ]
+  },
+  "assessment": {
+    "assessment_version": 1,
+    "target_binding": {"repository": "acme/example", "kind": "PR_SCOPE", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "method_coverage": [
+      {"method": "lifecycle_compatibility_analysis", "trigger": "externally evolving dependency", "status": "APPLIED_FINDING", "evidence_refs": ["EVD-1", "EVD-2"], "outcome": "Compatibility mechanism is narrower than the demonstrated required contract."}
+    ],
+    "findings": [
+      {"finding_id": "EC-FND-001", "title": "Compatibility gate is coupled to implementation identity", "qualification": "CONFIRMED_FINDING", "capability_class": "MISFIT_CAPABILITY", "severity": "HIGH", "repair_disposition": "REPAIR", "evidence_refs": ["EVD-1", "EVD-2"], "root_cause_group_id": "RC-1"}
+    ],
+    "root_cause_groups": [
+      {
+        "group_id": "RC-1",
+        "finding_ids": ["EC-FND-001"],
+        "anchor": {
+          "state": "CONFIRMED",
+          "observed_symptom": "A harmless upstream implementation change rejects the host.",
+          "confirmed_root_cause": "The integration treats exact implementation identity as the compatibility contract even though the required capability is available through a stable supported seam.",
+          "root_cause_evidence": ["EVD-1", "EVD-2"],
+          "affected_invariants": ["admit supported capability", "fail closed when required capability is absent"],
+          "correct_enforcement_boundary": "compatibility admission boundary",
+          "same_root_cause_instances": ["host version gate", "file fingerprint gate"],
+          "valid_behavior_to_preserve": ["fail closed when capability disappears"],
+          "explicit_unknowns": []
+        },
+        "material_change_flags": {"authority_or_ssot_change": false, "public_contract_or_schema_migration": false, "runtime_topology_change": false, "external_consumer_migration": false, "competing_material_methods": true},
+        "methods": [
+          {
+            "method_id": "M-CAPABILITY-PROBE",
+            "summary": "Admit by supported capability/contract probe and fail closed when it disappears.",
+            "decision_properties": {"enforcement_boundary": "compatibility admission boundary", "authority_owner": "upstream supported contract", "failure_semantics": "fail closed when capability absent", "contract_or_api_migration_strategy": "replace exact identity gate with supported capability probe"},
+            "decision_relevant_differences": ["enforcement_boundary", "contract_source"],
+            "admissibility": {"functional_truth": true, "defect_class_closure": true, "fail_closed_truthfulness": true, "authority_ssot_preservation": true, "mechanical_falsifiability": true, "regression_preservation": true, "bounded_scope": true, "no_unsupported_assumptions": true},
+            "evidence_refs": ["EVD-1", "EVD-2"],
+            "comparison": [
+              {"criterion": "functional_correctness_truthfulness", "assessment": "strong", "evidence_refs": ["EVD-2"]},
+              {"criterion": "defect_class_closure_durability", "assessment": "closes demonstrated identity-coupling class", "evidence_refs": ["EVD-1", "EVD-2"]},
+              {"criterion": "regression_preservation_blast_radius", "assessment": "bounded to compatibility admission", "evidence_refs": ["EVD-1"]},
+              {"criterion": "authority_ssot_coherence_drift_resistance", "assessment": "uses supported upstream contract", "evidence_refs": ["EVD-2"]},
+              {"criterion": "deterministic_proof_strength", "assessment": "probe can be tested with supported/unsupported hosts", "evidence_refs": ["EVD-2"]},
+              {"criterion": "project_proportionality", "assessment": "bounded replacement", "evidence_refs": []},
+              {"criterion": "owner_operability_automation", "assessment": "no new manual step", "evidence_refs": []},
+              {"criterion": "implementation_migration_burden", "assessment": "low", "evidence_refs": []},
+              {"criterion": "implementation_time", "assessment": "low", "evidence_refs": []}
+            ]
+          },
+          {
+            "method_id": "M-VERSION-RANGE",
+            "summary": "Replace exact build identity with a bounded supported-version range plus exact capability assertions.",
+            "decision_properties": {"enforcement_boundary": "version admission boundary", "authority_owner": "local compatibility policy", "failure_semantics": "fail closed outside declared range", "contract_or_api_migration_strategy": "maintain bounded version range"},
+            "decision_relevant_differences": ["authority_owner", "maintenance_model"],
+            "admissibility": {"functional_truth": true, "defect_class_closure": true, "fail_closed_truthfulness": true, "authority_ssot_preservation": true, "mechanical_falsifiability": true, "regression_preservation": true, "bounded_scope": true, "no_unsupported_assumptions": true},
+            "evidence_refs": ["EVD-1"],
+            "comparison": [
+              {"criterion": "functional_correctness_truthfulness", "assessment": "adequate but more policy-driven", "evidence_refs": ["EVD-1"]},
+              {"criterion": "defect_class_closure_durability", "assessment": "reduces exact-build coupling but preserves version-policy churn", "evidence_refs": ["EVD-1"]},
+              {"criterion": "regression_preservation_blast_radius", "assessment": "bounded", "evidence_refs": []},
+              {"criterion": "authority_ssot_coherence_drift_resistance", "assessment": "local policy requires maintenance", "evidence_refs": []},
+              {"criterion": "deterministic_proof_strength", "assessment": "range and capability checks are testable", "evidence_refs": []},
+              {"criterion": "project_proportionality", "assessment": "acceptable", "evidence_refs": []},
+              {"criterion": "owner_operability_automation", "assessment": "requires periodic version policy updates", "evidence_refs": []},
+              {"criterion": "implementation_migration_burden", "assessment": "low", "evidence_refs": []},
+              {"criterion": "implementation_time", "assessment": "low", "evidence_refs": []}
+            ]
+          }
+        ],
+        "selection": {"state": "SELECTED", "selected_method_id": "M-CAPABILITY-PROBE", "rationale": "The supported capability seam closes the demonstrated defect class with less ongoing version-policy drift."},
+        "conformance_lock": {
+          "selected_method_id": "M-CAPABILITY-PROBE",
+          "locked_properties": {"enforcement_boundary": "compatibility admission boundary", "authority_owner": "upstream supported contract", "source_of_truth_model": "supported capability/contract, not local implementation identity", "defect_class_closure_mechanism": "capability probe replaces exact identity admission", "failure_semantics": "fail closed when required capability is absent", "contract_or_api_migration_strategy": "replace identity gate with supported seam", "consumer_migration_boundary": "none"},
+          "allowed_local_freedom": ["helper_names", "local_function_decomposition", "equivalent_internal_syntax", "test_parameterization"],
+          "forbidden_deviations": ["replacing_the_selected_method", "moving_the_enforcement_boundary", "changing_authority_or_SSOT", "changing_failure_semantics", "broadening_the_defect_class", "adding_unrelated_refactoring", "substituting_reasoning_for_required_tests"]
+        },
+        "falsification_obligations": [
+          {"obligation_id": "FAL-1", "kind": "original_defect_reproduction", "expected_observable": "A harmless upstream implementation-only change no longer rejects a host when the required capability remains present.", "required": true},
+          {"obligation_id": "FAL-2", "kind": "enforcement_boundary_bypass", "expected_observable": "Removing the required capability causes deterministic fail-closed rejection.", "required": true},
+          {"obligation_id": "FAL-3", "kind": "selected_method_deviation", "expected_observable": "Reintroducing exact implementation identity makes the conformance test fail.", "required": true}
+        ]
+      }
+    ],
+    "unverified_areas": [],
+    "owner_policy_decision_required": false,
+    "specialist_review_required": false,
+    "stop_reason": "Root cause and selected repair are sufficient for bounded implementation handoff."
+  }
+}

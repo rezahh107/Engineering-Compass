@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-compass.prompt-pipeline-handoff.v1",
+  "type": "object",
+  "required": ["request", "desired_output", "target_environment", "strictness", "domain_hint", "success_criteria", "failure_modes", "eval_suite"],
+  "properties": {
+    "request": {"type": "string", "minLength": 3},
+    "desired_output": {"type": "string", "minLength": 3},
+    "target_environment": {"type": "string"},
+    "strictness": {"const": "production-grade"},
+    "domain_hint": {"const": "prompt_generation"},
+    "success_criteria": {"type": "array", "minItems": 1},
+    "failure_modes": {"type": "array", "minItems": 1},
+    "eval_suite": {"type": "array", "minItems": 1}
+  }
+}
