@@ -14,6 +14,9 @@ The current structural verifier checks:
 
 - required Foundation files exist;
 - `repository.manifest.json` is valid JSON;
+- the canonical repository phase is `BASELINE_COMPLETE`;
+- accepted-baseline metadata is present and SHA-shaped when the baseline is complete;
+- `AGENT_ENTRYPOINT.md` reports the same repository phase as the canonical manifest;
 - canonical manifest paths exist;
 - semantic regression fixtures are valid JSON and contain required contract fields;
 - local Markdown links resolve to repository files/directories;
@@ -23,6 +26,7 @@ The current structural verifier checks:
 
 A structural PASS does **not** prove:
 
+- the recorded accepted-baseline metadata corresponds to remote GitHub history;
 - an LLM will follow the guidance;
 - the reasoning model is complete;
 - a review will find every architecture defect;
@@ -36,7 +40,7 @@ Guidance is `prompt_level_influence`; CI is deterministic only for the structura
 
 Fixtures under `fixtures/` define review behaviors that should be preserved.
 
-At the current Foundation phase they are **test specifications**, not an executable LLM evaluation harness.
+In the current baseline-complete repository state they are **test specifications**, not an executable LLM evaluation harness.
 
 A future model-evaluation runner may consume them, but until such a runner exists, report semantic regression as `NOT_EXECUTED` unless a human/model evaluation was actually performed.
 

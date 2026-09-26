@@ -140,6 +140,42 @@ Examples:
 
 A missing capability and a poorly implemented capability are different findings.
 
+### Capability finding classes
+
+These classes describe the **shape of an evidenced capability issue**. They are not mandatory outcomes and must not be assigned merely to make a review fit a taxonomy.
+
+#### `MISSING_CAPABILITY`
+
+```text
+material obligation exists
+→ required capability is absent
+```
+
+Example shape: an external network dependency materially permits timeout/failure, but no applicable failure-handling strategy exists.
+
+#### `MISFIT_CAPABILITY`
+
+```text
+material obligation exists
+→ capability exists
+→ chosen strategy/mechanism does not adequately fit the real system property
+```
+
+Example shape: compatibility management exists, but exact implementation identity is used where evidence shows a demonstrably sufficient stable behavioral/public contract is available.
+
+Do not label a capability `MISFIT_CAPABILITY` merely because another design looks cleaner or more elegant. The mismatch requires evidence.
+
+#### `EXCESS_CAPABILITY`
+
+```text
+no material obligation or named failure justifies the mechanism
+→ material complexity/control/capability nevertheless exists
+```
+
+This class captures overengineering only when the missing justification is itself evidenced; it is not a shortcut for disliking complexity.
+
+No capability finding should be created unless the evidence supports it.
+
 ## 7. Material engineering decisions
 
 Extract decisions from the target before applying deep-review lenses.
@@ -176,6 +212,62 @@ Illustrative routing:
 This table is routing guidance, not a closed checklist.
 
 The model may use other engineering methods it already knows when evidence shows they are more appropriate.
+
+### Method Coverage Ledger
+
+Track only reasoning methods that were materially activated by routing. The ledger exists to distinguish “examined and no material issue found” from “not examined”; it is not an inventory of every method the model knows.
+
+For each activated method, record only auditable execution information:
+
+```text
+method:
+trigger:
+status:
+evidence:
+outcome:
+```
+
+Supported statuses:
+
+- `APPLIED_FINDING` — the method ran and produced a material finding/result;
+- `APPLIED_NO_FINDING` — the method ran and found no material issue;
+- `NOT_EXECUTED` — the method was activated but did not run;
+- `BLOCKED` — the method could not be executed because required evidence/access was unavailable.
+
+If later evidence materially reroutes the review and an activated-but-unrun method is no longer decision-material, keep it visible as `NOT_EXECUTED` and state in `outcome` that it was retired by rerouting. Do not invent a finding merely to close the entry.
+
+The ledger reports conclusions, evidence references, and concise outcomes. It does not expose private chain-of-thought.
+
+### Adaptation / re-routing checkpoint
+
+After a material reasoning result or new evidence, ask whether it materially changes any of:
+
+- system characterization;
+- a material entity/property;
+- a derived structural obligation;
+- a hypothesis;
+- suspected root cause;
+- abstraction level of the problem;
+- relevant tradeoff;
+- viable alternative set;
+- required evidence;
+- selected reasoning methods.
+
+If no, continue the current bounded review.
+
+If yes:
+
+```text
+Update the working system model
+→ re-evaluate reasoning-method routing
+→ activate only the smallest newly relevant method set
+→ retire methods that are no longer decision-material
+→ continue
+```
+
+Do not restart the entire review because one fact changed. Do not run all methods again. Keep the Method Coverage Ledger consistent with the reroute.
+
+The same stop-at-sufficiency rule remains authoritative; adaptation is not permission for an infinite reflection loop.
 
 ## 9. Sensitivity and tradeoff points
 
@@ -258,15 +350,24 @@ Prefer the smallest coherent change that:
 
 Do not reward complexity merely because it looks more architectural.
 
-## Review failure classes
+## Finding qualification boundary
 
-The model should distinguish at least:
+Capability classes and qualification states answer different questions.
 
-- `MISSING_CAPABILITY` — an obligation exists but no handling strategy exists;
-- `MISFIT_CAPABILITY` — handling exists but is poorly matched to the real obligation;
-- `EXCESS_CAPABILITY` — material complexity exists without a demonstrated obligation/failure;
-- `JUSTIFIED_DEVIATION` — the implementation departs from a normal engineering presumption for an evidence-backed reason;
-- `NOT_PROVEN` — evidence is insufficient to decide.
+Capability issue shape, when applicable:
+
+- `MISSING_CAPABILITY`
+- `MISFIT_CAPABILITY`
+- `EXCESS_CAPABILITY`
+
+Qualification state:
+
+- `CONFIRMED_FINDING`
+- `JUSTIFIED_DEVIATION`
+- `NOT_PROVEN`
+- `NO_MATERIAL_ISSUE`
+
+Do not force a capability class onto conclusions that are not capability-shape findings. The capability class describes **what kind of issue it is**; the qualification state describes **how strongly/resultfully the evidence supports the conclusion**.
 
 ## Stop rule
 

@@ -2,14 +2,19 @@
   "repository": {
     "owner": "rezahh107",
     "name": "Engineering-Compass",
-    "phase": "INITIAL_FOUNDATION",
+    "phase": "BASELINE_COMPLETE",
     "canonical_platform": "GitHub",
     "default_branch": "main"
   },
   "acceptance": {
     "current_authority_branch": "main",
     "candidate_branches_are_authoritative": false,
-    "baseline_rule": "The first human-approved main commit containing this foundation is the accepted baseline."
+    "baseline_rule": "The accepted baseline is the first human-approved main commit containing the initial Foundation; later repository changes do not change that historical baseline identity.",
+    "accepted_baseline": {
+      "main_commit_sha": "f7f3618509a89e4611ed66a3ef50be4aa80240e1",
+      "tree_sha": "594fe03c2ec163a847e01a0e56bd068e8580f36d",
+      "acceptance_source": "human-approved merge of PR #1"
+    }
   },
   "mission": "Guide LLMs to choose, sequence, adapt, and stop engineering reasoning methods without re-teaching general engineering knowledge.",
   "canonical_surfaces": {

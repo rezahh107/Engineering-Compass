@@ -1,8 +1,8 @@
 # Agent Entrypoint — Engineering Compass
 
-Repository phase: `INITIAL_FOUNDATION`
+Repository phase: `BASELINE_COMPLETE`
 
-Acceptance boundary: repository guidance becomes Accepted Current only from a human-approved `main` commit. A branch is review material, not accepted authority merely because the files exist.
+Acceptance boundary: the initial Foundation baseline has been human-approved and merged to `main`; its historical commit/tree identity is recorded in `repository.manifest.json`. Accepted Current authority comes from `main`. A candidate branch is review material, not accepted authority merely because the files exist.
 
 ## Purpose
 
@@ -29,6 +29,8 @@ Do not dump the repository into context.
 - Derive only **material** scenarios/obligations; do not propagate every property of every dependency.
 - Extract material engineering decisions; do not reduce review to changed lines.
 - Select and sequence reasoning methods based on the situation. Do not run a flat universal checklist.
+- Track materially activated methods with the compact Method Coverage Ledger so applied findings, applied no-findings, non-execution, and blockers remain visible without exposing private chain-of-thought.
+- After material new evidence, re-evaluate the working model and method routing; activate only the smallest newly relevant method set rather than restarting the whole review.
 - A problem and its proposed solution must be compared at the same abstraction level.
 - Prefer the smallest root-correct improvement; deeper is not automatically better.
 - Treat complexity, controls, evidence requests, and additional analysis as costs that require a named failure or decision value.

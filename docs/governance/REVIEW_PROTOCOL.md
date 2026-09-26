@@ -48,6 +48,8 @@ For each material entity property:
 
 Only derive obligations that can materially change engineering judgment.
 
+When evidence supports a capability-shape issue, use the canonical [`MISSING_CAPABILITY`, `MISFIT_CAPABILITY`, or `EXCESS_CAPABILITY`](../core/REASONING_MODEL.md#capability-finding-classes) semantics. Do not force a capability class when the conclusion has another shape.
+
 ## 4. Extract material engineering decisions
 
 List the decisions that implement or constrain those capabilities.
@@ -75,7 +77,13 @@ Possible families include:
 
 The model may activate methods not named here when the situation warrants them.
 
-## 6. Challenge constraints and decisions
+## 6. Track method coverage
+
+For every materially activated method, initialize and maintain the canonical [Method Coverage Ledger](../core/REASONING_MODEL.md#method-coverage-ledger).
+
+Update each entry from actual execution evidence. A method that ran and found nothing material must remain distinguishable from one that never ran or was blocked. Do not add never-activated methods merely to make the ledger look complete.
+
+## 7. Challenge constraints and decisions
 
 For each suspicious material decision, ask:
 
@@ -86,19 +94,29 @@ For each suspicious material decision, ask:
 - Does the selected structure fit the actual access/change/failure pattern?
 - If designing from the same intent and reality today, would this decision still be selected?
 
-## 7. Find sensitivity/tradeoff points
+## 8. Adapt after material evidence
+
+Apply the canonical [adaptation / re-routing checkpoint](../core/REASONING_MODEL.md#adaptation--re-routing-checkpoint) whenever a material reasoning result or new evidence appears during the remainder of the review.
+
+If the evidence changes the working system model, obligation/hypothesis/root cause, abstraction level, tradeoff/alternatives, required evidence, or method selection:
+
+`update model → re-evaluate routing → activate only the smallest newly relevant method set → retire no-longer-material methods → continue`
+
+Keep the Method Coverage Ledger consistent with the reroute. Do not restart the whole review or rerun all methods merely because one fact changed.
+
+## 9. Find sensitivity/tradeoff points
 
 Identify disproportionate change propagation and quality tradeoffs.
 
 A fail-closed mechanism may improve correctness/safety while damaging evolvability; both belong in the review.
 
-## 8. Use temporal evidence only when useful
+## 10. Use temporal evidence only when useful
 
 Inspect history, co-change, prior incidents, or previous fixes when it can discriminate between competing explanations.
 
 Do not mine history ceremonially.
 
-## 9. Synthesize findings into root causes/risk themes
+## 11. Synthesize findings into root causes/risk themes
 
 Prefer:
 
@@ -106,13 +124,13 @@ Prefer:
 
 over a flat list of local complaints.
 
-## 10. Search same-level alternatives
+## 12. Search same-level alternatives
 
 Do not answer an architecture problem with a micro-optimization and call it solved.
 
 Compare materially distinct repair families at the abstraction level of the root cause.
 
-## 11. Evaluate depth, blast radius, and adoption cost
+## 13. Evaluate depth, blast radius, and adoption cost
 
 For the leading improvement:
 
@@ -121,18 +139,20 @@ For the leading improvement:
 - separate technical superiority from migration/adoption cost;
 - escalate owner-dependent business/risk acceptance decisions instead of inventing them.
 
-## 12. Qualify
+## 14. Qualify
 
-Each material conclusion should be one of:
+Each material conclusion should use one qualification state:
 
 - `CONFIRMED_FINDING`
 - `JUSTIFIED_DEVIATION`
 - `NOT_PROVEN`
 - `NO_MATERIAL_ISSUE`
 
+When the conclusion is specifically a capability-shape issue, record the applicable capability class separately. Capability class and qualification state are complementary; neither replaces the other.
+
 Avoid certainty inflation.
 
-## 13. Stop at sufficiency
+## 15. Stop at sufficiency
 
 Stop when additional review is unlikely to change:
 
@@ -153,7 +173,7 @@ Intent / governing constraints:
 Material system inventory:
 Derived obligations:
 Material engineering decisions:
-Activated reasoning methods:
+Method Coverage Ledger:
 Findings:
 Risk themes:
 Alternatives considered:
