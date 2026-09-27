@@ -114,7 +114,8 @@
       "type": "object",
       "required": [
         "full_coverage",
-        "material_gaps"
+        "material_gaps",
+        "surfaces"
       ],
       "properties": {
         "full_coverage": {
@@ -127,7 +128,42 @@
           }
         },
         "surfaces": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "properties": {
+            "changed_file_inventory": {
+              "type": "boolean"
+            },
+            "diff_content": {
+              "type": "boolean"
+            },
+            "reviews": {
+              "type": "boolean"
+            },
+            "conversation_comments": {
+              "type": "boolean"
+            },
+            "inline_review_comments": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "boolean"
+            },
+            "commit_statuses": {
+              "type": "boolean"
+            },
+            "review_threads": {
+              "type": "boolean"
+            },
+            "repository_tree_inventory": {
+              "type": "boolean"
+            },
+            "repository_source_content": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },
@@ -141,5 +177,103 @@
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "target": {
+            "properties": {
+              "kind": {
+                "const": "PR_SCOPE"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "completeness": {
+            "properties": {
+              "surfaces": {
+                "required": [
+                  "changed_file_inventory",
+                  "diff_content",
+                  "reviews",
+                  "conversation_comments",
+                  "inline_review_comments",
+                  "checks",
+                  "commit_statuses",
+                  "review_threads"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target": {
+            "properties": {
+              "kind": {
+                "const": "REF_DELTA_SCOPE"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "completeness": {
+            "properties": {
+              "surfaces": {
+                "required": [
+                  "changed_file_inventory",
+                  "diff_content"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target": {
+            "properties": {
+              "kind": {
+                "const": "REPOSITORY_SCOPE"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "completeness": {
+            "properties": {
+              "surfaces": {
+                "required": [
+                  "repository_tree_inventory",
+                  "repository_source_content"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

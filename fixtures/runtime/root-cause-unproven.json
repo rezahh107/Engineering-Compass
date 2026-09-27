@@ -19,7 +19,14 @@
       "full_coverage": true,
       "material_gaps": [],
       "surfaces": {
-        "changed_files": true
+        "changed_file_inventory": true,
+        "diff_content": true,
+        "reviews": true,
+        "conversation_comments": true,
+        "inline_review_comments": true,
+        "checks": true,
+        "commit_statuses": true,
+        "review_threads": true
       }
     },
     "evidence_records": [
@@ -31,7 +38,7 @@
         "limitations": []
       }
     ],
-    "evidence_digest": "sha256:116af9b6119794cd333eaecd4c461fd947bff440cfe4bb8768332297f5041df4",
+    "evidence_digest": "sha256:42fe0f29bce991ed157784174788e5276040f6155f161a957a4a52213e066909",
     "review_intent": "Root-cause verification for the runtime diagnosis fixture.",
     "review_intent_digest": "sha256:f7d4ea4a64aa57fdbe6a02e38b72d5febbc1e4c8424aa37720b572991067b2a5"
   },
@@ -42,7 +49,7 @@
       "repository_id": "123",
       "kind": "PR_SCOPE",
       "head_sha": "dddddddddddddddddddddddddddddddddddddddd",
-      "evidence_digest": "sha256:116af9b6119794cd333eaecd4c461fd947bff440cfe4bb8768332297f5041df4",
+      "evidence_digest": "sha256:42fe0f29bce991ed157784174788e5276040f6155f161a957a4a52213e066909",
       "pr_number": 7,
       "base_ref": "main",
       "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

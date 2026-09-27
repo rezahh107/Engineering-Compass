@@ -50,3 +50,7 @@ Only materially activated reasoning methods belong in the Method Coverage Ledger
 The material evidence digest excludes review intent. Review intent is bound separately by review_intent_digest. A changed Head, material evidence digest, or intent digest on the same canonical target is a stale/superseded review and projects RERUN_REVIEW before full current-assessment validation; malformed or cross-target bindings remain contract errors.
 
 The canonical repair authority output is authorized_repair_finding_ids_by_group. Group membership never promotes a sibling Finding into modification authority.
+
+## Evidence-surface admission
+
+Evidence contract v2 requires target-specific completeness surfaces before assessment admission. PR evidence must independently account for changed-file inventory, diff content, reviews/comments, Check Runs, Commit statuses, and authoritative review-thread state. Repository-scope evidence must independently account for recursive tree inventory and exact-blob source-content coverage. A required surface marked incomplete cannot coexist with `full_coverage=true`, and any incomplete required surface must carry an explicit material gap.

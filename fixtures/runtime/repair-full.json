@@ -19,8 +19,14 @@
       "full_coverage": true,
       "material_gaps": [],
       "surfaces": {
-        "changed_files": true,
-        "checks": true
+        "changed_file_inventory": true,
+        "diff_content": true,
+        "reviews": true,
+        "conversation_comments": true,
+        "inline_review_comments": true,
+        "checks": true,
+        "commit_statuses": true,
+        "review_threads": true
       }
     },
     "evidence_records": [
@@ -39,7 +45,7 @@
         "limitations": []
       }
     ],
-    "evidence_digest": "sha256:e4eb5b1fdfa6d5eefccab0a46ed45b6dbf766439c9ffc78e51b4329438ee871f",
+    "evidence_digest": "sha256:3bb95aae9cdb24d10fe0ffa031e598681e2f3efb2a3687f33cf00ef7e4b88cc7",
     "review_intent": "Deep engineering review for the runtime repair fixture.",
     "review_intent_digest": "sha256:ce236427e1ea943643db2ab9084a6566e4675407b6e2af13ce5e1d991d81275a"
   },
@@ -50,7 +56,7 @@
       "repository_id": "123",
       "kind": "PR_SCOPE",
       "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "evidence_digest": "sha256:e4eb5b1fdfa6d5eefccab0a46ed45b6dbf766439c9ffc78e51b4329438ee871f",
+      "evidence_digest": "sha256:3bb95aae9cdb24d10fe0ffa031e598681e2f3efb2a3687f33cf00ef7e4b88cc7",
       "pr_number": 42,
       "base_ref": "main",
       "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

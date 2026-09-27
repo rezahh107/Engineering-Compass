@@ -34,7 +34,11 @@ The runtime unit suite exercises deterministic transition invariants, including:
 - numeric scoring/weights are rejected;
 - equivalent finalists can route to owner decision instead of a fabricated winner;
 - implementation handoff binds root cause, selected method, Conformance Lock, falsification obligations, and selected-method infeasibility behavior;
-- no prompt is produced when the canonical action does not require one.
+- no prompt is produced when the canonical action does not require one;
+- repository-scope inventory cannot masquerade as semantic source coverage, and exact-blob source limits fail closed;
+- exact-blob changes alter evidence identity and stale prior assessments;
+- Commit statuses stay distinct from Check Runs, including proven-empty status lists;
+- authoritative review-thread resolution/outdated state is independently collected and pagination/auth failures block PR full coverage.
 
 ## Cross-repository Prompt-Pipeline check
 

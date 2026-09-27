@@ -15,6 +15,20 @@ TARGET_SELECTOR_KEYS = {
     "REF_DELTA_SCOPE": {"kind", "repository", "base_ref", "target_ref"},
     "REPOSITORY_SCOPE": {"kind", "repository", "ref"},
 }
+EVIDENCE_SURFACES_BY_TARGET = {
+    "PR_SCOPE": {
+        "changed_file_inventory",
+        "diff_content",
+        "reviews",
+        "conversation_comments",
+        "inline_review_comments",
+        "checks",
+        "commit_statuses",
+        "review_threads",
+    },
+    "REF_DELTA_SCOPE": {"changed_file_inventory", "diff_content"},
+    "REPOSITORY_SCOPE": {"repository_tree_inventory", "repository_source_content"},
+}
 FRESHNESS = {"CURRENT", "STALE", "UNKNOWN"}
 QUALIFICATION_STATES = {
     "CONFIRMED_FINDING",
@@ -177,8 +191,22 @@ def validate_evidence_bundle(bundle: dict[str, Any]) -> None:
         _validate_sha40(identity.get("merge_base_sha"), "evidence.identity.merge_base_sha")
     require(bundle.get("freshness") in FRESHNESS, f"evidence.freshness must be one of {sorted(FRESHNESS)}")
     completeness = require_dict(bundle.get("completeness"), "evidence.completeness")
-    require(isinstance(completeness.get("full_coverage"), bool), "completeness.full_coverage must be boolean")
-    require_list(completeness.get("material_gaps", []), "completeness.material_gaps")
+    full_coverage = completeness.get("full_coverage")
+    require(isinstance(full_coverage, bool), "completeness.full_coverage must be boolean")
+    material_gaps = require_list(completeness.get("material_gaps", []), "completeness.material_gaps")
+    surfaces = require_dict(completeness.get("surfaces"), "completeness.surfaces")
+    required_surfaces = EVIDENCE_SURFACES_BY_TARGET[kind]
+    missing_surfaces = sorted(required_surfaces - set(surfaces))
+    require(not missing_surfaces, f"evidence completeness missing required surfaces for {kind}: {missing_surfaces}")
+    for surface in required_surfaces:
+        require(
+            isinstance(surfaces.get(surface), bool),
+            f"completeness.surfaces.{surface} must be boolean",
+        )
+    incomplete_surfaces = sorted(surface for surface in required_surfaces if surfaces[surface] is not True)
+    if incomplete_surfaces:
+        require(not full_coverage, "incomplete evidence surfaces cannot coexist with full_coverage=true")
+        require(bool(material_gaps), "incomplete evidence surfaces require an explicit material gap")
     ids=[]
     for index, record in enumerate(require_list(bundle.get("evidence_records", []), "evidence.evidence_records")):
         obj=require_dict(record,f"evidence_records[{index}]")

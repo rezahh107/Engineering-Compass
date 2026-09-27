@@ -216,7 +216,9 @@ class EvidenceCeilingTests(unittest.TestCase):
         compare = {"merge_base_commit": {"sha": "c" * 40}}
         checks = {"check_runs": [], "total_count": 0}
         with patch.object(collector, "_repo", return_value={"id": 1, "full_name": "acme/example", "default_branch": "main"}), patch.object(
-            collector, "_paginate", side_effect=[(files, True), ([], True), ([], True), ([], True)]
+            collector, "_paginate", side_effect=[(files, True), ([], True), ([], True), ([], True), ([], True)]
+        ), patch.object(
+            collector, "_collect_review_threads", return_value=([], True, [])
         ), patch.object(collector, "_request", side_effect=[(pr, {}), (compare, {}), (checks, {})]):
             return collector.collect({"target": {"kind": "PR_SCOPE", "repository": "acme/example", "pr_number": 1}, "review_intent": "review"})
 
