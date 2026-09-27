@@ -37,7 +37,8 @@
   "fixtures": {
     "semantic_regression_scenarios": [
       "fixtures/gravity-flow-version-coupling.json",
-      "fixtures/control-boundary-semantics.json"
+      "fixtures/control-boundary-semantics.json",
+      "fixtures/scenario-driven-gap-discovery.json"
     ],
     "semantic_evaluator_rubric": "fixtures/semantic-evaluation-rubric.json"
   },

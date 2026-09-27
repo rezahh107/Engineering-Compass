@@ -46,7 +46,7 @@ Fixtures under `fixtures/` define behaviors that should be evaluated, but fixtur
 
 Scenario input and evaluator expectations are physically separated:
 
-- reviewer-model input comes from scenario fixtures such as `fixtures/gravity-flow-version-coupling.json` and `fixtures/control-boundary-semantics.json`;
+- reviewer-model input comes from scenario fixtures such as `fixtures/gravity-flow-version-coupling.json`, `fixtures/control-boundary-semantics.json`, and `fixtures/scenario-driven-gap-discovery.json`;
 - evaluator expectations live in `fixtures/semantic-evaluation-rubric.json` and must not be shown to the reviewer model during a clean-context run.
 
 For an actual semantic comparison:

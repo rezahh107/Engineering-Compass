@@ -14,6 +14,7 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SCENARIO_FIXTURES = [
     "fixtures/gravity-flow-version-coupling.json",
     "fixtures/control-boundary-semantics.json",
+    "fixtures/scenario-driven-gap-discovery.json",
 ]
 EVALUATOR_RUBRIC = "fixtures/semantic-evaluation-rubric.json"
 
@@ -27,6 +28,19 @@ CONTROL_INPUT_KEYS = {
     "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH": frozenset({"workflow", "claim_under_review"}),
     "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": frozenset({"assessment", "claim_under_review"}),
 }
+GAP_FIXTURE_KEYS = frozenset({"authority", "purpose", "scenarios"})
+GAP_SCENARIO_KEYS = frozenset({"id", "input", "review_task"})
+GAP_INPUT_KEYS = {
+    "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"scope", "change", "known_evidence", "owner_authority"}),
+    "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": frozenset({"scope", "components", "material_dimensions"}),
+    "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": frozenset({"scope", "authority_and_surfaces", "uninspected_context"}),
+}
+GAP_LIST_FIELDS = {
+    "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"change", "known_evidence", "owner_authority"}),
+    "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": frozenset({"components", "material_dimensions"}),
+    "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": frozenset({"authority_and_surfaces", "uninspected_context"}),
+}
+VALID_REVIEW_SCOPES = frozenset({"PR_SCOPE", "REPOSITORY_SCOPE"})
 
 REQUIRED = [
     "README.md",
@@ -232,6 +246,49 @@ def validate_control_reviewer_fixture(controls: dict, errors: list[str]) -> set[
     return scenario_ids
 
 
+def validate_gap_reviewer_fixture(gaps: dict, errors: list[str]) -> set[str]:
+    _check_exact_keys(gaps, GAP_FIXTURE_KEYS, "gap-discovery reviewer fixture", errors)
+    if gaps.get("authority") != "NON_CANONICAL_EVALUATION_SCENARIOS":
+        fail("gap-discovery scenario authority must be NON_CANONICAL_EVALUATION_SCENARIOS", errors)
+    _check_non_empty_string(gaps.get("purpose"), "gap-discovery scenario purpose", errors)
+
+    scenario_ids: set[str] = set()
+    rows = gaps.get("scenarios")
+    if not isinstance(rows, list) or not rows:
+        fail("gap-discovery scenarios must be a non-empty list", errors)
+        return scenario_ids
+
+    for index, row in enumerate(rows):
+        label = f"gap-discovery scenario[{index}]"
+        if not isinstance(row, dict):
+            fail(f"{label} must be an object", errors)
+            continue
+        _check_exact_keys(row, GAP_SCENARIO_KEYS, label, errors)
+        sid = _scenario_id(row.get("id"), f"{label}.id", errors)
+        if sid:
+            if sid in scenario_ids:
+                fail(f"duplicate semantic scenario id: {sid}", errors)
+            scenario_ids.add(sid)
+        _check_non_empty_string(row.get("review_task"), f"{label}.review_task", errors)
+
+        scenario_input = row.get("input")
+        if not isinstance(scenario_input, dict):
+            fail(f"{label} must contain an input object", errors)
+            continue
+        expected_input_keys = GAP_INPUT_KEYS.get(sid)
+        if expected_input_keys is None:
+            fail(f"{label} id is not admitted by the reviewer-input contract: {sid!r}", errors)
+            continue
+        _check_exact_keys(scenario_input, expected_input_keys, f"{label}.input", errors)
+
+        scope = scenario_input.get("scope")
+        if scope not in VALID_REVIEW_SCOPES:
+            fail(f"{label}.input.scope must be one of {sorted(VALID_REVIEW_SCOPES)}", errors)
+        for field in GAP_LIST_FIELDS[sid]:
+            _check_string_list(scenario_input.get(field), f"{label}.input.{field}", errors)
+    return scenario_ids
+
+
 def validate_evaluator_rubric(rubric: dict, scenario_ids: set[str], errors: list[str]) -> None:
     if rubric.get("authority") != "EVALUATOR_ONLY_NON_CANONICAL":
         fail("semantic evaluator rubric authority must be EVALUATOR_ONLY_NON_CANONICAL", errors)
@@ -274,6 +331,13 @@ def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
     controls = load_json(SCENARIO_FIXTURES[1], errors)
     if isinstance(controls, dict):
         for sid in validate_control_reviewer_fixture(controls, errors):
+            if sid in scenario_ids:
+                fail(f"duplicate semantic scenario id: {sid}", errors)
+            scenario_ids.add(sid)
+
+    gaps = load_json(SCENARIO_FIXTURES[2], errors)
+    if isinstance(gaps, dict):
+        for sid in validate_gap_reviewer_fixture(gaps, errors):
             if sid in scenario_ids:
                 fail(f"duplicate semantic scenario id: {sid}", errors)
             scenario_ids.add(sid)

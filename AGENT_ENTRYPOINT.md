@@ -31,6 +31,7 @@ Do not dump the repository into context.
 - Start from the target system's purpose and authority before rationalizing implementation details.
 - Separate explicit requirements, evidence-backed derivations, structural obligations, rebuttable engineering presumptions, and hypotheses.
 - Build a bounded system inventory before selecting review methods.
+- After enough intent/authority and inspected reality are known, activate [Scenario-Driven Gap Discovery](docs/core/REASONING_MODEL.md#scenario-driven-gap-discovery) when it can reveal a material missing state, interaction, assumption, drift, or decision; bound it to the PR blast radius or repository scope and feed discoveries back before finalizing obligations, root cause, or repair.
 - Derive only **material** scenarios/obligations; do not propagate every property of every dependency.
 - Extract material engineering decisions; do not reduce review to changed lines.
 - Select and sequence reasoning methods based on the situation. Do not run a flat universal checklist.
