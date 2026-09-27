@@ -34,11 +34,17 @@ GAP_INPUT_KEYS = {
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"scope", "change", "known_evidence", "owner_authority"}),
     "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": frozenset({"scope", "components", "material_dimensions"}),
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": frozenset({"scope", "authority_and_surfaces", "uninspected_context"}),
+    "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": frozenset(
+        {"scope", "initial_evidence", "fresh_owner_context", "possible_future_changes"}
+    ),
 }
 GAP_LIST_FIELDS = {
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"change", "known_evidence", "owner_authority"}),
     "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": frozenset({"components", "material_dimensions"}),
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": frozenset({"authority_and_surfaces", "uninspected_context"}),
+    "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": frozenset(
+        {"initial_evidence", "fresh_owner_context", "possible_future_changes"}
+    ),
 }
 VALID_REVIEW_SCOPES = frozenset({"PR_SCOPE", "REPOSITORY_SCOPE"})
 
