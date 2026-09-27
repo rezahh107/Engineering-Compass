@@ -19,6 +19,8 @@ System Inventory
         ↓
 Material Properties
         ↓
+Scenario-Driven Gap Discovery (when material)
+        ↓
 Change / Failure Scenarios
         ↓
 Structural Obligations
@@ -79,6 +81,140 @@ For each material entity, inspect relevant characteristics such as:
 - trust/security boundary.
 
 Do not propagate every property. A property enters the graph only when ignoring it could materially affect correctness, reliability, maintainability, security, evolution, operability, or another stated objective.
+
+## Scenario-Driven Gap Discovery
+
+Use **Scenario-Driven Gap Discovery** after enough Intent / Authority and inspected Reality are known to construct a useful operational model, but before structural obligations, root-cause framing, material engineering decisions, or repair direction are finalized.
+
+It is a bounded reasoning strategy, not a separate runtime, workflow engine, control plane, second review pipeline, mandatory universal checklist, or exhaustive model-checking exercise. Activate it only when it can plausibly reveal a material missing state, interaction, assumption, failure path, drift, or decision.
+
+A discovery may require the reviewer to revise the operational model, assumptions, structural obligations, root-cause framing, evidence needs, or reasoning-method routing. Feed the result back into the main review graph rather than maintaining a parallel analysis track.
+
+### Scope adaptation
+
+For `REPOSITORY_SCOPE`, model the material operational system broadly enough to expose repository-level blind spots.
+
+For `PR_SCOPE`, identify the behavioral blast radius of the change and exercise only affected material states, transitions, invariants, dependencies, progress obligations, and interactions by default.
+
+Do not simulate the entire repository for a trivial or unrelated change.
+
+### Operational model discovery
+
+When material, identify:
+
+- actors and permission/authority boundaries;
+- material states and state ownership;
+- transitions, guards, preconditions, and postconditions;
+- persistent sources of truth versus derived/display state;
+- external dependencies and host/platform capabilities;
+- navigation and lifecycle boundaries;
+- concurrency and multi-actor interaction points;
+- environment dimensions that can change behavior;
+- assumptions whose falsity would materially change the result.
+
+Explicitly challenge whether an important state, actor, dependency, transition, or environment dimension is missing from the model itself. A model that cleanly exercises only the states it already knows is not evidence that the model is complete.
+
+### Invariants and progress obligations
+
+Derive both when applicable:
+
+- **invariants / safety properties** — what must never become false;
+- **progress / liveness obligations** — what valid outcomes must remain achievable.
+
+A system that preserves every safety invariant but can become permanently stuck must not automatically be treated as correct.
+
+These concepts do not require formal specification machinery. Use the smallest notation that makes the material obligation clear.
+
+### Scenario expansion
+
+Select only scenario families material to the target. Candidate families include:
+
+- normal completion;
+- validation / partial completion;
+- explicit technical failure;
+- ambiguous outcome / unknown commit state;
+- stale state / reload / back-forward;
+- concurrency, retries, duplicate actions, reordered events;
+- permission / role / session changes;
+- dependency timeout, unavailability, version or capability drift, fallback;
+- malformed / empty / boundary / real-world data shapes;
+- responsive, zoom, accessibility, input-mode, RTL/BiDi when user-facing;
+- migration, upgrade, rollback, old persisted state, or platform drift when material.
+
+Structured scenario notation may be used when useful, but must not become ceremony.
+
+### Interaction-failure reasoning
+
+Do not stop at broken individual components.
+
+Challenge whether individually correct components, layers, or controls can combine into an incorrect system result because ownership, ordering, timing, coordination, or assumptions are wrong.
+
+### Bounded combinatorial exploration
+
+Do not enumerate Cartesian products.
+
+Use pairwise or higher-order/t-way reasoning only where the interacting dimensions are materially relevant, plus known high-risk scenarios. Prefer the smallest combinations capable of changing the engineering decision.
+
+Never claim complete real-world coverage merely because the known model received combinatorial coverage.
+
+### Drift / conformance
+
+Compare the material destination and reality across relevant surfaces such as:
+
+- current Owner/project authority;
+- accepted architecture/product contracts;
+- documentation;
+- tests and fixtures;
+- implementation/configuration;
+- actual runtime evidence when available.
+
+A difference is not automatically a defect. Distinguish:
+
+- justified deviation;
+- retained future capability;
+- obsolete contract/test;
+- actual drift.
+
+### Gap disposition
+
+Every material discovered gap should end in one useful disposition:
+
+- `AUTO_RESOLVE_WITHIN_AUTHORITY`
+- `TECHNICAL_QUALIFICATION_REQUIRED`
+- `OWNER_ESCALATION_REQUIRED`
+- `NO_MATERIAL_ISSUE_OR_JUSTIFIED_DEVIATION`
+
+Authority comes before reversibility.
+
+Do not burden the Owner with standard low-risk reversible engineering defaults when existing authority and evidence are enough. Escalate only when Owner authority is genuinely required, including materially different product/business meaning, user rights, policy, data ownership/retention, workflow semantics, external commitments, or another durable/high-cost decision.
+
+### Evidence boundary
+
+Simulation is reasoning, not runtime proof.
+
+When a scenario depends on an unverified runtime, host, provider, or capability fact, keep the conclusion `NOT_PROVEN` or route it to `TECHNICAL_QUALIFICATION_REQUIRED`. Do not turn a simulated outcome into an observed fact.
+
+### Two-key stop rule
+
+Stop Scenario-Driven Gap Discovery only when both are sufficiently true for the materiality of the target:
+
+**A. Structural sufficiency for the known model**
+
+Relevant states/transitions, invariants, progress obligations, scenario families/interactions, and discovered-gap dispositions are adequately covered.
+
+**B. Discovery/materiality sufficiency**
+
+Further exploration is no longer reasonably likely to reveal a new material state, dependency, invariant/progress obligation, interaction failure, drift, failure family, Owner decision, repair-family change, or materially larger blast radius.
+
+Do not chase ceremonial completeness after both conditions are satisfied.
+
+### Repair and regression feedback
+
+Do not jump from a simulated symptom directly to a patch.
+
+Feed discoveries back into the problem model, evidence request, structural obligations, and root-cause analysis. Keep the existing North Star: the smallest root-correct improvement with bounded blast radius and durable cost.
+
+After implementation, re-exercise the affected operational model and relevant interactions. Reuse the prior model and broaden it only when new evidence requires it.
 
 ## 3. Material scenario layer
 
