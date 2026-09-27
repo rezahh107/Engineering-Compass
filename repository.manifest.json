@@ -16,7 +16,7 @@
       "acceptance_source": "human-approved merge of PR #1"
     }
   },
-  "mission": "Guide LLMs to choose, sequence, adapt, and stop engineering reasoning methods without re-teaching general engineering knowledge.",
+  "mission": "Guide LLMs to choose, sequence, adapt, and stop engineering reasoning methods while keeping control and verification claims within actually executed evidence.",
   "canonical_surfaces": {
     "mission": "docs/core/MISSION.md",
     "reasoning_model": "docs/core/REASONING_MODEL.md",
@@ -35,14 +35,17 @@
     "semantic_reasoning_quality_mechanically_proven": false
   },
   "fixtures": {
-    "semantic_regression": [
-      "fixtures/gravity-flow-version-coupling.json"
-    ]
+    "semantic_regression_scenarios": [
+      "fixtures/gravity-flow-version-coupling.json",
+      "fixtures/control-boundary-semantics.json"
+    ],
+    "semantic_evaluator_rubric": "fixtures/semantic-evaluation-rubric.json"
   },
   "current_limits": [
     "No executable review engine is implemented.",
-    "No claim is made that Markdown guidance mechanically controls an LLM.",
-    "Structural CI does not prove semantic review quality.",
+    "No claim is made that Markdown guidance, repository-visible deterministic code, schemas, or model-mediated invocation mechanically control an LLM.",
+    "Structural CI proves only the predicates executed by scripts/verify_repo.py and does not prove semantic review quality.",
+    "Semantic scenario fixtures and evaluator rubric are specifications; no clean-context model evaluation harness is implemented.",
     "No universal language/framework checklist is part of the core."
   ]
 }
