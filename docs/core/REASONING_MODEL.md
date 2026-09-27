@@ -19,6 +19,8 @@ System Inventory
         ↓
 Material Properties
         ↓
+Scenario-Driven Gap Discovery (when material)
+        ↓
 Change / Failure Scenarios
         ↓
 Structural Obligations
@@ -79,6 +81,140 @@ For each material entity, inspect relevant characteristics such as:
 - trust/security boundary.
 
 Do not propagate every property. A property enters the graph only when ignoring it could materially affect correctness, reliability, maintainability, security, evolution, operability, or another stated objective.
+
+## Scenario-Driven Gap Discovery
+
+Use **Scenario-Driven Gap Discovery** after enough Intent / Authority and inspected Reality are known to construct a useful operational model, but before structural obligations, root-cause framing, material engineering decisions, or repair direction are finalized.
+
+It is a bounded reasoning strategy, not a separate runtime, workflow engine, control plane, second review pipeline, mandatory universal checklist, or exhaustive model-checking exercise. Activate it only when it can plausibly reveal a material missing state, interaction, assumption, failure path, drift, or decision.
+
+A discovery may require the reviewer to revise the operational model, assumptions, structural obligations, root-cause framing, evidence needs, or reasoning-method routing. Feed the result back into the main review graph rather than maintaining a parallel analysis track.
+
+### Scope adaptation
+
+For `REPOSITORY_SCOPE`, model the material operational system broadly enough to expose repository-level blind spots.
+
+For `PR_SCOPE`, identify the behavioral blast radius of the change and exercise only affected material states, transitions, invariants, dependencies, progress obligations, and interactions by default.
+
+Do not simulate the entire repository for a trivial or unrelated change.
+
+### Operational model discovery
+
+When material, identify:
+
+- actors and permission/authority boundaries;
+- material states and state ownership;
+- transitions, guards, preconditions, and postconditions;
+- persistent sources of truth versus derived/display state;
+- external dependencies and host/platform capabilities;
+- navigation and lifecycle boundaries;
+- concurrency and multi-actor interaction points;
+- environment dimensions that can change behavior;
+- assumptions whose falsity would materially change the result.
+
+Explicitly challenge whether an important state, actor, dependency, transition, or environment dimension is missing from the model itself. A model that cleanly exercises only the states it already knows is not evidence that the model is complete.
+
+### Invariants and progress obligations
+
+Derive both when applicable:
+
+- **invariants / safety properties** — what must never become false;
+- **progress / liveness obligations** — what valid outcomes must remain achievable.
+
+A system that preserves every safety invariant but can become permanently stuck must not automatically be treated as correct.
+
+These concepts do not require formal specification machinery. Use the smallest notation that makes the material obligation clear.
+
+### Scenario expansion
+
+Select only scenario families material to the target. Candidate families include:
+
+- normal completion;
+- validation / partial completion;
+- explicit technical failure;
+- ambiguous outcome / unknown commit state;
+- stale state / reload / back-forward;
+- concurrency, retries, duplicate actions, reordered events;
+- permission / role / session changes;
+- dependency timeout, unavailability, version or capability drift, fallback;
+- malformed / empty / boundary / real-world data shapes;
+- responsive, zoom, accessibility, input-mode, RTL/BiDi when user-facing;
+- migration, upgrade, rollback, old persisted state, or platform drift when material.
+
+Structured scenario notation may be used when useful, but must not become ceremony.
+
+### Interaction-failure reasoning
+
+Do not stop at broken individual components.
+
+Challenge whether individually correct components, layers, or controls can combine into an incorrect system result because ownership, ordering, timing, coordination, or assumptions are wrong.
+
+### Bounded combinatorial exploration
+
+Do not enumerate Cartesian products.
+
+Use pairwise or higher-order/t-way reasoning only where the interacting dimensions are materially relevant, plus known high-risk scenarios. Prefer the smallest combinations capable of changing the engineering decision.
+
+Never claim complete real-world coverage merely because the known model received combinatorial coverage.
+
+### Drift / conformance
+
+Compare the material destination and reality across relevant surfaces such as:
+
+- current Owner/project authority;
+- accepted architecture/product contracts;
+- documentation;
+- tests and fixtures;
+- implementation/configuration;
+- actual runtime evidence when available.
+
+A difference is not automatically a defect. Distinguish:
+
+- justified deviation;
+- retained future capability;
+- obsolete contract/test;
+- actual drift.
+
+### Gap disposition
+
+Every material discovered gap should end in one useful disposition:
+
+- `AUTO_RESOLVE_WITHIN_AUTHORITY`
+- `TECHNICAL_QUALIFICATION_REQUIRED`
+- `OWNER_ESCALATION_REQUIRED`
+- `NO_MATERIAL_ISSUE_OR_JUSTIFIED_DEVIATION`
+
+Authority comes before reversibility.
+
+Do not burden the Owner with standard low-risk reversible engineering defaults when existing authority and evidence are enough. Escalate only when Owner authority is genuinely required, including materially different product/business meaning, user rights, policy, data ownership/retention, workflow semantics, external commitments, or another durable/high-cost decision.
+
+### Evidence boundary
+
+Simulation is reasoning, not runtime proof.
+
+When a scenario depends on an unverified runtime, host, provider, or capability fact, keep the conclusion `NOT_PROVEN` or route it to `TECHNICAL_QUALIFICATION_REQUIRED`. Do not turn a simulated outcome into an observed fact.
+
+### Two-key stop rule
+
+Stop Scenario-Driven Gap Discovery only when both are sufficiently true for the materiality of the target:
+
+**A. Structural sufficiency for the known model**
+
+Relevant states/transitions, invariants, progress obligations, scenario families/interactions, and discovered-gap dispositions are adequately covered.
+
+**B. Discovery/materiality sufficiency**
+
+Further exploration is no longer reasonably likely to reveal a new material state, dependency, invariant/progress obligation, interaction failure, drift, failure family, Owner decision, repair-family change, or materially larger blast radius.
+
+Do not chase ceremonial completeness after both conditions are satisfied.
+
+### Repair and regression feedback
+
+Do not jump from a simulated symptom directly to a patch.
+
+Feed discoveries back into the problem model, evidence request, structural obligations, and root-cause analysis. Keep the existing North Star: the smallest root-correct improvement with bounded blast radius and durable cost.
+
+After implementation, re-exercise the affected operational model and relevant interactions. Reuse the prior model and broaden it only when new evidence requires it.
 
 ## 3. Material scenario layer
 
@@ -299,6 +435,18 @@ internal seam
 → Upstream Implementation Coupling
 ```
 
+### Finding-to-repair boundary
+
+A confirmed symptom is not a confirmed root cause. Do not jump directly from a Finding to implementation merely because the manifestation is reproducible.
+
+Before recommending a repair as root-correct, establish enough evidence for the causal mechanism and the boundary that actually owns or enforces it. If those remain unresolved, keep the root cause `NOT_PROVEN` and identify the smallest verification step that could discriminate between hypotheses.
+
+When useful, apply the **surface-patch counterfactual**:
+
+> If the current manifestation disappeared but the same causal mechanism appeared at another reachable instance, would this repair still prevent or deterministically expose the defect?
+
+If not, treat the proposal as a surface patch unless evidence shows the defect class is genuinely single-instance and the local boundary is causal.
+
 ## 12. Same-abstraction-level alternatives
 
 A proposed repair must address the problem at the same or higher causal level.
@@ -349,6 +497,34 @@ Prefer the smallest coherent change that:
 - can be verified at the level of the claim.
 
 Do not reward complexity merely because it looks more architectural.
+
+## 16. Guidance, validation, and proof
+
+Do not confuse repository visibility with execution authority.
+
+### Guidance
+
+Repository-visible prose, examples, schemas, code, contracts, or policies can guide a model or human. Their existence proves that the guidance/artifact is present; it does not prove that a reviewer consumed it, that code ran, or that behavior was mechanically prevented.
+
+### Validation
+
+A validator or checker proves only the explicit predicates it actually executed on the supplied input. A schema PASS may prove shape and required-field constraints. A structural repository verifier may prove repository integrity predicates. Neither result, by itself, proves semantic engineering correctness, root-cause truth, architecture optimality, evidence completeness, or global LLM compliance.
+
+Model-mediated invocation is still model-mediated: when an LLM can skip a requested command and no independent downstream gate rejects that bypass, the command is not an externally forced control path.
+
+### Proof of mechanical control
+
+A mechanical-enforcement claim requires evidence that an **externally forced execution path** ran the relevant control and that the path cannot be bypassed within the claimed boundary. The claim extends only to the exact machine-checkable predicates executed by that path.
+
+For each claimed control, state or make clear:
+
+- the failure it is intended to prevent;
+- the exact machine-checkable predicate, if any;
+- the executor that actually runs it;
+- the consumer or gate that depends on its result;
+- how the path can be bypassed, or why it cannot within scope.
+
+If those facts are unknown, keep the control claim narrow. Deterministic code is justified by a real machine-executed purpose, not by a desire to make prompt-level guidance appear deterministic.
 
 ## Finding qualification boundary
 

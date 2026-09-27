@@ -40,6 +40,8 @@ Inspect enough target evidence to identify:
 
 Unknowns remain unknown.
 
+Once enough intent/authority and inspected reality are known to construct a useful operational model, run the canonical [Scenario-Driven Gap Discovery](../core/REASONING_MODEL.md#scenario-driven-gap-discovery) strategy when it can materially change the review. In `PR_SCOPE`, bound it to the changed capability's behavioral blast radius; in `REPOSITORY_SCOPE`, model broadly enough to expose repository-level blind spots. Feed material discoveries and dispositions into the following scenario/obligation/capability derivation instead of treating the exercise as a parallel pipeline.
+
 ## 3. Derive scenarios, obligations, and capabilities
 
 For each material entity property:

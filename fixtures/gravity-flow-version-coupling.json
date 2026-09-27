@@ -1,7 +1,7 @@
 {
-  "id": "EC-RR-001_GRAVITY_FLOW_VERSION_COUPLING",
-  "authority": "NON_CANONICAL_TEST_SPEC",
-  "purpose": "Regression fixture for detecting an architectural upstream-evolution problem without pre-teaching the exact bug.",
+  "id": "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING",
+  "authority": "NON_CANONICAL_EVALUATION_SCENARIO",
+  "purpose": "Clean reviewer-input scenario for testing whether an LLM distinguishes a visible local symptom from the causal compatibility problem without seeing evaluator expectations.",
   "scope": "PR_OR_REPOSITORY_REVIEW",
   "scenario": {
     "product": "A maintained WordPress integration plugin adds presentation behavior on top of Gravity Flow.",
@@ -22,29 +22,5 @@
     ],
     "local_performance_detail": "the same upstream files are hashed repeatedly across requests"
   },
-  "expected_reasoning": [
-    "Identify upstream independent evolution as a material system property.",
-    "Create a change scenario for an upstream version/update.",
-    "Derive a structural obligation for an explicit compatibility/evolution strategy without inventing a requirement to support every version.",
-    "Recognize compatibility handling as a present capability whose selected strategy may require evidence-backed fit analysis.",
-    "Extract exact-version admission and file fingerprinting as material engineering decisions.",
-    "Question whether compatibility is coupled to behavioral capability or exact implementation identity.",
-    "Treat repeated hashing/caching as a local optimization, not automatically as the root-cause repair.",
-    "Search for same-level alternatives such as supported public seams, capability/behavior detection, bounded compatibility adapters, or evidence-backed version ranges before recommending a method.",
-    "If evidence proves the compatibility strategy is unnecessarily narrower than the real dependency and a safer sufficient alternative exists, allow the issue shape to be classified as MISFIT_CAPABILITY.",
-    "Allow exact-build admission to remain a JUSTIFIED_DEVIATION if inspection shows no safer sufficient alternative and fail-closed safety materially requires it.",
-    "Represent materially activated reasoning methods in the Method Coverage Ledger, distinguishing applied findings, applied no-findings, non-execution, and blockers.",
-    "If material evidence changes the system model, such as discovery of a stable supported public seam or proof that no such seam exists, re-evaluate reasoning-method routing instead of blindly continuing the original sequence."
-  ],
-  "forbidden_shortcuts": [
-    "Do not invent 'support all future Gravity Flow versions' as an explicit project requirement.",
-    "Do not stop at 'cache the file hashes' if the architecture coupling remains unexplored.",
-    "Do not declare fingerprinting wrong without inspecting whether a stable/supported alternative exists.",
-    "Do not pre-classify compatibility handling as MISFIT_CAPABILITY before evidence establishes a strategy-to-obligation mismatch."
-  ],
-  "acceptable_final_states": [
-    "CONFIRMED_FINDING",
-    "JUSTIFIED_DEVIATION",
-    "NOT_PROVEN"
-  ]
+  "review_task": "Review the engineering decision. Identify the material system property, the relevant compatibility obligation, the likely causal level of any defect, what remains unproven, and the smallest next engineering action. Do not assume that a local performance optimization repairs an architecture-level problem."
 }

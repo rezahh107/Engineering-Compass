@@ -17,3 +17,6 @@ jobs:
 
       - name: Verify repository contract
         run: python3 scripts/verify_repo.py
+
+      - name: Verify semantic fixture admission regressions
+        run: python3 -m unittest discover -s tests -p 'test_semantic_fixture_contract.py'

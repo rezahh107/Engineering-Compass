@@ -1,0 +1,67 @@
+{
+  "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
+  "purpose": "Clean reviewer-input scenarios for evaluating bounded Scenario-Driven Gap Discovery without exposing evaluator-only expectations.",
+  "scenarios": [
+    {
+      "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
+      "input": {
+        "scope": "PR_SCOPE",
+        "change": [
+          "A PR adds an operator action that sends a one-shot request to an external counter service, records the returned counter, then marks the item complete.",
+          "The UI disables the action after click; the server rechecks assignment and workflow state before calling the service."
+        ],
+        "known_evidence": [
+          "Happy-path runtime evidence shows one counter is recorded and the item completes.",
+          "Duplicate browser submissions that arrive before the first external call are rejected locally.",
+          "The service can time out after accepting a request; no lookup-by-client-request-id or idempotency capability has been verified.",
+          "On timeout the current item remains in REQUESTING and is still visible after reload."
+        ],
+        "owner_authority": [
+          "The accepted product outcome is that every valid item eventually receives exactly one counter or reaches a recoverable operator-visible path.",
+          "Standard low-risk technical choices that preserve that meaning are delegated to engineering.",
+          "No Owner decision defines what business outcome to choose if the external provider cannot determine whether an uncertain request committed."
+        ]
+      },
+      "review_task": "Review the change using the smallest useful operational model. Surface material gaps or missing decisions even when they were not explicitly requested, assign each material gap a useful disposition, bound claims to observed evidence, and stop when further exploration is unlikely to change the engineering decision."
+    },
+    {
+      "id": "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
+      "input": {
+        "scope": "PR_SCOPE",
+        "components": [
+          "Retry middleware retries one POST after a network timeout and is documented as correct for idempotent operations.",
+          "The external shipment endpoint creates one shipment for every accepted POST and exposes no verified idempotency key.",
+          "The local order service records shipment_created only after receiving a successful response.",
+          "The server rechecks the current user's permission on every request, including retries after a refreshed session."
+        ],
+        "material_dimensions": [
+          "network outcome: success, timeout before remote commit, timeout after remote commit",
+          "retry: enabled or disabled",
+          "remote idempotency: verified or absent",
+          "role state: stable or revoked between attempts",
+          "browser lifecycle: uninterrupted or reload after timeout"
+        ]
+      },
+      "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions, identify any system-level failure that changes the engineering decision, state what remains outside the known model, and explain why further combinations would or would not be decision-material."
+    },
+    {
+      "id": "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP",
+      "input": {
+        "scope": "REPOSITORY_SCOPE",
+        "authority_and_surfaces": [
+          "Current Owner-approved contract accepts JPG, JPEG, and PDF uploads up to 5 MB.",
+          "Current documentation states the same 5 MB JPG/JPEG/PDF contract.",
+          "Implementation enforces that contract; a dormant configuration enum also contains WEBP, but no current UI or validation path exposes or accepts WEBP.",
+          "Current runtime evidence verifies JPG and PDF within 5 MB and rejects files over 5 MB.",
+          "One legacy test still requires JPG-only uploads no larger than 2 MB.",
+          "A roadmap document labels an object-storage adapter as future capability, and no current runtime path references it."
+        ],
+        "uninspected_context": [
+          "Persisted entries created under the earlier 2 MB-era configuration have not been examined.",
+          "No inspected evidence yet shows whether those old entries are revalidated through the current upload validator when viewed or edited."
+        ]
+      },
+      "review_task": "Assess conformance and whether the review is sufficient to stop. Distinguish material drift from justified, retained-future, or obsolete differences; challenge whether an unmodeled state could materially change the conclusion; and do not expand into unrelated subsystems once both structural and discovery/materiality sufficiency are reached."
+    }
+  ]
+}

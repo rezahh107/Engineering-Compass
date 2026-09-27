@@ -1,0 +1,75 @@
+{
+  "authority": "EVALUATOR_ONLY_NON_CANONICAL",
+  "purpose": "Evaluator-only rubric for Engineering Compass semantic regression scenarios. Never include this file in reviewer-model input for a clean-context evaluation.",
+  "reviewer_input_rule": "The reviewer model receives only the scenario fixture content and applicable canonical Engineering Compass guidance. The evaluator receives the reviewer output plus this rubric after the reviewer response is complete.",
+  "result_states": [
+    "PASS",
+    "FAIL",
+    "NOT_PROVEN"
+  ],
+  "aggregation": "No opaque numeric or aggregate score. Preserve one result per scenario plus concise evidence for each criterion.",
+  "global_criteria": [
+    "Claim strength does not exceed inspected or executed evidence.",
+    "Unknowns remain explicit rather than being converted into facts.",
+    "The response stops when further analysis is unlikely to change the engineering decision or exact next action."
+  ],
+  "scenarios": {
+    "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING": {
+      "criteria": [
+        "Identifies independent upstream evolution as a material system property and derives only an evidence-backed compatibility/evolution obligation.",
+        "Does not treat repeated hashing or caching as a root-cause repair merely because it removes a visible local symptom.",
+        "Distinguishes a confirmed symptom from a confirmed causal mechanism and keeps the root cause NOT_PROVEN when the evidence is insufficient.",
+        "Uses a same-abstraction-level or surface-patch counterfactual before recommending implementation when useful.",
+        "Does not declare exact-version admission or fingerprinting wrong without evidence about safer sufficient alternatives."
+      ]
+    },
+    "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION": {
+      "criteria": [
+        "States that repository-visible deterministic code does not by itself prove that the code is executed on the relevant path.",
+        "Identifies the absence of a forced consumer/executor path and names bypass possibility as material to any enforcement claim.",
+        "Separates guidance, validation, and proof instead of treating code existence as mechanical enforcement."
+      ]
+    },
+    "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH": {
+      "criteria": [
+        "Classifies an instruction to an LLM to invoke a command as model-mediated invocation rather than an externally forced path when the model can bypass it.",
+        "Identifies the bypass explicitly.",
+        "Requires an independent external gate or equivalent non-bypassable consumer before making a mechanical-enforcement claim, and limits that claim to predicates actually executed."
+      ]
+    },
+    "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": {
+      "criteria": [
+        "States that schema/validator PASS proves only the predicates the validator actually executed.",
+        "Does not infer semantic engineering correctness, root-cause truth, architecture optimality, evidence completeness, or global LLM compliance from structural validity.",
+        "Identifies clean-context model evaluation or other behavior-level evidence as the relevant boundary for observed semantic performance without inflating one run into a global guarantee."
+      ]
+    },
+    "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": {
+      "criteria": [
+        "Proactively identifies the timeout-after-acceptance outcome as a material state/gap not closed by the happy-path or pre-call duplicate-submit evidence, even though the review request did not name that gap.",
+        "Derives both the safety obligation of not producing more than one counter and the progress obligation that the item must eventually complete or reach a recoverable operator-visible state; does not treat a permanently stuck safe state as correct.",
+        "Does not assume a blind retry is safe while external commit/idempotency semantics are unverified; routes provider lookup/idempotency/commit semantics to TECHNICAL_QUALIFICATION_REQUIRED or keeps them NOT_PROVEN.",
+        "Distinguishes low-risk engineering defaults that preserve accepted semantics from a true OWNER_ESCALATION_REQUIRED decision if unresolved provider behavior would force a materially different business/workflow meaning.",
+        "Stops after the material uncertain-outcome state, obligations, evidence boundary, and dispositions are sufficient rather than expanding into unrelated workflow states."
+      ]
+    },
+    "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": {
+      "criteria": [
+        "Detects that retry-on-timeout plus a non-idempotent remote create operation can duplicate a shipment after timeout-after-remote-commit even though the retry middleware and endpoint are locally correct within their individual assumptions.",
+        "Treats ownership, ordering, timing, and assumption interaction as the system-level failure boundary instead of requiring an individually broken component.",
+        "Selects only decision-material combinations, such as timeout timing × retry × idempotency, and does not enumerate the full Cartesian product with role and browser-lifecycle dimensions when those dimensions do not change the leading decision.",
+        "Does not claim complete real-world coverage from bounded pairwise/t-way exploration and keeps the possibility of a missing operational-model dimension explicit.",
+        "Feeds the discovered interaction back into the causal/repair framing rather than jumping from one simulated manifestation to a local patch."
+      ]
+    },
+    "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": {
+      "criteria": [
+        "Identifies the legacy 2 MB JPG-only test as obsolete or drifted relative to current Owner authority, documentation, implementation, and runtime evidence instead of treating conforming production behavior as the defect.",
+        "Does not label the dormant WEBP enum or explicitly future object-storage adapter as current defects merely because they differ from the active contract; distinguishes retained future capability or justified non-active difference from actual drift.",
+        "Challenges the uninspected old persisted-entry state as a possible missing model dimension and assesses whether it could materially affect current behavior before claiming completeness; routes it to technical qualification only if that materiality remains unresolved.",
+        "Applies the two-key stop rule: structural coverage of the known model and discovery/materiality sufficiency must both be adequate before stopping.",
+        "Stops once the material drift, missing-state materiality, and dispositions are resolved or bounded, rather than expanding into unrelated repository subsystems."
+      ]
+    }
+  }
+}
