@@ -299,6 +299,18 @@ internal seam
 → Upstream Implementation Coupling
 ```
 
+### Finding-to-repair boundary
+
+A confirmed symptom is not a confirmed root cause. Do not jump directly from a Finding to implementation merely because the manifestation is reproducible.
+
+Before recommending a repair as root-correct, establish enough evidence for the causal mechanism and the boundary that actually owns or enforces it. If those remain unresolved, keep the root cause `NOT_PROVEN` and identify the smallest verification step that could discriminate between hypotheses.
+
+When useful, apply the **surface-patch counterfactual**:
+
+> If the current manifestation disappeared but the same causal mechanism appeared at another reachable instance, would this repair still prevent or deterministically expose the defect?
+
+If not, treat the proposal as a surface patch unless evidence shows the defect class is genuinely single-instance and the local boundary is causal.
+
 ## 12. Same-abstraction-level alternatives
 
 A proposed repair must address the problem at the same or higher causal level.
@@ -349,6 +361,34 @@ Prefer the smallest coherent change that:
 - can be verified at the level of the claim.
 
 Do not reward complexity merely because it looks more architectural.
+
+## 16. Guidance, validation, and proof
+
+Do not confuse repository visibility with execution authority.
+
+### Guidance
+
+Repository-visible prose, examples, schemas, code, contracts, or policies can guide a model or human. Their existence proves that the guidance/artifact is present; it does not prove that a reviewer consumed it, that code ran, or that behavior was mechanically prevented.
+
+### Validation
+
+A validator or checker proves only the explicit predicates it actually executed on the supplied input. A schema PASS may prove shape and required-field constraints. A structural repository verifier may prove repository integrity predicates. Neither result, by itself, proves semantic engineering correctness, root-cause truth, architecture optimality, evidence completeness, or global LLM compliance.
+
+Model-mediated invocation is still model-mediated: when an LLM can skip a requested command and no independent downstream gate rejects that bypass, the command is not an externally forced control path.
+
+### Proof of mechanical control
+
+A mechanical-enforcement claim requires evidence that an **externally forced execution path** ran the relevant control and that the path cannot be bypassed within the claimed boundary. The claim extends only to the exact machine-checkable predicates executed by that path.
+
+For each claimed control, state or make clear:
+
+- the failure it is intended to prevent;
+- the exact machine-checkable predicate, if any;
+- the executor that actually runs it;
+- the consumer or gate that depends on its result;
+- how the path can be bypassed, or why it cannot within scope.
+
+If those facts are unknown, keep the control claim narrow. Deterministic code is justified by a real machine-executed purpose, not by a desire to make prompt-level guidance appear deterministic.
 
 ## Finding qualification boundary
 
