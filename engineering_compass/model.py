@@ -10,6 +10,11 @@ SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 TARGET_KINDS = {"PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"}
+TARGET_SELECTOR_KEYS = {
+    "PR_SCOPE": {"kind", "repository", "pr_number"},
+    "REF_DELTA_SCOPE": {"kind", "repository", "base_ref", "target_ref"},
+    "REPOSITORY_SCOPE": {"kind", "repository", "ref"},
+}
 FRESHNESS = {"CURRENT", "STALE", "UNKNOWN"}
 QUALIFICATION_STATES = {
     "CONFIRMED_FINDING",
@@ -72,46 +77,50 @@ def require_dict(value: Any, path: str) -> dict[str, Any]:
     return value
 
 
-def validate_target(target: dict[str, Any]) -> None:
+
+def canonical_target(target: dict[str, Any]) -> dict[str, Any]:
+    target = require_dict(target, "target")
     kind = target.get("kind")
     require(kind in TARGET_KINDS, f"target.kind must be one of {sorted(TARGET_KINDS)}")
+    allowed = TARGET_SELECTOR_KEYS[kind]
+    extra, missing = set(target) - allowed, allowed - set(target)
+    require(not extra, f"{kind} target contains unsupported selector keys: {sorted(extra)}")
+    require(not missing, f"{kind} target missing required selector keys: {sorted(missing)}")
     repo = require_string(target.get("repository"), "target.repository")
     require(REPO_RE.fullmatch(repo) is not None, "target.repository must use owner/name")
     if kind == "PR_SCOPE":
         pr = target.get("pr_number")
         require(isinstance(pr, int) and not isinstance(pr, bool) and pr > 0, "PR_SCOPE requires positive pr_number")
-    elif kind == "REF_DELTA_SCOPE":
-        require_string(target.get("base_ref"), "target.base_ref")
-        require_string(target.get("target_ref"), "target.target_ref")
-    elif kind == "REPOSITORY_SCOPE":
-        require_string(target.get("ref", "main"), "target.ref")
+        return {"kind": kind, "repository": repo, "pr_number": pr}
+    if kind == "REF_DELTA_SCOPE":
+        return {"kind": kind, "repository": repo, "base_ref": require_string(target.get("base_ref"), "target.base_ref"), "target_ref": require_string(target.get("target_ref"), "target.target_ref")}
+    return {"kind": kind, "repository": repo, "ref": require_string(target.get("ref"), "target.ref")}
+
+
+def validate_target(target: dict[str, Any]) -> None:
+    canonical_target(target)
 
 
 def validate_request(request: dict[str, Any]) -> None:
     require_dict(request, "request")
-    validate_target(require_dict(request.get("target"), "request.target"))
+    extra = set(request) - {"target", "review_intent", "inspection_profile"}
+    require(not extra, f"caller request contains unsupported fields: {sorted(extra)}")
+    canonical_target(require_dict(request.get("target"), "request.target"))
     require_string(request.get("review_intent"), "request.review_intent")
-    profile = request.get("inspection_profile", "deep")
-    require(profile in {"focused", "deep"}, "inspection_profile must be focused or deep")
-    forbidden = {
-        "head_sha",
-        "base_sha",
-        "merge_base_sha",
-        "changed_files",
-        "checks",
-        "findings",
-        "root_cause",
-        "decision",
-    }
-    overlap = forbidden.intersection(request)
-    require(not overlap, f"caller request contains fact/judgment authority fields: {sorted(overlap)}")
+    require(request.get("inspection_profile", "deep") in {"focused", "deep"}, "inspection_profile must be focused or deep")
+
+
+def compute_review_intent_digest(review_intent: str) -> str:
+    value = require_string(review_intent, "review_intent")
+    material = json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return f"sha256:{hashlib.sha256(material).hexdigest()}"
+
 
 
 def _evidence_digest_payload(bundle: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": bundle.get("schema_version"),
         "target": bundle.get("target"),
-        "review_intent": bundle.get("review_intent"),
         "identity": bundle.get("identity"),
         "freshness": bundle.get("freshness"),
         "completeness": bundle.get("completeness"),
@@ -129,84 +138,114 @@ def compute_evidence_digest(bundle: dict[str, Any]) -> str:
     return f"sha256:{hashlib.sha256(material).hexdigest()}"
 
 
+
 def finalize_evidence_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
+    bundle["target"] = canonical_target(require_dict(bundle.get("target"), "evidence.target"))
+    review_intent = require_string(bundle.get("review_intent"), "evidence.review_intent")
+    bundle["review_intent_digest"] = compute_review_intent_digest(review_intent)
     bundle["evidence_digest"] = compute_evidence_digest(bundle)
     return bundle
 
 
+def _validate_sha40(value: Any, path: str) -> str:
+    require(isinstance(value, str) and SHA40_RE.fullmatch(value) is not None, f"{path} must be lowercase SHA-40")
+    return value
+
+
+def _validate_sha256(value: Any, path: str) -> str:
+    require(isinstance(value, str) and SHA256_RE.fullmatch(value) is not None, f"{path} must be sha256:<64 lowercase hex chars>")
+    return value
+
+
+
 def validate_evidence_bundle(bundle: dict[str, Any]) -> None:
     version = bundle.get("schema_version")
-    require(
-        version == 2,
-        f"evidence schema_version must be 2 (got {version!r}); regenerate evidence under the current snapshot-binding contract",
-    )
-    validate_target(require_dict(bundle.get("target"), "evidence.target"))
+    require(version == 2, f"evidence schema_version must be 2 (got {version!r}); regenerate evidence under the current snapshot-binding contract")
+    target = canonical_target(require_dict(bundle.get("target"), "evidence.target"))
+    require(bundle.get("target") == target, "evidence.target must be canonical")
+    review_intent = require_string(bundle.get("review_intent"), "evidence.review_intent")
+    intent_digest = _validate_sha256(bundle.get("review_intent_digest"), "evidence.review_intent_digest")
+    require(intent_digest == compute_review_intent_digest(review_intent), "review_intent_digest does not match review_intent")
     identity = require_dict(bundle.get("identity"), "evidence.identity")
     require_string(identity.get("repository_id"), "evidence.identity.repository_id")
-    head = identity.get("head_sha")
-    if head is not None:
-        require(isinstance(head, str) and SHA40_RE.fullmatch(head) is not None, "head_sha must be lowercase SHA-40")
-    base = identity.get("base_sha")
-    if base is not None:
-        require(isinstance(base, str) and SHA40_RE.fullmatch(base) is not None, "base_sha must be lowercase SHA-40")
-    merge_base = identity.get("merge_base_sha")
-    if merge_base is not None:
-        require(isinstance(merge_base, str) and SHA40_RE.fullmatch(merge_base) is not None, "merge_base_sha must be lowercase SHA-40")
+    _validate_sha40(identity.get("head_sha"), "evidence.identity.head_sha")
+    kind = target["kind"]
+    if kind in {"PR_SCOPE", "REF_DELTA_SCOPE"}:
+        require_string(identity.get("base_ref"), "evidence.identity.base_ref")
+        _validate_sha40(identity.get("base_sha"), "evidence.identity.base_sha")
+        require_string(identity.get("head_ref"), "evidence.identity.head_ref")
+        _validate_sha40(identity.get("merge_base_sha"), "evidence.identity.merge_base_sha")
     require(bundle.get("freshness") in FRESHNESS, f"evidence.freshness must be one of {sorted(FRESHNESS)}")
     completeness = require_dict(bundle.get("completeness"), "evidence.completeness")
     require(isinstance(completeness.get("full_coverage"), bool), "completeness.full_coverage must be boolean")
     require_list(completeness.get("material_gaps", []), "completeness.material_gaps")
-    records = require_list(bundle.get("evidence_records", []), "evidence.evidence_records")
-    ids: list[str] = []
-    for index, record in enumerate(records):
-        obj = require_dict(record, f"evidence_records[{index}]")
+    ids=[]
+    for index, record in enumerate(require_list(bundle.get("evidence_records", []), "evidence.evidence_records")):
+        obj=require_dict(record,f"evidence_records[{index}]")
         ids.append(require_string(obj.get("evidence_id"), f"evidence_records[{index}].evidence_id"))
         require_string(obj.get("kind"), f"evidence_records[{index}].kind")
         require_string(obj.get("source"), f"evidence_records[{index}].source")
-    require(len(ids) == len(set(ids)), "evidence_id values must be unique")
-    digest = require_string(bundle.get("evidence_digest"), "evidence.evidence_digest")
-    require(SHA256_RE.fullmatch(digest) is not None, "evidence_digest must be sha256:<64 lowercase hex chars>")
-    require(digest == compute_evidence_digest(bundle), "evidence_digest does not match the material evidence snapshot")
+        require_list(obj.get("limitations", []), f"evidence_records[{index}].limitations")
+    require(len(ids)==len(set(ids)), "evidence_id values must be unique")
+    digest=_validate_sha256(bundle.get("evidence_digest"), "evidence.evidence_digest")
+    require(digest==compute_evidence_digest(bundle), "evidence_digest does not match the material evidence snapshot")
 
 
 def expected_target_binding(bundle: dict[str, Any]) -> dict[str, Any]:
-    target = bundle["target"]
-    identity = bundle["identity"]
-    common = {
-        "repository": target["repository"],
-        "repository_id": identity["repository_id"],
-        "kind": target["kind"],
-        "head_sha": identity.get("head_sha"),
-        "evidence_digest": bundle["evidence_digest"],
-    }
-    if target["kind"] == "PR_SCOPE":
-        common.update(
-            {
-                "pr_number": target["pr_number"],
-                "base_ref": identity.get("base_ref"),
-                "base_sha": identity.get("base_sha"),
-                "head_ref": identity.get("head_ref"),
-                "merge_base_sha": identity.get("merge_base_sha"),
-            }
-        )
-    elif target["kind"] == "REF_DELTA_SCOPE":
-        common.update(
-            {
-                "base_ref": target["base_ref"],
-                "base_sha": identity.get("base_sha"),
-                "target_ref": target["target_ref"],
-                "merge_base_sha": identity.get("merge_base_sha"),
-            }
-        )
+    target, identity = bundle["target"], bundle["identity"]
+    common={"repository":target["repository"],"repository_id":identity["repository_id"],"kind":target["kind"],"head_sha":identity["head_sha"],"evidence_digest":bundle["evidence_digest"],"review_intent_digest":bundle["review_intent_digest"]}
+    if target["kind"]=="PR_SCOPE":
+        common.update({"pr_number":target["pr_number"],"base_ref":identity["base_ref"],"base_sha":identity["base_sha"],"head_ref":identity["head_ref"],"merge_base_sha":identity["merge_base_sha"]})
+    elif target["kind"]=="REF_DELTA_SCOPE":
+        common.update({"base_ref":target["base_ref"],"base_sha":identity["base_sha"],"target_ref":target["target_ref"],"merge_base_sha":identity["merge_base_sha"]})
     else:
-        common["ref"] = target.get("ref", "main")
+        common["ref"]=target["ref"]
     return common
 
 
+def _validate_target_binding_shape(binding: dict[str, Any], bundle: dict[str, Any]) -> dict[str, Any]:
+    expected=expected_target_binding(bundle)
+    require(not (set(expected)-set(binding)), f"assessment target binding missing mandatory fields: {sorted(set(expected)-set(binding))}")
+    require(not (set(binding)-set(expected)), f"assessment target binding contains unsupported fields: {sorted(set(binding)-set(expected))}")
+    require_string(binding.get("repository"), "assessment.target_binding.repository")
+    require_string(binding.get("repository_id"), "assessment.target_binding.repository_id")
+    kind=binding.get("kind")
+    require(kind in TARGET_KINDS and kind==bundle["target"]["kind"], "assessment target binding kind does not match target kind")
+    _validate_sha40(binding.get("head_sha"), "assessment.target_binding.head_sha")
+    _validate_sha256(binding.get("evidence_digest"), "assessment.target_binding.evidence_digest")
+    _validate_sha256(binding.get("review_intent_digest"), "assessment.target_binding.review_intent_digest")
+    if kind=="PR_SCOPE":
+        pr=binding.get("pr_number"); require(isinstance(pr,int) and not isinstance(pr,bool) and pr>0,"assessment.target_binding.pr_number must be positive")
+        require_string(binding.get("base_ref"),"assessment.target_binding.base_ref"); _validate_sha40(binding.get("base_sha"),"assessment.target_binding.base_sha")
+        require_string(binding.get("head_ref"),"assessment.target_binding.head_ref"); _validate_sha40(binding.get("merge_base_sha"),"assessment.target_binding.merge_base_sha")
+    elif kind=="REF_DELTA_SCOPE":
+        require_string(binding.get("base_ref"),"assessment.target_binding.base_ref"); _validate_sha40(binding.get("base_sha"),"assessment.target_binding.base_sha")
+        require_string(binding.get("target_ref"),"assessment.target_binding.target_ref"); _validate_sha40(binding.get("merge_base_sha"),"assessment.target_binding.merge_base_sha")
+    else:
+        require_string(binding.get("ref"),"assessment.target_binding.ref")
+    return expected
+
+
+def preflight_assessment_binding(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
+    validate_evidence_bundle(evidence_bundle)
+    assessment=require_dict(assessment,"assessment")
+    version=assessment.get("assessment_version")
+    require(version==2, f"assessment_version must be 2 (got {version!r}); regenerate assessment under the current snapshot-binding contract")
+    binding=require_dict(assessment.get("target_binding"),"assessment.target_binding")
+    expected=_validate_target_binding_shape(binding,evidence_bundle)
+    stable={"repository","repository_id","kind"}
+    kind=evidence_bundle["target"]["kind"]
+    stable |= {"pr_number"} if kind=="PR_SCOPE" else ({"base_ref","target_ref"} if kind=="REF_DELTA_SCOPE" else {"ref"})
+    unrelated=sorted(k for k in stable if binding.get(k)!=expected.get(k))
+    require(not unrelated,f"assessment target binding refers to a different target: {unrelated}")
+    mismatched=sorted(k for k,v in expected.items() if binding.get(k)!=v)
+    return {"state":"CURRENT_MATCH" if not mismatched else "STALE_OR_SUPERSEDED_REVIEW","mismatched_fields":mismatched,"previous_binding":dict(binding),"current_binding":expected}
+
+
 def validate_target_binding(binding: dict[str, Any], bundle: dict[str, Any]) -> None:
-    expected = expected_target_binding(bundle)
-    for key, value in expected.items():
-        require(binding.get(key) == value, f"assessment target binding mismatch for {key}")
+    expected=_validate_target_binding_shape(binding,bundle)
+    for key,value in expected.items():
+        require(binding.get(key)==value,f"assessment target binding mismatch for {key}")
 
 
 def evidence_ids(bundle: dict[str, Any]) -> set[str]:

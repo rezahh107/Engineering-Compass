@@ -48,3 +48,9 @@ It does mechanically reject known invalid transitions such as stale snapshot reu
 ## Freshness
 
 Evidence contract v2 fingerprints material evidence content and target identity while excluding intentionally volatile collection time. Assessment contract v2 binds to that digest plus target-specific selectors/identity. A later material snapshot at the same Head therefore requires a new assessment; no stale repair-ready state is carried forward.
+
+## Control-plane closure invariants
+
+Caller target selectors are canonicalized before collection; unknown per-kind selector keys fail closed. Material evidence identity is hashed independently from review intent, while a separate review-intent digest binds assessment intent. Projection performs a binding/freshness preflight before current-state semantic validation so a valid superseded review routes to RERUN_REVIEW while malformed contracts still fail.
+
+Repair modification authority is Finding-granular. Root-cause grouping may contain related non-authorized Findings, but only confirmed REPAIR Findings in the canonical authorization mapping can reach implementation. GitHub evidence completeness distinguishes changed-file inventory from textual diff content and accounts for endpoint ceilings.

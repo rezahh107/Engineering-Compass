@@ -2,21 +2,144 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "engineering-compass.evidence-bundle.v2",
   "type": "object",
-  "required": ["schema_version", "target", "identity", "freshness", "completeness", "evidence_records", "evidence_digest"],
+  "required": [
+    "schema_version",
+    "target",
+    "review_intent",
+    "review_intent_digest",
+    "identity",
+    "freshness",
+    "completeness",
+    "evidence_records",
+    "evidence_digest"
+  ],
   "properties": {
-    "schema_version": {"const": 2},
-    "target": {"type": "object"},
-    "identity": {"type": "object"},
-    "freshness": {"enum": ["CURRENT", "STALE", "UNKNOWN"]},
+    "schema_version": {
+      "const": 2
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "pr_number"
+          ],
+          "properties": {
+            "kind": {
+              "const": "PR_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "pr_number": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "base_ref",
+            "target_ref"
+          ],
+          "properties": {
+            "kind": {
+              "const": "REF_DELTA_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "base_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "ref"
+          ],
+          "properties": {
+            "kind": {
+              "const": "REPOSITORY_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "review_intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_intent_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "freshness": {
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "UNKNOWN"
+      ]
+    },
     "completeness": {
       "type": "object",
-      "required": ["full_coverage", "material_gaps"],
+      "required": [
+        "full_coverage",
+        "material_gaps"
+      ],
       "properties": {
-        "full_coverage": {"type": "boolean"},
-        "material_gaps": {"type": "array", "items": {"type": "string"}}
+        "full_coverage": {
+          "type": "boolean"
+        },
+        "material_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "surfaces": {
+          "type": "object"
+        }
       }
     },
-    "evidence_records": {"type": "array", "items": {"type": "object"}},
-    "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+    "evidence_records": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "evidence_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
   }
 }

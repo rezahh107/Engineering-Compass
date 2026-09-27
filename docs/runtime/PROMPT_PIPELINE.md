@@ -59,3 +59,7 @@ python3 -m engineering_compass prompt-check --prompt-pipeline-root ../Prompt-Pip
 python3 -m engineering_compass prompt-handoff --evidence evidence.json --assessment assessment.json --out /tmp/prompt-intake.json
 python3 -m engineering_compass compile-prompt --intake /tmp/prompt-intake.json --prompt-pipeline-root ../Prompt-Pipeline --out /tmp/prompt-generation-result.json
 ```
+
+## Operational recovery handoffs
+
+Implementation handoff serializes only authorized implementation Finding IDs from the canonical projection mapping, never raw group.finding_ids. Prompt-required non-modifying actions carry exact target selectors, resolved Head, evidence and intent digests, plus action-specific gaps/findings/groups/unknowns; each explicitly grants no code modification authority. Missing material recovery context blocks prompt construction.

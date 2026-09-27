@@ -1,23 +1,98 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "engineering-compass.review-request.v1",
+  "$id": "engineering-compass.review-request.v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["target", "review_intent"],
+  "required": [
+    "target",
+    "review_intent"
+  ],
   "properties": {
     "target": {
-      "type": "object",
-      "required": ["kind", "repository"],
-      "properties": {
-        "kind": {"enum": ["PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"]},
-        "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
-        "pr_number": {"type": "integer", "minimum": 1},
-        "base_ref": {"type": "string", "minLength": 1},
-        "target_ref": {"type": "string", "minLength": 1},
-        "ref": {"type": "string", "minLength": 1}
-      }
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "pr_number"
+          ],
+          "properties": {
+            "kind": {
+              "const": "PR_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "pr_number": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "base_ref",
+            "target_ref"
+          ],
+          "properties": {
+            "kind": {
+              "const": "REF_DELTA_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "base_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "repository",
+            "ref"
+          ],
+          "properties": {
+            "kind": {
+              "const": "REPOSITORY_SCOPE"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
     },
-    "review_intent": {"type": "string", "minLength": 1},
-    "inspection_profile": {"enum": ["focused", "deep"], "default": "deep"}
+    "review_intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inspection_profile": {
+      "enum": [
+        "focused",
+        "deep"
+      ],
+      "default": "deep"
+    }
   }
 }

@@ -39,7 +39,9 @@
         "limitations": []
       }
     ],
-    "evidence_digest": "sha256:2113ac7bd1f00212ec6cfd2100ce4dbd526cf536a3d7f94939aa868c93aebc34"
+    "evidence_digest": "sha256:e4eb5b1fdfa6d5eefccab0a46ed45b6dbf766439c9ffc78e51b4329438ee871f",
+    "review_intent": "Deep engineering review for the runtime repair fixture.",
+    "review_intent_digest": "sha256:ce236427e1ea943643db2ab9084a6566e4675407b6e2af13ce5e1d991d81275a"
   },
   "assessment": {
     "assessment_version": 2,
@@ -48,12 +50,13 @@
       "repository_id": "123",
       "kind": "PR_SCOPE",
       "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "evidence_digest": "sha256:2113ac7bd1f00212ec6cfd2100ce4dbd526cf536a3d7f94939aa868c93aebc34",
+      "evidence_digest": "sha256:e4eb5b1fdfa6d5eefccab0a46ed45b6dbf766439c9ffc78e51b4329438ee871f",
       "pr_number": 42,
       "base_ref": "main",
       "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "head_ref": "feature/fix",
-      "merge_base_sha": "cccccccccccccccccccccccccccccccccccccccc"
+      "merge_base_sha": "cccccccccccccccccccccccccccccccccccccccc",
+      "review_intent_digest": "sha256:ce236427e1ea943643db2ab9084a6566e4675407b6e2af13ce5e1d991d81275a"
     },
     "method_coverage": [
       {

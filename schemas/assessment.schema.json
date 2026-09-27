@@ -2,40 +2,184 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "engineering-compass.assessment.v2",
   "type": "object",
-  "required": ["assessment_version", "target_binding", "method_coverage", "findings", "root_cause_groups", "unverified_areas", "stop_reason"],
+  "required": [
+    "assessment_version",
+    "target_binding",
+    "method_coverage",
+    "findings",
+    "root_cause_groups",
+    "unverified_areas",
+    "stop_reason"
+  ],
   "properties": {
-    "assessment_version": {"const": 2},
+    "assessment_version": {
+      "const": 2
+    },
     "target_binding": {
       "type": "object",
-      "required": ["repository", "repository_id", "kind", "head_sha", "evidence_digest"],
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "repository_id",
+        "kind",
+        "head_sha",
+        "evidence_digest",
+        "review_intent_digest"
+      ],
       "properties": {
-        "repository": {"type": "string"},
-        "repository_id": {"type": "string"},
-        "kind": {"enum": ["PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"]},
-        "head_sha": {"type": ["string", "null"]},
-        "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+        "repository": {
+          "type": "string"
+        },
+        "repository_id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "PR_SCOPE",
+            "REF_DELTA_SCOPE",
+            "REPOSITORY_SCOPE"
+          ]
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "evidence_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "review_intent_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "pr_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "base_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "head_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "merge_base_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "target_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "allOf": [
         {
-          "if": {"properties": {"kind": {"const": "PR_SCOPE"}}},
-          "then": {"required": ["pr_number", "base_ref", "base_sha", "head_ref", "merge_base_sha"]}
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "PR_SCOPE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "pr_number",
+              "base_ref",
+              "base_sha",
+              "head_ref",
+              "merge_base_sha"
+            ]
+          }
         },
         {
-          "if": {"properties": {"kind": {"const": "REF_DELTA_SCOPE"}}},
-          "then": {"required": ["base_ref", "base_sha", "target_ref", "merge_base_sha"]}
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "REF_DELTA_SCOPE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "base_ref",
+              "base_sha",
+              "target_ref",
+              "merge_base_sha"
+            ]
+          }
         },
         {
-          "if": {"properties": {"kind": {"const": "REPOSITORY_SCOPE"}}},
-          "then": {"required": ["ref"]}
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "REPOSITORY_SCOPE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ref"
+            ]
+          }
         }
       ]
     },
-    "method_coverage": {"type": "array"},
-    "findings": {"type": "array"},
-    "root_cause_groups": {"type": "array"},
-    "unverified_areas": {"type": "array", "items": {"type": "string"}},
-    "owner_policy_decision_required": {"type": "boolean"},
-    "specialist_review_required": {"type": "boolean"},
-    "stop_reason": {"type": "string", "minLength": 1}
-  }
+    "method_coverage": {
+      "type": "array"
+    },
+    "findings": {
+      "type": "array"
+    },
+    "root_cause_groups": {
+      "type": "array"
+    },
+    "unverified_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner_policy_decision_required": {
+      "type": "boolean"
+    },
+    "specialist_review_required": {
+      "type": "boolean"
+    },
+    "specialist_review_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stop_reason": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "specialist_review_required": {
+            "const": true
+          }
+        },
+        "required": [
+          "specialist_review_required"
+        ]
+      },
+      "then": {
+        "required": [
+          "specialist_review_scope"
+        ]
+      }
+    }
+  ]
 }

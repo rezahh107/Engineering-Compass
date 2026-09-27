@@ -195,32 +195,35 @@ def _validate_selection(group: dict[str, Any], methods: list[dict[str, Any]], ro
     return True
 
 
-def _validate_lock_and_falsification(group: dict[str, Any], methods: list[dict[str, Any]]) -> bool:
+
+def _repair_design_missing(group: dict[str, Any], methods: list[dict[str, Any]]) -> list[str]:
     selection = group["selection"]
     if selection["state"] != "SELECTED":
-        return False
+        return ["selected_method_not_selected"]
+    missing: list[str] = []
     lock_value = group.get("conformance_lock")
     obligations_value = group.get("falsification_obligations", [])
-    if not lock_value or not obligations_value:
-        return False
-    lock = require_dict(lock_value, "group.conformance_lock")
-    require(lock.get("selected_method_id") == selection.get("selected_method_id"), "conformance lock must bind selected method")
-    locked = require_dict(lock.get("locked_properties"), "conformance_lock.locked_properties")
-    chosen = next(method for method in methods if method["method_id"] == selection["selected_method_id"])
-    decision_properties = require_dict(chosen.get("decision_properties"), "selected_method.decision_properties")
-    for key in LOCKED_PROPERTIES:
-        value = require_string(locked.get(key), f"conformance_lock.locked_properties.{key}")
-        require(value == decision_properties.get(key), f"conformance lock {key} contradicts selected method")
-    anchor = require_dict(group.get("anchor"), "group.anchor")
-    if anchor.get("state") == "CONFIRMED":
-        require(
-            locked["enforcement_boundary"] == anchor.get("correct_enforcement_boundary"),
-            "conformance lock enforcement_boundary contradicts confirmed root-cause anchor",
-        )
-    require_list(lock.get("allowed_local_freedom", []), "conformance_lock.allowed_local_freedom")
-    forbidden = require_list(lock.get("forbidden_deviations", []), "conformance_lock.forbidden_deviations")
-    require("replacing_the_selected_method" in forbidden, "conformance lock must forbid selected-method replacement")
+    if not lock_value:
+        missing.append("conformance_lock_missing")
+    else:
+        lock = require_dict(lock_value, "group.conformance_lock")
+        require(lock.get("selected_method_id") == selection.get("selected_method_id"), "conformance lock must bind selected method")
+        locked = require_dict(lock.get("locked_properties"), "conformance_lock.locked_properties")
+        chosen = next(method for method in methods if method["method_id"] == selection["selected_method_id"])
+        decision_properties = require_dict(chosen.get("decision_properties"), "selected_method.decision_properties")
+        for key in LOCKED_PROPERTIES:
+            value = require_string(locked.get(key), f"conformance_lock.locked_properties.{key}")
+            require(value == decision_properties.get(key), f"conformance lock {key} contradicts selected method")
+        anchor = require_dict(group.get("anchor"), "group.anchor")
+        if anchor.get("state") == "CONFIRMED":
+            require(locked["enforcement_boundary"] == anchor.get("correct_enforcement_boundary"), "conformance lock enforcement_boundary contradicts confirmed root-cause anchor")
+        require_list(lock.get("allowed_local_freedom", []), "conformance_lock.allowed_local_freedom")
+        forbidden = require_list(lock.get("forbidden_deviations", []), "conformance_lock.forbidden_deviations")
+        require("replacing_the_selected_method" in forbidden, "conformance lock must forbid selected-method replacement")
     obligations = require_list(obligations_value, "group.falsification_obligations")
+    if not obligations:
+        missing.append("falsification_obligations_missing")
+        return missing
     ids: set[str] = set()
     required_kinds: set[str] = set()
     for index, value in enumerate(obligations):
@@ -235,22 +238,20 @@ def _validate_lock_and_falsification(group: dict[str, Any], methods: list[dict[s
         if required:
             required_kinds.add(kind)
     if not required_kinds:
-        return False
+        missing.append("required_falsification_obligation_missing")
     if "selected_method_deviation" not in required_kinds:
-        return False
+        missing.append("selected_method_deviation_check_missing")
     if not (required_kinds & DEFECT_CLASS_FALSIFICATION_KINDS):
-        return False
-    return True
+        missing.append("defect_class_falsification_check_missing")
+    return missing
+
 
 
 def validate_assessment(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
-    """Validate assessment and derive the sole repair-authorization set used downstream."""
+    """Validate current assessment and derive the sole Finding-granular repair authorization state."""
     validate_evidence_bundle(evidence_bundle)
     version = assessment.get("assessment_version")
-    require(
-        version == 2,
-        f"assessment_version must be 2 (got {version!r}); regenerate assessment under the current snapshot-binding contract",
-    )
+    require(version == 2, f"assessment_version must be 2 (got {version!r}); regenerate assessment under the current snapshot-binding contract")
     allowed_evidence = evidence_ids(evidence_bundle)
     binding = require_dict(assessment.get("target_binding"), "assessment.target_binding")
     validate_target_binding(binding, evidence_bundle)
@@ -262,54 +263,58 @@ def validate_assessment(evidence_bundle: dict[str, Any], assessment: dict[str, A
     routes: dict[str, str] = {}
     selection_evidence_complete: dict[str, bool] = {}
     repair_design_complete: dict[str, bool] = {}
+    repair_design_missing: dict[str, list[str]] = {}
     for index, value in enumerate(groups):
         group = require_dict(value, f"root_cause_groups[{index}]")
         gid = require_string(group.get("group_id"), f"root_cause_groups[{index}].group_id")
         require(gid not in group_ids, f"duplicate root-cause group: {gid}")
-        group_ids.add(gid)
-        groups_by_id[gid] = group
+        group_ids.add(gid); groups_by_id[gid] = group
         _validate_anchor(group, findings, allowed_evidence)
         methods = _validate_methods(group, allowed_evidence)
         route = determine_repair_route(group, methods)
         declared = group.get("route")
         require(declared in {None, route}, f"root-cause group {gid} declares {declared}, runtime requires {route}")
         selection_evidence_complete[gid] = _validate_selection(group, methods, route)
-        repair_design_complete[gid] = _validate_lock_and_falsification(group, methods)
+        missing = _repair_design_missing(group, methods)
+        repair_design_missing[gid] = missing
+        repair_design_complete[gid] = not missing
         routes[gid] = route
 
     repair_findings = [f for f in findings.values() if f.get("repair_disposition") == "REPAIR"]
     for finding in repair_findings:
         gid = finding["root_cause_group_id"]
         require(gid in group_ids, f"repair finding {finding['finding_id']} lacks a valid root-cause group")
-        require(
-            finding["finding_id"] in groups_by_id[gid].get("finding_ids", []),
-            f"repair finding {finding['finding_id']} is not present in root-cause group {gid}.finding_ids",
-        )
-
+        require(finding["finding_id"] in groups_by_id[gid].get("finding_ids", []), f"repair finding {finding['finding_id']} is not present in root-cause group {gid}.finding_ids")
     for gid, group in groups_by_id.items():
         for fid in group.get("finding_ids", []):
             finding = findings[fid]
             if finding.get("repair_disposition") == "REPAIR":
-                require(
-                    finding.get("root_cause_group_id") == gid,
-                    f"repair finding {fid} is attached to conflicting root-cause groups",
-                )
+                require(finding.get("root_cause_group_id") == gid, f"repair finding {fid} is attached to conflicting root-cause groups")
 
-    authorized_findings = sorted(
-        f["finding_id"]
-        for f in repair_findings
-        if f.get("qualification") == "CONFIRMED_FINDING"
-    )
-    authorized_groups = sorted({findings[fid]["root_cause_group_id"] for fid in authorized_findings})
+    authorized_by_group: dict[str, list[str]] = {}
+    for finding in repair_findings:
+        if finding.get("qualification") == "CONFIRMED_FINDING":
+            authorized_by_group.setdefault(finding["root_cause_group_id"], []).append(finding["finding_id"])
+    authorized_by_group = {gid: sorted(set(authorized_by_group[gid])) for gid in sorted(authorized_by_group)}
+    authorized_findings = sorted(fid for ids in authorized_by_group.values() for fid in ids)
+    authorized_groups = sorted(authorized_by_group)
 
     require_list(assessment.get("unverified_areas", []), "assessment.unverified_areas")
     require(isinstance(assessment.get("owner_policy_decision_required", False), bool), "owner_policy_decision_required must be boolean")
-    require(isinstance(assessment.get("specialist_review_required", False), bool), "specialist_review_required must be boolean")
+    specialist_required = assessment.get("specialist_review_required", False)
+    require(isinstance(specialist_required, bool), "specialist_review_required must be boolean")
+    specialist_scope = assessment.get("specialist_review_scope")
+    if specialist_required:
+        require_string(specialist_scope, "assessment.specialist_review_scope")
+    elif specialist_scope is not None:
+        require_string(specialist_scope, "assessment.specialist_review_scope")
     require_string(assessment.get("stop_reason", "not yet sufficient"), "assessment.stop_reason")
     return {
         "routes": routes,
         "authorized_repair_finding_ids": authorized_findings,
         "authorized_repair_group_ids": authorized_groups,
+        "authorized_repair_finding_ids_by_group": authorized_by_group,
         "selection_evidence_complete": selection_evidence_complete,
         "repair_design_complete": repair_design_complete,
+        "repair_design_missing": repair_design_missing,
     }

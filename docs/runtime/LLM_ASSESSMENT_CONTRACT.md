@@ -44,3 +44,9 @@ Therefore evidence references must resolve to the bound evidence bundle; confirm
 ## Coverage
 
 Only materially activated reasoning methods belong in the Method Coverage Ledger. `APPLIED_NO_FINDING` and `NOT_EXECUTED` are distinct states; the ledger is not a universal checklist.
+
+## Intent and stale-review binding
+
+The material evidence digest excludes review intent. Review intent is bound separately by review_intent_digest. A changed Head, material evidence digest, or intent digest on the same canonical target is a stale/superseded review and projects RERUN_REVIEW before full current-assessment validation; malformed or cross-target bindings remain contract errors.
+
+The canonical repair authority output is authorized_repair_finding_ids_by_group. Group membership never promotes a sibling Finding into modification authority.

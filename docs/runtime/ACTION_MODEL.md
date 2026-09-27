@@ -31,3 +31,9 @@ Projection evaluates the complete validated state first and applies this precede
 The action and reason ordering are invariant under reordering of Findings and root-cause groups. `IMPLEMENT_REPAIR` also carries the sorted canonical `authorized_repair_group_ids`; non-modifying actions carry no repair authorization.
 
 The runtime does not create new Findings or root causes during projection. Projection consumes structured judgment; it does not replace it.
+
+## Freshness preflight and authorization payload
+
+Before applying normal action precedence, projection validates the evidence contract and syntactic assessment binding. Valid binding drift or a non-current bundle projects RERUN_REVIEW; malformed/cross-target input fails closed. Only CURRENT_MATCH proceeds to full assessment validation.
+
+IMPLEMENT_REPAIR carries the canonical Finding-granular authorization mapping. Non-modifying actions carry no implementation authorization.

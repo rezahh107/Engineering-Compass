@@ -69,3 +69,7 @@ Local implementation details may vary only when they preserve those properties. 
 Selected repairs require executable falsification obligations. At least one obligation must be required, and implementation readiness requires a required defect-class check plus a required selected-method-deviation check. Applicable defect-class checks include original-defect reproduction, explicit defect-class closure, and same-root-cause/future-drift checks.
 
 A conformance test is too weak if materially different/nonconforming methods can pass without a deterministic observable difference.
+
+## Finding-granular modification authority
+
+Root-cause grouping and modification authority are separate. validate_assessment derives authorized_repair_finding_ids_by_group from only CONFIRMED_FINDING + REPAIR Findings. A mixed root-cause group may retain non-authorized context, but those siblings cannot be serialized as authorized implementation Findings or gain modification authority from group membership.
