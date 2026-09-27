@@ -17,6 +17,17 @@ SCENARIO_FIXTURES = [
 ]
 EVALUATOR_RUBRIC = "fixtures/semantic-evaluation-rubric.json"
 
+GRAVITY_FIXTURE_KEYS = frozenset({"id", "authority", "purpose", "scope", "scenario", "review_task"})
+GRAVITY_SCENARIO_KEYS = frozenset({"product", "upstream", "implementation_decisions", "local_performance_detail"})
+GRAVITY_UPSTREAM_KEYS = frozenset({"name", "properties"})
+CONTROL_FIXTURE_KEYS = frozenset({"authority", "purpose", "scenarios"})
+CONTROL_SCENARIO_KEYS = frozenset({"id", "input", "review_task"})
+CONTROL_INPUT_KEYS = {
+    "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION": frozenset({"repository_state", "claim_under_review"}),
+    "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH": frozenset({"workflow", "claim_under_review"}),
+    "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": frozenset({"assessment", "claim_under_review"}),
+}
+
 REQUIRED = [
     "README.md",
     "AGENT_ENTRYPOINT.md",
@@ -32,20 +43,12 @@ REQUIRED = [
     *SCENARIO_FIXTURES,
     EVALUATOR_RUBRIC,
     "scripts/verify_repo.py",
+    "tests/test_semantic_fixture_contract.py",
     ".github/workflows/verify.yml",
 ]
 
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 ENTRYPOINT_PHASE_RE = re.compile(r"^Repository phase:\s*`([^`]+)`\s*$", re.MULTILINE)
-FORBIDDEN_REVIEWER_KEYS = {
-    "expected_reasoning",
-    "forbidden_shortcuts",
-    "acceptable_final_states",
-    "expected_answer",
-    "expected_answers",
-    "evaluator_criteria",
-    "verdict",
-}
 
 
 def fail(message: str, errors: list[str]) -> None:
@@ -65,6 +68,30 @@ def load_json(rel: str, errors: list[str]):
     except Exception as exc:
         fail(f"invalid JSON {rel}: {exc}", errors)
         return None
+
+
+def _check_exact_keys(value: dict, expected: frozenset[str], label: str, errors: list[str]) -> None:
+    actual = set(value)
+    missing = sorted(expected - actual)
+    unexpected = sorted(actual - expected)
+    if missing:
+        fail(f"{label} missing required fields: {missing}", errors)
+    if unexpected:
+        fail(f"{label} contains unsupported fields: {unexpected}", errors)
+
+
+def _check_non_empty_string(value, label: str, errors: list[str]) -> bool:
+    if not isinstance(value, str) or not value.strip():
+        fail(f"{label} must be a non-empty string", errors)
+        return False
+    return True
+
+
+def _check_string_list(value, label: str, errors: list[str]) -> bool:
+    if not isinstance(value, list) or not value or not all(isinstance(item, str) and item.strip() for item in value):
+        fail(f"{label} must be a non-empty list of non-empty strings", errors)
+        return False
+    return True
 
 
 def check_lifecycle(data: dict, errors: list[str]) -> None:
@@ -131,75 +158,81 @@ def check_manifest(errors: list[str]) -> None:
             fail("manifest semantic_evaluator_rubric must match canonical evaluator rubric", errors)
 
 
-def _contains_forbidden_reviewer_key(value) -> str | None:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            if key in FORBIDDEN_REVIEWER_KEYS:
-                return key
-            found = _contains_forbidden_reviewer_key(child)
-            if found:
-                return found
-    elif isinstance(value, list):
-        for child in value:
-            found = _contains_forbidden_reviewer_key(child)
-            if found:
-                return found
-    return None
-
-
 def _scenario_id(value, label: str, errors: list[str]) -> str | None:
-    if not isinstance(value, str) or not value.strip():
-        fail(f"{label} must be a non-empty string", errors)
+    if not _check_non_empty_string(value, label, errors):
         return None
     return value
 
 
-def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
+def validate_gravity_reviewer_fixture(gravity: dict, errors: list[str]) -> str | None:
+    _check_exact_keys(gravity, GRAVITY_FIXTURE_KEYS, "Gravity Flow reviewer fixture", errors)
+    if gravity.get("authority") != "NON_CANONICAL_EVALUATION_SCENARIO":
+        fail("Gravity Flow scenario authority must be NON_CANONICAL_EVALUATION_SCENARIO", errors)
+    sid = _scenario_id(gravity.get("id"), "Gravity Flow scenario id", errors)
+    _check_non_empty_string(gravity.get("purpose"), "Gravity Flow scenario purpose", errors)
+    _check_non_empty_string(gravity.get("scope"), "Gravity Flow scenario scope", errors)
+    _check_non_empty_string(gravity.get("review_task"), "Gravity Flow scenario review_task", errors)
+
+    scenario = gravity.get("scenario")
+    if not isinstance(scenario, dict):
+        fail("Gravity Flow scenario must contain a scenario object", errors)
+        return sid
+    _check_exact_keys(scenario, GRAVITY_SCENARIO_KEYS, "Gravity Flow scenario payload", errors)
+    _check_non_empty_string(scenario.get("product"), "Gravity Flow scenario product", errors)
+    _check_string_list(scenario.get("implementation_decisions"), "Gravity Flow implementation_decisions", errors)
+    _check_non_empty_string(scenario.get("local_performance_detail"), "Gravity Flow local_performance_detail", errors)
+
+    upstream = scenario.get("upstream")
+    if not isinstance(upstream, dict):
+        fail("Gravity Flow scenario upstream must be an object", errors)
+        return sid
+    _check_exact_keys(upstream, GRAVITY_UPSTREAM_KEYS, "Gravity Flow upstream payload", errors)
+    _check_non_empty_string(upstream.get("name"), "Gravity Flow upstream name", errors)
+    _check_string_list(upstream.get("properties"), "Gravity Flow upstream properties", errors)
+    return sid
+
+
+def validate_control_reviewer_fixture(controls: dict, errors: list[str]) -> set[str]:
+    _check_exact_keys(controls, CONTROL_FIXTURE_KEYS, "control-boundary reviewer fixture", errors)
+    if controls.get("authority") != "NON_CANONICAL_EVALUATION_SCENARIOS":
+        fail("control-boundary scenario authority must be NON_CANONICAL_EVALUATION_SCENARIOS", errors)
+    _check_non_empty_string(controls.get("purpose"), "control-boundary scenario purpose", errors)
+
     scenario_ids: set[str] = set()
+    rows = controls.get("scenarios")
+    if not isinstance(rows, list) or not rows:
+        fail("control-boundary scenarios must be a non-empty list", errors)
+        return scenario_ids
 
-    gravity = load_json(SCENARIO_FIXTURES[0], errors)
-    if isinstance(gravity, dict):
-        if gravity.get("authority") != "NON_CANONICAL_EVALUATION_SCENARIO":
-            fail("Gravity Flow scenario authority must be NON_CANONICAL_EVALUATION_SCENARIO", errors)
-        sid = _scenario_id(gravity.get("id"), "Gravity Flow scenario id", errors)
+    for index, row in enumerate(rows):
+        label = f"control-boundary scenario[{index}]"
+        if not isinstance(row, dict):
+            fail(f"{label} must be an object", errors)
+            continue
+        _check_exact_keys(row, CONTROL_SCENARIO_KEYS, label, errors)
+        sid = _scenario_id(row.get("id"), f"{label}.id", errors)
         if sid:
+            if sid in scenario_ids:
+                fail(f"duplicate semantic scenario id: {sid}", errors)
             scenario_ids.add(sid)
-        if not isinstance(gravity.get("scenario"), dict):
-            fail("Gravity Flow scenario must contain a scenario object", errors)
-        if not isinstance(gravity.get("review_task"), str) or not gravity["review_task"].strip():
-            fail("Gravity Flow scenario must contain a non-empty review_task", errors)
-        forbidden = _contains_forbidden_reviewer_key(gravity)
-        if forbidden:
-            fail(f"reviewer-input Gravity Flow scenario leaks evaluator key: {forbidden}", errors)
+        _check_non_empty_string(row.get("review_task"), f"{label}.review_task", errors)
 
-    controls = load_json(SCENARIO_FIXTURES[1], errors)
-    if isinstance(controls, dict):
-        if controls.get("authority") != "NON_CANONICAL_EVALUATION_SCENARIOS":
-            fail("control-boundary scenario authority must be NON_CANONICAL_EVALUATION_SCENARIOS", errors)
-        rows = controls.get("scenarios")
-        if not isinstance(rows, list) or not rows:
-            fail("control-boundary scenarios must be a non-empty list", errors)
-        else:
-            for index, row in enumerate(rows):
-                if not isinstance(row, dict):
-                    fail(f"control-boundary scenario[{index}] must be an object", errors)
-                    continue
-                sid = _scenario_id(row.get("id"), f"control-boundary scenario[{index}].id", errors)
-                if sid:
-                    if sid in scenario_ids:
-                        fail(f"duplicate semantic scenario id: {sid}", errors)
-                    scenario_ids.add(sid)
-                if not isinstance(row.get("input"), dict):
-                    fail(f"control-boundary scenario[{index}] must contain an input object", errors)
-                if not isinstance(row.get("review_task"), str) or not row["review_task"].strip():
-                    fail(f"control-boundary scenario[{index}] must contain a non-empty review_task", errors)
-        forbidden = _contains_forbidden_reviewer_key(controls)
-        if forbidden:
-            fail(f"reviewer-input control scenario leaks evaluator key: {forbidden}", errors)
+        scenario_input = row.get("input")
+        if not isinstance(scenario_input, dict):
+            fail(f"{label} must contain an input object", errors)
+            continue
+        expected_input_keys = CONTROL_INPUT_KEYS.get(sid)
+        if expected_input_keys is None:
+            fail(f"{label} id is not admitted by the reviewer-input contract: {sid!r}", errors)
+            continue
+        _check_exact_keys(scenario_input, expected_input_keys, f"{label}.input", errors)
+        _check_non_empty_string(scenario_input.get("claim_under_review"), f"{label}.input.claim_under_review", errors)
+        list_key = next(key for key in expected_input_keys if key != "claim_under_review")
+        _check_string_list(scenario_input.get(list_key), f"{label}.input.{list_key}", errors)
+    return scenario_ids
 
-    rubric = load_json(EVALUATOR_RUBRIC, errors)
-    if not isinstance(rubric, dict):
-        return
+
+def validate_evaluator_rubric(rubric: dict, scenario_ids: set[str], errors: list[str]) -> None:
     if rubric.get("authority") != "EVALUATOR_ONLY_NON_CANONICAL":
         fail("semantic evaluator rubric authority must be EVALUATOR_ONLY_NON_CANONICAL", errors)
     if rubric.get("result_states") != ["PASS", "FAIL", "NOT_PROVEN"]:
@@ -227,6 +260,27 @@ def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
         criteria = spec.get("criteria")
         if not isinstance(criteria, list) or not criteria or not all(isinstance(item, str) and item.strip() for item in criteria):
             fail(f"rubric scenario {sid} must contain non-empty string criteria", errors)
+
+
+def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
+    scenario_ids: set[str] = set()
+
+    gravity = load_json(SCENARIO_FIXTURES[0], errors)
+    if isinstance(gravity, dict):
+        sid = validate_gravity_reviewer_fixture(gravity, errors)
+        if sid:
+            scenario_ids.add(sid)
+
+    controls = load_json(SCENARIO_FIXTURES[1], errors)
+    if isinstance(controls, dict):
+        for sid in validate_control_reviewer_fixture(controls, errors):
+            if sid in scenario_ids:
+                fail(f"duplicate semantic scenario id: {sid}", errors)
+            scenario_ids.add(sid)
+
+    rubric = load_json(EVALUATOR_RUBRIC, errors)
+    if isinstance(rubric, dict):
+        validate_evaluator_rubric(rubric, scenario_ids, errors)
 
 
 def is_external_link(target: str) -> bool:
