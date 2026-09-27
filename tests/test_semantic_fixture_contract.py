@@ -80,6 +80,31 @@ class SemanticFixtureContractTests(unittest.TestCase):
         errors = semantic_errors(rubric=rubric)
         self.assertTrue(any("semantic scenario/rubric ids differ" in error for error in errors), errors)
 
+    def test_owner_context_rubric_tracks_canonical_authority_order(self):
+        authority = (ROOT / "docs" / "governance" / "AUTHORITY.md").read_text(encoding="utf-8")
+        owner_rule = "1. current explicit owner/project requirements;"
+        mandatory_rule = "2. mandatory product/platform/legal/safety constraints;"
+        self.assertIn(owner_rule, authority)
+        self.assertIn(mandatory_rule, authority)
+        self.assertLess(authority.index(owner_rule), authority.index(mandatory_rule))
+
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        criteria = rubric["scenarios"]["EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"]["criteria"]
+        combined = " ".join(criteria).lower()
+        self.assertNotIn("higher-order", combined)
+        self.assertNotIn("override owner", combined)
+
+        authority_criterion = next(
+            (criterion for criterion in criteria if "canonical authority/evidence boundary" in criterion.lower()),
+            None,
+        )
+        self.assertIsNotNone(authority_criterion)
+        normalized = authority_criterion.lower()
+        self.assertIn("owner acceptance may justify deviation from a rebuttable engineering presumption", normalized)
+        self.assertIn("does not manufacture facts", normalized)
+        self.assertIn("docs/governance/authority.md", normalized)
+        self.assertIn("without inventing a new precedence rule", normalized)
+
 
 if __name__ == "__main__":
     unittest.main()
