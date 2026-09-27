@@ -6,11 +6,15 @@ Guides LLMs to choose, sequence, and adapt the right engineering reasoning metho
 
 ## Mission
 
-Engineering Compass does **not** teach an LLM software engineering from scratch and it is not a giant code-quality checklist. The model already knows many engineering methods. This repository governs **when and how to apply that expertise**:
+Engineering Compass is primarily an **LLM-native reasoning-governance repository**. The normal product path is direct consumption by an LLM: read the smallest relevant guidance, understand the governing reasoning system, and apply it during engineering review.
+
+It does **not** teach an LLM software engineering from scratch and it is not a giant code-quality checklist. The model already knows many engineering methods. This repository governs **when and how to apply that expertise**:
 
 `characterize the situation → select reasoning methods → sequence them → monitor evidence → adapt → stop at sufficiency`
 
-The target is deeper engineering judgment: identify material system obligations, challenge architecture and implementation decisions at the right abstraction level, and prefer the smallest root-correct improvement.
+The target is deeper engineering judgment: identify material system obligations, challenge architecture and implementation decisions at the right abstraction level, distinguish symptoms from causes, and prefer the smallest root-correct improvement.
+
+Deterministic repository code is secondary and should exist only for a real machine-executed purpose. Repository-visible code, schemas, contracts, validators, or policies do not by themselves prove that an LLM path executed them or that model behavior was mechanically enforced.
 
 ## What this repository is
 
@@ -22,7 +26,8 @@ A version-controlled reasoning-governance repository for deep engineering review
 - capability and structural-obligation gaps;
 - sensitivity and tradeoff points;
 - root-cause and risk-theme analysis;
-- materially better implementation or architecture alternatives.
+- materially better implementation or architecture alternatives;
+- honest Guidance / Validation / Proof boundaries for engineering-control claims.
 
 ## What this repository is not
 
@@ -31,7 +36,8 @@ A version-controlled reasoning-governance repository for deep engineering review
 - an encyclopedic catalog of anti-patterns;
 - a generic security/compliance checklist;
 - proof that a review is correct merely because these Markdown files exist;
-- a multi-agent execution orchestrator.
+- proof of mechanical enforcement merely because deterministic repository code exists;
+- a multi-agent execution orchestrator or review-control runtime.
 
 ## Canonical reasoning path
 
@@ -50,10 +56,12 @@ At a high level:
 - [`docs/core/REASONING_MODEL.md`](docs/core/REASONING_MODEL.md) — canonical reasoning architecture.
 - [`docs/governance/AUTHORITY.md`](docs/governance/AUTHORITY.md) — authority, evidence, and derivation rules.
 - [`docs/governance/REVIEW_PROTOCOL.md`](docs/governance/REVIEW_PROTOCOL.md) — PR/repository review procedure.
-- [`docs/governance/VERIFICATION.md`](docs/governance/VERIFICATION.md) — what repository verification does and does not prove.
+- [`docs/governance/VERIFICATION.md`](docs/governance/VERIFICATION.md) — what repository verification and semantic evaluation do and do not prove.
 - [`docs/research/RESEARCH_BASIS.md`](docs/research/RESEARCH_BASIS.md) — research concepts that inform the design.
-- [`fixtures/gravity-flow-version-coupling.json`](fixtures/gravity-flow-version-coupling.json) — first semantic regression fixture.
-- [`scripts/verify_repo.py`](scripts/verify_repo.py) — canonical repository verification command.
+- [`fixtures/gravity-flow-version-coupling.json`](fixtures/gravity-flow-version-coupling.json) — clean reviewer-input root-cause scenario.
+- [`fixtures/control-boundary-semantics.json`](fixtures/control-boundary-semantics.json) — clean reviewer-input control/proof scenarios.
+- [`fixtures/semantic-evaluation-rubric.json`](fixtures/semantic-evaluation-rubric.json) — evaluator-only expectations; do not provide to the reviewer model during clean-context evaluation.
+- [`scripts/verify_repo.py`](scripts/verify_repo.py) — canonical structural verification command.
 
 ## Verification
 
@@ -65,7 +73,9 @@ python3 scripts/verify_repo.py
 
 CI executes the same underlying verification contract.
 
-This verifies repository structure, machine-readable artifacts, and local documentation links. It does **not** prove that an LLM will make correct engineering judgments. Semantic review quality remains a separate evaluation boundary described in the verification document.
+This verifies repository structure, machine-readable artifacts, scenario/rubric separation, and local documentation links. It does **not** prove that an LLM will make correct engineering judgments. Semantic review quality remains a separate behavior-level evaluation boundary described in the verification document.
+
+If no independent clean-context model evaluation was actually run, the semantic result is `SEMANTIC_EVAL_NOT_EXECUTED`.
 
 ## Change model
 
