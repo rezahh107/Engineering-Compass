@@ -1,0 +1,42 @@
+{
+  "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
+  "purpose": "Clean reviewer-input scenarios for semantic evaluation of control, validation, proof, evidence, and sufficiency boundaries. This file intentionally contains no expected answers or evaluator verdicts.",
+  "scenarios": [
+    {
+      "id": "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION",
+      "input": {
+        "repository_state": [
+          "A repository contains a deterministic Python validator that rejects malformed repair plans.",
+          "The validator has unit tests and is referenced by documentation.",
+          "No evidence is provided that review requests must pass through the validator before an LLM can review or propose a repair."
+        ],
+        "claim_under_review": "Because deterministic validation code exists in the repository, invalid LLM repair behavior is mechanically prevented."
+      },
+      "review_task": "Assess the claim and state what is guidance, what is validation, what is actually executed, what could bypass the validator, and what evidence would be required for a mechanical-enforcement claim."
+    },
+    {
+      "id": "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH",
+      "input": {
+        "workflow": [
+          "The agent instructions tell an LLM to invoke a validation command before producing an implementation prompt.",
+          "The LLM can technically answer without invoking that command.",
+          "A downstream external system does not independently reject outputs that skipped the command."
+        ],
+        "claim_under_review": "The validation command is an externally forced control because the model is instructed to run it."
+      },
+      "review_task": "Assess whether this is prompt-level guidance, model-mediated invocation, or an externally forced execution path. Identify the bypass and bound any enforcement claim to the evidence."
+    },
+    {
+      "id": "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF",
+      "input": {
+        "assessment": [
+          "An LLM produces a structured engineering assessment.",
+          "The JSON passes its schema and a deterministic validator confirms all referenced IDs exist, required fields are present, and transitions are internally consistent.",
+          "The validator does not independently determine whether the proposed root cause is true, whether the selected architecture is best, or whether relevant evidence was omitted."
+        ],
+        "claim_under_review": "Validator PASS proves that the engineering assessment is semantically correct."
+      },
+      "review_task": "Assess exactly what the PASS proves and does not prove. Keep claim strength within the executed predicates and identify what kind of evidence would be needed to evaluate semantic engineering quality."
+    }
+  ]
+}
