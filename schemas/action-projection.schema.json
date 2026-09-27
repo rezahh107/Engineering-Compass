@@ -1,16 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "engineering-compass.action-projection.v1",
+  "$id": "engineering-compass.action-projection.v2",
   "type": "object",
-  "required": ["schema_version", "action", "recipient", "may_modify_code", "prompt_required", "reason_codes", "target_binding"],
+  "required": ["schema_version", "action", "recipient", "may_modify_code", "prompt_required", "reason_codes", "authorized_repair_group_ids", "target_binding"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "action": {"enum": ["STOP_AT_SUFFICIENCY", "COLLECT_EVIDENCE", "VERIFY_ROOT_CAUSE", "COMPLETE_REPAIR_DESIGN", "OWNER_DECISION_REQUIRED", "SPECIALIST_REVIEW_REQUIRED", "IMPLEMENT_REPAIR", "RERUN_REVIEW"]},
     "recipient": {"type": "string"},
     "may_modify_code": {"type": "boolean"},
     "prompt_required": {"type": "boolean"},
     "prompt_kind": {"type": ["string", "null"]},
     "reason_codes": {"type": "array", "items": {"type": "string"}},
+    "authorized_repair_group_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
     "target_binding": {"type": "object"}
   }
 }

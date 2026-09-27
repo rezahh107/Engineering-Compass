@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from typing import Any, Iterable
 
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 TARGET_KINDS = {"PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"}
@@ -104,8 +107,39 @@ def validate_request(request: dict[str, Any]) -> None:
     require(not overlap, f"caller request contains fact/judgment authority fields: {sorted(overlap)}")
 
 
+def _evidence_digest_payload(bundle: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": bundle.get("schema_version"),
+        "target": bundle.get("target"),
+        "review_intent": bundle.get("review_intent"),
+        "identity": bundle.get("identity"),
+        "freshness": bundle.get("freshness"),
+        "completeness": bundle.get("completeness"),
+        "evidence_records": bundle.get("evidence_records"),
+    }
+
+
+def compute_evidence_digest(bundle: dict[str, Any]) -> str:
+    material = json.dumps(
+        _evidence_digest_payload(bundle),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return f"sha256:{hashlib.sha256(material).hexdigest()}"
+
+
+def finalize_evidence_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
+    bundle["evidence_digest"] = compute_evidence_digest(bundle)
+    return bundle
+
+
 def validate_evidence_bundle(bundle: dict[str, Any]) -> None:
-    require(bundle.get("schema_version") == 1, "evidence schema_version must be 1")
+    version = bundle.get("schema_version")
+    require(
+        version == 2,
+        f"evidence schema_version must be 2 (got {version!r}); regenerate evidence under the current snapshot-binding contract",
+    )
     validate_target(require_dict(bundle.get("target"), "evidence.target"))
     identity = require_dict(bundle.get("identity"), "evidence.identity")
     require_string(identity.get("repository_id"), "evidence.identity.repository_id")
@@ -130,6 +164,49 @@ def validate_evidence_bundle(bundle: dict[str, Any]) -> None:
         require_string(obj.get("kind"), f"evidence_records[{index}].kind")
         require_string(obj.get("source"), f"evidence_records[{index}].source")
     require(len(ids) == len(set(ids)), "evidence_id values must be unique")
+    digest = require_string(bundle.get("evidence_digest"), "evidence.evidence_digest")
+    require(SHA256_RE.fullmatch(digest) is not None, "evidence_digest must be sha256:<64 lowercase hex chars>")
+    require(digest == compute_evidence_digest(bundle), "evidence_digest does not match the material evidence snapshot")
+
+
+def expected_target_binding(bundle: dict[str, Any]) -> dict[str, Any]:
+    target = bundle["target"]
+    identity = bundle["identity"]
+    common = {
+        "repository": target["repository"],
+        "repository_id": identity["repository_id"],
+        "kind": target["kind"],
+        "head_sha": identity.get("head_sha"),
+        "evidence_digest": bundle["evidence_digest"],
+    }
+    if target["kind"] == "PR_SCOPE":
+        common.update(
+            {
+                "pr_number": target["pr_number"],
+                "base_ref": identity.get("base_ref"),
+                "base_sha": identity.get("base_sha"),
+                "head_ref": identity.get("head_ref"),
+                "merge_base_sha": identity.get("merge_base_sha"),
+            }
+        )
+    elif target["kind"] == "REF_DELTA_SCOPE":
+        common.update(
+            {
+                "base_ref": target["base_ref"],
+                "base_sha": identity.get("base_sha"),
+                "target_ref": target["target_ref"],
+                "merge_base_sha": identity.get("merge_base_sha"),
+            }
+        )
+    else:
+        common["ref"] = target.get("ref", "main")
+    return common
+
+
+def validate_target_binding(binding: dict[str, Any], bundle: dict[str, Any]) -> None:
+    expected = expected_target_binding(bundle)
+    for key, value in expected.items():
+        require(binding.get(key) == value, f"assessment target binding mismatch for {key}")
 
 
 def evidence_ids(bundle: dict[str, Any]) -> set[str]:

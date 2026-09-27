@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from .model import ContractError, require, validate_request
+from .model import ContractError, finalize_evidence_bundle, require, validate_request
 
 API = "https://api.github.com"
 
@@ -161,8 +161,8 @@ class GitHubEvidenceCollector:
             }, limitations=[] if comments_complete and review_comments_complete else ["pagination incomplete"]),
         ]
 
-        return {
-            "schema_version": 1,
+        return finalize_evidence_bundle({
+            "schema_version": 2,
             "collected_at_epoch": int(time.time()),
             "target": target,
             "review_intent": request["review_intent"],
@@ -178,7 +178,7 @@ class GitHubEvidenceCollector:
             "freshness": "CURRENT",
             "completeness": completeness,
             "evidence_records": evidence_records,
-        }
+        })
 
     def _collect_ref_delta(self, request: dict[str, Any]) -> dict[str, Any]:
         target = request["target"]
@@ -196,8 +196,8 @@ class GitHubEvidenceCollector:
             "status": compare.get("status"), "ahead_by": compare.get("ahead_by"), "behind_by": compare.get("behind_by"),
             "files": [{"filename": item.get("filename"), "status": item.get("status"), "changes": item.get("changes"), "patch": item.get("patch")} for item in files],
         })
-        return {
-            "schema_version": 1,
+        return finalize_evidence_bundle({
+            "schema_version": 2,
             "collected_at_epoch": int(time.time()),
             "target": target,
             "review_intent": request["review_intent"],
@@ -211,7 +211,7 @@ class GitHubEvidenceCollector:
                 self._evidence_record("EVD-REPO", "REPOSITORY", f"GET /repos/{repo_name}", {"id": repo.get("id"), "full_name": repo.get("full_name")}),
                 evidence,
             ],
-        }
+        })
 
     def _collect_repository(self, request: dict[str, Any]) -> dict[str, Any]:
         target = request["target"]
@@ -227,8 +227,8 @@ class GitHubEvidenceCollector:
         require(isinstance(tree, dict), "tree response must be object")
         truncated = bool(tree.get("truncated"))
         entries = tree.get("tree", []) or []
-        return {
-            "schema_version": 1,
+        return finalize_evidence_bundle({
+            "schema_version": 2,
             "collected_at_epoch": int(time.time()),
             "target": target,
             "review_intent": request["review_intent"],
@@ -246,4 +246,4 @@ class GitHubEvidenceCollector:
                     "paths": [{"path": item.get("path"), "type": item.get("type"), "sha": item.get("sha"), "size": item.get("size")} for item in entries],
                 }, limitations=["recursive tree truncated"] if truncated else []),
             ],
-        }
+        })

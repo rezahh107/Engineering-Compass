@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .model import require, require_dict, validate_evidence_bundle
+from .model import expected_target_binding, require, require_dict, validate_evidence_bundle
 from .root_cause import validate_assessment
 
 ACTION_ROUTING = {
@@ -24,14 +24,15 @@ def _group_by_id(assessment: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def _material_evidence_gaps(evidence: dict[str, Any], assessment: dict[str, Any]) -> list[str]:
     gaps = [str(item) for item in evidence["completeness"].get("material_gaps", [])]
     gaps.extend(str(item) for item in assessment.get("unverified_areas", []) if str(item))
-    return list(dict.fromkeys(gaps))
+    return sorted(set(gaps))
 
 
 def project_action(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
-    """Deterministically project next action from validated evidence + bounded LLM judgment."""
+    """Project one canonical action from the complete validated state, independent of input ordering."""
     validate_evidence_bundle(evidence_bundle)
-    routes = validate_assessment(evidence_bundle, assessment)
+    validation = validate_assessment(evidence_bundle, assessment)
     reasons: list[str] = []
+    authorized_group_ids = list(validation["authorized_repair_group_ids"])
 
     if evidence_bundle["freshness"] != "CURRENT":
         action = "RERUN_REVIEW"
@@ -47,68 +48,87 @@ def project_action(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) 
         elif assessment.get("owner_policy_decision_required") is True:
             action = "OWNER_DECISION_REQUIRED"
             reasons.append("owner_policy_decision_required")
+        elif authorized_group_ids:
+            groups = _group_by_id(assessment)
+            authorized_groups = [groups[gid] for gid in authorized_group_ids]
+            root_unconfirmed = sorted(
+                group["group_id"] for group in authorized_groups if group["anchor"]["state"] != "CONFIRMED"
+            )
+            selection_insufficient = sorted(
+                group["group_id"]
+                for group in authorized_groups
+                if group["selection"]["state"] == "INSUFFICIENT_EVIDENCE"
+                or not validation["selection_evidence_complete"][group["group_id"]]
+            )
+            equivalent = sorted(
+                group["group_id"] for group in authorized_groups if group["selection"]["state"] == "EQUIVALENT_FINALISTS"
+            )
+            design_incomplete = sorted(
+                group["group_id"]
+                for group in authorized_groups
+                if group["selection"]["state"] == "SELECTED"
+                and not validation["repair_design_complete"][group["group_id"]]
+            )
+
+            if root_unconfirmed:
+                action = "VERIFY_ROOT_CAUSE"
+                reasons.extend(f"root_cause_not_confirmed:{gid}" for gid in root_unconfirmed)
+            elif selection_insufficient:
+                action = "COLLECT_EVIDENCE"
+                reasons.extend(f"method_selection_insufficient:{gid}" for gid in selection_insufficient)
+            elif equivalent:
+                action = "OWNER_DECISION_REQUIRED"
+                reasons.extend(f"equivalent_finalists:{gid}" for gid in equivalent)
+            elif design_incomplete:
+                action = "COMPLETE_REPAIR_DESIGN"
+                reasons.extend(f"repair_design_incomplete:{gid}" for gid in design_incomplete)
+            else:
+                action = "IMPLEMENT_REPAIR"
+                reasons.extend(
+                    f"root_complete_repair_ready:{gid}:{validation['routes'][gid]}" for gid in authorized_group_ids
+                )
         else:
             findings = assessment.get("findings", [])
-            repair_findings = [f for f in findings if f.get("qualification") == "CONFIRMED_FINDING" and f.get("repair_disposition") == "REPAIR"]
-            verify_findings = [f for f in findings if f.get("repair_disposition") == "VERIFY" or f.get("qualification") == "NOT_PROVEN"]
-            if verify_findings and not repair_findings:
+            verify_findings = sorted(
+                f["finding_id"]
+                for f in findings
+                if f.get("repair_disposition") == "VERIFY" or f.get("qualification") == "NOT_PROVEN"
+            )
+            if verify_findings:
                 action = "COLLECT_EVIDENCE"
-                reasons.extend(f"unresolved_finding:{f['finding_id']}" for f in verify_findings)
-            elif repair_findings:
-                groups = _group_by_id(assessment)
-                selected_groups: list[str] = []
-                action = "IMPLEMENT_REPAIR"
-                for finding in repair_findings:
-                    group = groups[finding["root_cause_group_id"]]
-                    anchor_state = group["anchor"]["state"]
-                    if anchor_state != "CONFIRMED":
-                        action = "VERIFY_ROOT_CAUSE"
-                        reasons.append(f"root_cause_not_confirmed:{group['group_id']}")
-                        break
-                    selection = group["selection"]
-                    if selection["state"] == "INSUFFICIENT_EVIDENCE":
-                        action = "COLLECT_EVIDENCE"
-                        reasons.append(f"method_selection_insufficient:{group['group_id']}")
-                        break
-                    if selection["state"] == "EQUIVALENT_FINALISTS":
-                        action = "OWNER_DECISION_REQUIRED"
-                        reasons.append(f"equivalent_finalists:{group['group_id']}")
-                        break
-                    if not group.get("conformance_lock") or not group.get("falsification_obligations"):
-                        action = "COMPLETE_REPAIR_DESIGN"
-                        reasons.append(f"repair_design_incomplete:{group['group_id']}")
-                        break
-                    selected_groups.append(group["group_id"])
-                if action == "IMPLEMENT_REPAIR":
-                    reasons.extend(f"root_complete_repair_ready:{gid}:{routes[gid]}" for gid in sorted(set(selected_groups)))
+                reasons.extend(f"unresolved_finding:{fid}" for fid in verify_findings)
             else:
                 action = "STOP_AT_SUFFICIENCY"
                 reasons.append("no_confirmed_repair_obligation")
 
     route = ACTION_ROUTING[action]
     projection = {
-        "schema_version": 1,
+        "schema_version": 2,
         "action": action,
         "recipient": route["recipient"],
         "may_modify_code": route["may_modify_code"],
         "prompt_required": route["prompt_required"],
         "prompt_kind": route["prompt_kind"],
         "reason_codes": reasons,
-        "target_binding": {
-            "repository": evidence_bundle["target"]["repository"],
-            "kind": evidence_bundle["target"]["kind"],
-            "head_sha": evidence_bundle["identity"].get("head_sha"),
-        },
+        "authorized_repair_group_ids": authorized_group_ids if action == "IMPLEMENT_REPAIR" else [],
+        "target_binding": expected_target_binding(evidence_bundle),
     }
     validate_projection(projection)
     return projection
 
 
 def validate_projection(projection: dict[str, Any]) -> None:
-    require(projection.get("schema_version") == 1, "action projection schema_version must be 1")
+    require(projection.get("schema_version") == 2, "action projection schema_version must be 2")
     action = projection.get("action")
     require(action in ACTION_ROUTING, f"unknown action: {action}")
     route = ACTION_ROUTING[action]
     for field in ("recipient", "may_modify_code", "prompt_required", "prompt_kind"):
         require(projection.get(field) == route[field], f"projection {field} diverges from canonical routing")
+    groups = projection.get("authorized_repair_group_ids")
+    require(isinstance(groups, list), "projection authorized_repair_group_ids must be a list")
+    require(groups == sorted(set(groups)), "projection authorized_repair_group_ids must be sorted and unique")
+    if action == "IMPLEMENT_REPAIR":
+        require(bool(groups), "IMPLEMENT_REPAIR requires authorized repair groups")
+    else:
+        require(not groups, "non-modifying action must not carry authorized repair groups")
     require_dict(projection.get("target_binding"), "projection.target_binding")

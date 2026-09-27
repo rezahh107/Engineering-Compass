@@ -15,15 +15,19 @@ The runtime converts validated evidence + bounded model assessment into exactly 
 
 ## Projection precedence
 
+Projection evaluates the complete validated state first and applies this precedence globally; it does not stop at the first Finding or root-cause group encountered.
+
 1. stale/non-current target → `RERUN_REVIEW`;
 2. material evidence/unverified gaps → `COLLECT_EVIDENCE`;
 3. explicit specialist requirement → `SPECIALIST_REVIEW_REQUIRED`;
 4. owner policy decision required → `OWNER_DECISION_REQUIRED`;
-5. confirmed repair finding with unconfirmed root cause → `VERIFY_ROOT_CAUSE`;
-6. insufficient method-selection evidence → `COLLECT_EVIDENCE`;
-7. equivalent finalists → `OWNER_DECISION_REQUIRED`;
-8. selected repair without required lock/falsification → `COMPLETE_REPAIR_DESIGN`;
-9. root-complete selected repair → `IMPLEMENT_REPAIR`;
+5. any authorized repair group with unconfirmed root cause → `VERIFY_ROOT_CAUSE`;
+6. any authorized repair group with insufficient/incomplete method-selection evidence → `COLLECT_EVIDENCE`;
+7. any authorized repair group with equivalent finalists → `OWNER_DECISION_REQUIRED`;
+8. any authorized selected repair without complete Conformance Lock/falsification → `COMPLETE_REPAIR_DESIGN`;
+9. all authorized repair groups root-complete and selected → `IMPLEMENT_REPAIR`;
 10. no remaining material repair/verification obligation → `STOP_AT_SUFFICIENCY`.
+
+The action and reason ordering are invariant under reordering of Findings and root-cause groups. `IMPLEMENT_REPAIR` also carries the sorted canonical `authorized_repair_group_ids`; non-modifying actions carry no repair authorization.
 
 The runtime does not create new Findings or root causes during projection. Projection consumes structured judgment; it does not replace it.

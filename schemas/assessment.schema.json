@@ -1,11 +1,35 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "engineering-compass.assessment.v1",
+  "$id": "engineering-compass.assessment.v2",
   "type": "object",
   "required": ["assessment_version", "target_binding", "method_coverage", "findings", "root_cause_groups", "unverified_areas", "stop_reason"],
   "properties": {
-    "assessment_version": {"const": 1},
-    "target_binding": {"type": "object"},
+    "assessment_version": {"const": 2},
+    "target_binding": {
+      "type": "object",
+      "required": ["repository", "repository_id", "kind", "head_sha", "evidence_digest"],
+      "properties": {
+        "repository": {"type": "string"},
+        "repository_id": {"type": "string"},
+        "kind": {"enum": ["PR_SCOPE", "REF_DELTA_SCOPE", "REPOSITORY_SCOPE"]},
+        "head_sha": {"type": ["string", "null"]},
+        "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "PR_SCOPE"}}},
+          "then": {"required": ["pr_number", "base_ref", "base_sha", "head_ref", "merge_base_sha"]}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "REF_DELTA_SCOPE"}}},
+          "then": {"required": ["base_ref", "base_sha", "target_ref", "merge_base_sha"]}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "REPOSITORY_SCOPE"}}},
+          "then": {"required": ["ref"]}
+        }
+      ]
+    },
     "method_coverage": {"type": "array"},
     "findings": {"type": "array"},
     "root_cause_groups": {"type": "array"},

@@ -30,8 +30,9 @@ class RuntimeTests(unittest.TestCase):
 
     def test_full_root_cause_repair_projects_implementation(self):
         fixture = load_fixture("repair-full.json")
-        routes = validate_assessment(fixture["evidence"], fixture["assessment"])
-        self.assertEqual(routes["RC-1"], "FULL")
+        validation = validate_assessment(fixture["evidence"], fixture["assessment"])
+        self.assertEqual(validation["routes"]["RC-1"], "FULL")
+        self.assertEqual(validation["authorized_repair_group_ids"], ["RC-1"])
         projection = project_action(fixture["evidence"], fixture["assessment"])
         self.assertEqual(projection["action"], "IMPLEMENT_REPAIR")
         self.assertTrue(projection["may_modify_code"])
