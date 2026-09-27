@@ -70,6 +70,16 @@
         "Applies the two-key stop rule: structural coverage of the known model and discovery/materiality sufficiency must both be adequate before stopping.",
         "Stops once the material drift, missing-state materiality, and dispositions are resolved or bounded, rather than expanding into unrelated repository subsystems."
       ]
+    },
+    "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": {
+      "criteria": [
+        "Identifies that ordinary direct push to the unprotected main branch can bypass the repository's normal branch -> pull request -> verification -> merge path, and treats that observation as a plausible governance concern rather than ignoring it.",
+        "Updates the operational model when the fresh context establishes a single Owner writer, no known write-capable automation, explicit Owner acceptance of direct-push risk, and no evidenced recurring or unauthorized-write failure; does not freeze the earlier concern after stronger evidence arrives.",
+        "Distinguishes theoretical bypass possibility from a current material failure and, absent a stronger overriding constraint or evidenced failure, reaches NO_MATERIAL_ISSUE, JUSTIFIED_DEVIATION, or an equivalent accepted-Owner-risk disposition. Insisting on mandatory branch protection solely as a general best practice fails this criterion.",
+        "Preserves the authority boundary by noting that an evidenced higher-order platform/legal/safety constraint could override Owner preference, rather than treating Owner acceptance as universally dispositive.",
+        "Records re-evaluation conditions tied to material model changes: additional human writers, write-capable automations, or evidenced recurring accidental direct-push mistakes.",
+        "Stops after the evidence-sensitive disposition and triggers are established instead of expanding into generic GitHub hardening such as reviewer quotas, CODEOWNERS, signed commits, linear history, merge queues, or unrelated controls."
+      ]
     }
   }
 }
