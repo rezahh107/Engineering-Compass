@@ -128,8 +128,8 @@ def check_prompt_pipeline_lock(errors: list[str]) -> None:
 
 def check_runtime_fixtures(errors: list[str]) -> None:
     try:
-        from engineering_compass.projection import project_action
-        from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake
+        from engineering_compass.projection import _project_action_current as project_action
+        from engineering_compass.prompt_pipeline import _build_prompt_pipeline_intake_current as build_prompt_pipeline_intake
     except Exception as exc:
         fail(f"cannot import runtime package: {exc}", errors); return
     for rel, expected in [("fixtures/runtime/repair-full.json", "IMPLEMENT_REPAIR"), ("fixtures/runtime/root-cause-unproven.json", "VERIFY_ROOT_CAUSE")]:

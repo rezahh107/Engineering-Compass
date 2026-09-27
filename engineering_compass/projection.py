@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from .github_evidence import GitHubEvidenceCollector
 from .model import expected_target_binding, preflight_assessment_binding, require, require_dict, validate_evidence_bundle
 from .root_cause import validate_assessment
 
@@ -52,8 +53,8 @@ def _projection(
     return projection
 
 
-def project_action(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
-    """Project one canonical action; stale valid reviews rerun before current-state semantic validation."""
+def _project_action_current(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
+    """Pure projection over an already-current evidence bundle; internal/test use only."""
     validate_evidence_bundle(evidence_bundle)
     preflight = preflight_assessment_binding(evidence_bundle, assessment)
 
@@ -123,6 +124,63 @@ def project_action(evidence_bundle: dict[str, Any], assessment: dict[str, Any]) 
 
     authorized_map = validation["authorized_repair_finding_ids_by_group"] if action == "IMPLEMENT_REPAIR" else None
     return _projection(action, reasons, evidence_bundle, authorized_by_group=authorized_map)
+
+
+def revalidate_live_evidence(
+    reviewed_evidence: dict[str, Any],
+    assessment: dict[str, Any],
+    *,
+    collector: GitHubEvidenceCollector | None = None,
+) -> dict[str, Any]:
+    """Recollect canonical GitHub evidence before externally consumable authority is projected."""
+    validate_evidence_bundle(reviewed_evidence)
+    # Preserve malformed/cross-target fail-closed behavior before any external authority work.
+    preflight_assessment_binding(reviewed_evidence, assessment)
+    active_collector = collector if collector is not None else GitHubEvidenceCollector()
+    request = {
+        "target": reviewed_evidence["target"],
+        "review_intent": reviewed_evidence["review_intent"],
+    }
+    live_evidence = active_collector.collect(request)
+    validate_evidence_bundle(live_evidence)
+    require(
+        live_evidence["target"] == reviewed_evidence["target"],
+        "live evidence collector changed canonical target selectors",
+    )
+    require(
+        live_evidence["review_intent"] == reviewed_evidence["review_intent"],
+        "live evidence collector changed review intent",
+    )
+    return live_evidence
+
+
+def _project_action_live(
+    reviewed_evidence: dict[str, Any],
+    assessment: dict[str, Any],
+    *,
+    collector: GitHubEvidenceCollector | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    live_evidence = revalidate_live_evidence(
+        reviewed_evidence,
+        assessment,
+        collector=collector,
+    )
+    return live_evidence, _project_action_current(live_evidence, assessment)
+
+
+def project_action(
+    evidence_bundle: dict[str, Any],
+    assessment: dict[str, Any],
+    *,
+    collector: GitHubEvidenceCollector | None = None,
+) -> dict[str, Any]:
+    """Authoritative projection boundary: live GitHub evidence is required before authority."""
+    _, projection = _project_action_live(
+        evidence_bundle,
+        assessment,
+        collector=collector,
+    )
+    return projection
 
 
 def validate_projection(projection: dict[str, Any]) -> None:

@@ -12,6 +12,8 @@ It deliberately does not replace the LLM with deterministic heuristics. The mode
 caller intent
 → exact target evidence + deterministic evidence digest
 → LLM engineering assessment bound to that snapshot
+→ canonical live GitHub recollection/revalidation
+→ existing snapshot-binding / stale-review preflight
 → root-cause / repair-design validation
 → canonical authorized-repair set
 → global action projection
@@ -62,3 +64,9 @@ Repository inventory and semantic source evidence are separate surfaces. A non-t
 The source acquisition budget is deterministic and fail-closed: exhausting file, per-blob, or total-byte limits creates a material gap rather than silently narrowing scope. Because tree blob identities and exact collected source content are part of the evidence bundle, a blob change at the same path changes the material evidence digest.
 
 For `PR_SCOPE`, Check Runs, Commit statuses, and review-thread state are independent GitHub decision surfaces. Commit statuses are collected from the exact-Head status-list endpoint, preserving the real context list/count rather than inferring a status from the combined aggregate state. Review threads are collected from GitHub GraphQL with independent `isResolved` and `isOutdated` state plus paginated comment provenance. If either surface is unavailable, unauthorized, or incompletely paginated, PR full coverage fails closed with an explicit material gap; inline review comments never stand in for authoritative thread state.
+
+## Freshness authority
+
+Collection and action-time freshness are separate checks. Every GitHub collection pass re-resolves its selector at completion and records a `target_stabilization` evidence surface; a moved PR Head/Base, ref-delta Base/target ref, or repository ref makes that pass `STALE` with an explicit material gap.
+
+Before public projection or Prompt-Pipeline handoff, Engineering Compass recollects the same canonical target through the existing collector. The freshly collected bundle—not the persisted `CURRENT` flag—is fed into the existing binding logic. Same-Head changes in checks, statuses, reviews/comments, review threads, source blobs, or other material evidence therefore change the evidence digest and supersede the old assessment. Network/auth/API failure cannot become modification authority.

@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from engineering_compass.github_evidence import GitHubEvidenceCollector
 from engineering_compass.model import ContractError, expected_target_binding
-from engineering_compass.projection import project_action
+from engineering_compass.projection import _project_action_current as project_action
 
 
 def clone(value):

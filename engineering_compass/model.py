@@ -17,6 +17,7 @@ TARGET_SELECTOR_KEYS = {
 }
 EVIDENCE_SURFACES_BY_TARGET = {
     "PR_SCOPE": {
+        "target_stabilization",
         "changed_file_inventory",
         "diff_content",
         "reviews",
@@ -26,8 +27,8 @@ EVIDENCE_SURFACES_BY_TARGET = {
         "commit_statuses",
         "review_threads",
     },
-    "REF_DELTA_SCOPE": {"changed_file_inventory", "diff_content"},
-    "REPOSITORY_SCOPE": {"repository_tree_inventory", "repository_source_content"},
+    "REF_DELTA_SCOPE": {"target_stabilization", "changed_file_inventory", "diff_content"},
+    "REPOSITORY_SCOPE": {"target_stabilization", "repository_tree_inventory", "repository_source_content"},
 }
 FRESHNESS = {"CURRENT", "STALE", "UNKNOWN"}
 QUALIFICATION_STATES = {

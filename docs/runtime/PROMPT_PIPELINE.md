@@ -63,3 +63,9 @@ python3 -m engineering_compass compile-prompt --intake /tmp/prompt-intake.json -
 ## Operational recovery handoffs
 
 Implementation handoff serializes only authorized implementation Finding IDs from the canonical projection mapping, never raw group.finding_ids. Prompt-required non-modifying actions carry exact target selectors, resolved Head, evidence and intent digests, plus action-specific gaps/findings/groups/unknowns; each explicitly grants no code modification authority. Missing material recovery context blocks prompt construction.
+
+## Live freshness before handoff
+
+The public `build_prompt_pipeline_intake()` boundary performs the same canonical live GitHub recollection used by authoritative projection before it serializes any handoff. It cannot produce an implementation-capable intake from persisted `CURRENT` evidence alone. If live evidence changed, the old assessment routes to a non-modifying `RERUN_REVIEW` handoff; if live evidence cannot be established, intake construction fails closed and no Prompt-Pipeline request is emitted.
+
+Repository-only fixture/integration tests may use the private current-state builder after explicitly supplying already-current synthetic evidence. That helper is not exported as Engineering Compass modification authority and does not replace the public live gate.

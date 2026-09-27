@@ -9,8 +9,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from engineering_compass.model import ContractError, finalize_evidence_bundle
-from engineering_compass.projection import project_action
-from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake, verify_prompt_pipeline_checkout
+from engineering_compass.projection import _project_action_current as project_action
+from engineering_compass.prompt_pipeline import _build_prompt_pipeline_intake_current as build_prompt_pipeline_intake, verify_prompt_pipeline_checkout
 from engineering_compass.root_cause import validate_assessment
 
 ROOT = Path(__file__).resolve().parents[1]

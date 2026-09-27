@@ -29,9 +29,10 @@ jobs:
       - name: Run runtime unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py'
 
-      - name: Smoke read-only GitHub repository evidence collector
+      - name: Smoke live GitHub collection and action-time freshness gate
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          LIVE_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           python3 - <<'PY'
           import json, os
@@ -40,9 +41,9 @@ jobs:
               "target": {
                   "kind": "REPOSITORY_SCOPE",
                   "repository": os.environ["GITHUB_REPOSITORY"],
-                  "ref": os.environ["EXPECTED_HEAD"],
+                  "ref": os.environ["LIVE_REF"],
               },
-              "review_intent": "CI smoke test for exact-target read-only evidence collection.",
+              "review_intent": "CI live freshness smoke for the authoritative action boundary.",
               "inspection_profile": "focused",
           }
           Path('/tmp/ec-request.json').write_text(json.dumps(request), encoding='utf-8')
@@ -51,10 +52,29 @@ jobs:
           python3 - <<'PY'
           import json, os
           from pathlib import Path
+          from engineering_compass.model import expected_target_binding
+          from engineering_compass.projection import project_action
+
           evidence = json.loads(Path('/tmp/ec-evidence.json').read_text(encoding='utf-8'))
           assert evidence['identity']['head_sha'] == os.environ['EXPECTED_HEAD']
           assert evidence['target']['kind'] == 'REPOSITORY_SCOPE'
           assert evidence['freshness'] == 'CURRENT'
+          assert evidence['completeness']['surfaces']['target_stabilization'] is True
+
+          assessment = {
+              "assessment_version": 2,
+              "target_binding": expected_target_binding(evidence),
+              "method_coverage": [],
+              "findings": [],
+              "root_cause_groups": [],
+              "unverified_areas": [],
+              "owner_policy_decision_required": False,
+              "specialist_review_required": False,
+              "stop_reason": "CI live-freshness smoke has no repair finding.",
+          }
+          projection = project_action(evidence, assessment)
+          assert projection['may_modify_code'] is False
+          assert projection['action'] in {'STOP_AT_SUFFICIENCY', 'COLLECT_EVIDENCE'}
           PY
 
   prompt-pipeline-integration:
@@ -93,9 +113,9 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake, write_intake
+          from engineering_compass.prompt_pipeline import _build_prompt_pipeline_intake_current, write_intake
           data = json.loads(Path('fixtures/runtime/repair-full.json').read_text(encoding='utf-8'))
-          write_intake('/tmp/engineering-compass-prompt-intake.json', build_prompt_pipeline_intake(data['evidence'], data['assessment']))
+          write_intake('/tmp/engineering-compass-prompt-intake.json', _build_prompt_pipeline_intake_current(data['evidence'], data['assessment']))
           PY
 
       - name: Setup Node for locked Prompt-Pipeline

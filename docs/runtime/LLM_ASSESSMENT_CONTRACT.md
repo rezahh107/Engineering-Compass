@@ -54,3 +54,7 @@ The canonical repair authority output is authorized_repair_finding_ids_by_group.
 ## Evidence-surface admission
 
 Evidence contract v2 requires target-specific completeness surfaces before assessment admission. PR evidence must independently account for changed-file inventory, diff content, reviews/comments, Check Runs, Commit statuses, and authoritative review-thread state. Repository-scope evidence must independently account for recursive tree inventory and exact-blob source-content coverage. A required surface marked incomplete cannot coexist with `full_coverage=true`, and any incomplete required surface must carry an explicit material gap.
+
+## Live freshness versus snapshot consistency
+
+Assessment/evidence consistency proves only that judgment is bound to a particular collected snapshot. It is not proof that the live GitHub selector/evidence is still current. Authoritative projection and handoff therefore recollect the target first; any live target/evidence or review-intent binding drift is handled by the existing stale/superseded transition, while collection failure blocks authority.

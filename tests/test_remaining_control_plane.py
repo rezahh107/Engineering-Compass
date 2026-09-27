@@ -10,8 +10,8 @@ from unittest.mock import patch
 
 from engineering_compass.github_evidence import GitHubEvidenceCollector
 from engineering_compass.model import ContractError, expected_target_binding, finalize_evidence_bundle, validate_request
-from engineering_compass.projection import project_action
-from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake, verify_prompt_pipeline_checkout
+from engineering_compass.projection import _project_action_current as project_action
+from engineering_compass.prompt_pipeline import _build_prompt_pipeline_intake_current as build_prompt_pipeline_intake, verify_prompt_pipeline_checkout
 from engineering_compass.root_cause import validate_assessment
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,13 +219,22 @@ class EvidenceCeilingTests(unittest.TestCase):
             collector, "_paginate", side_effect=[(files, True), ([], True), ([], True), ([], True), ([], True)]
         ), patch.object(
             collector, "_collect_review_threads", return_value=([], True, [])
-        ), patch.object(collector, "_request", side_effect=[(pr, {}), (compare, {}), (checks, {})]):
+        ), patch.object(collector, "_request", side_effect=[(pr, {}), (compare, {}), (checks, {}), (pr, {})]):
             return collector.collect({"target": {"kind": "PR_SCOPE", "repository": "acme/example", "pr_number": 1}, "review_intent": "review"})
 
     def _ref_collect(self, files):
         collector = GitHubEvidenceCollector(token="x")
         compare = {"status": "ahead", "ahead_by": 1, "behind_by": 0, "base_commit": {"sha": "b" * 40}, "head_commit": {"sha": "a" * 40}, "merge_base_commit": {"sha": "c" * 40}, "files": files}
-        with patch.object(collector, "_repo", return_value={"id": 1, "full_name": "acme/example"}), patch.object(collector, "_request", return_value=(compare, {})):
+        def request(path, **_kwargs):
+            if "/compare/" in path:
+                return compare, {}
+            if path.endswith("/commits/main"):
+                return {"sha": "b" * 40}, {}
+            if path.endswith("/commits/feat"):
+                return {"sha": "a" * 40}, {}
+            raise AssertionError(f"unexpected request path: {path}")
+
+        with patch.object(collector, "_repo", return_value={"id": 1, "full_name": "acme/example"}), patch.object(collector, "_request", side_effect=request):
             return collector.collect({"target": {"kind": "REF_DELTA_SCOPE", "repository": "acme/example", "base_ref": "main", "target_ref": "feat"}, "review_intent": "review"})
 
     def test_pr_expected_count_mismatch_is_incomplete(self):

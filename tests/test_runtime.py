@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from engineering_compass.model import ContractError, validate_request
-from engineering_compass.projection import project_action
-from engineering_compass.prompt_pipeline import build_prompt_pipeline_intake, load_lock
+from engineering_compass.projection import _project_action_current as project_action
+from engineering_compass.prompt_pipeline import _build_prompt_pipeline_intake_current as build_prompt_pipeline_intake, load_lock
 from engineering_compass.root_cause import validate_assessment
 
 ROOT = Path(__file__).resolve().parents[1]

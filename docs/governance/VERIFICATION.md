@@ -38,7 +38,10 @@ The runtime unit suite exercises deterministic transition invariants, including:
 - repository-scope inventory cannot masquerade as semantic source coverage, and exact-blob source limits fail closed;
 - exact-blob changes alter evidence identity and stale prior assessments;
 - Commit statuses stay distinct from Check Runs, including proven-empty status lists;
-- authoritative review-thread resolution/outdated state is independently collected and pagination/auth failures block PR full coverage.
+- authoritative review-thread resolution/outdated state is independently collected and pagination/auth failures block PR full coverage;
+- end-of-collection selector movement marks evidence stale instead of CURRENT;
+- authoritative project/handoff paths recollect live GitHub evidence and reject persisted-current bypasses;
+- Head movement, same-Head material evidence drift, symbolic-ref movement, and live GitHub failure cannot authorize implementation.
 
 ## Cross-repository Prompt-Pipeline check
 
@@ -84,3 +87,7 @@ A runtime/governance change is structurally complete when:
 - changed transitions have focused regression fixtures/tests;
 - Prompt-Pipeline lock drift is absent or deliberately reconciled from an inspected source;
 - claims stay within the stage actually verified.
+
+## Live freshness proof boundary
+
+Pure unit tests prove deterministic stale/bypass behavior with injected collectors. CI additionally exercises the public action-time live gate against the repository's live symbolic ref through the real GitHub collector. A repository/runtime PASS without that live step is not sufficient evidence for action-time freshness. Prompt-Pipeline generation remains a separate authority state.

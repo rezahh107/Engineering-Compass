@@ -303,6 +303,7 @@ class GitHubEvidenceCollector:
             return threads, False, limitations
 
 
+
     def _collect_pr(self, request: dict[str, Any]) -> dict[str, Any]:
         target = canonical_target(request["target"])
         repo_name, pr_number = target["repository"], target["pr_number"]
@@ -334,6 +335,9 @@ class GitHubEvidenceCollector:
                 checks_complete = total <= len(checks)
                 if not checks_complete:
                     check_limitations.append("check-runs response exceeded first page; exact completeness not proven")
+            else:
+                checks_complete = False
+                check_limitations.append("check-runs response was not an object")
         except ContractError as exc:
             checks_complete = False
             check_limitations.append(str(exc))
@@ -342,6 +346,24 @@ class GitHubEvidenceCollector:
         review_threads, review_threads_complete, thread_limitations = self._collect_review_threads(
             repo_name, pr_number
         )
+
+        initial_selector = {
+            "base_ref": pr["base"]["ref"],
+            "base_sha": base_sha,
+            "head_ref": pr["head"]["ref"],
+            "head_sha": head_sha,
+            "state": pr.get("state"),
+        }
+        final_pr, _ = self._request(f"/repos/{repo_name}/pulls/{pr_number}")
+        require(isinstance(final_pr, dict), "pull request stabilization response must be object")
+        final_selector = {
+            "base_ref": final_pr["base"]["ref"],
+            "base_sha": final_pr["base"]["sha"],
+            "head_ref": final_pr["head"]["ref"],
+            "head_sha": final_pr["head"]["sha"],
+            "state": final_pr.get("state"),
+        }
+        target_stable = initial_selector == final_selector
 
         gaps: list[str] = []
         if not files_inventory_complete:
@@ -354,6 +376,8 @@ class GitHubEvidenceCollector:
             gaps.append("pr_commit_statuses_incomplete")
         if not review_threads_complete:
             gaps.append("pr_review_threads_incomplete")
+        if not target_stable:
+            gaps.append("target_selector_moved_during_collection")
         if not all([
             reviews_complete,
             comments_complete,
@@ -367,6 +391,7 @@ class GitHubEvidenceCollector:
             "full_coverage": not gaps,
             "material_gaps": sorted(set(gaps)),
             "surfaces": {
+                "target_stabilization": target_stable,
                 "changed_file_inventory": files_inventory_complete,
                 "diff_content": diff_content_complete,
                 "reviews": reviews_complete,
@@ -400,6 +425,13 @@ class GitHubEvidenceCollector:
                 "thread_count": len(review_threads),
                 "threads": review_threads,
             }, limitations=thread_limitations),
+            self._evidence_record(
+                "EVD-STABILIZATION",
+                "TARGET_STABILIZATION",
+                f"final selector re-read for PR #{pr_number}",
+                {"initial": initial_selector, "final": final_selector, "stable": target_stable},
+                limitations=[] if target_stable else ["PR selector identity moved during evidence collection"],
+            ),
         ]
         return finalize_evidence_bundle({
             "schema_version": 2,
@@ -407,7 +439,7 @@ class GitHubEvidenceCollector:
             "target": target,
             "review_intent": request["review_intent"],
             "identity": {"repository_id": str(repo["id"]), "base_ref": pr["base"]["ref"], "base_sha": base_sha, "head_ref": pr["head"]["ref"], "head_sha": head_sha, "merge_base_sha": merge_base_sha, "pr_state": pr.get("state")},
-            "freshness": "CURRENT",
+            "freshness": "CURRENT" if target_stable else "STALE",
             "completeness": completeness,
             "evidence_records": evidence_records,
         })
@@ -441,21 +473,54 @@ class GitHubEvidenceCollector:
             limitations.append("Compare API changed-file list reached the 300-file ceiling; exact inventory is not proven")
         if missing_patches:
             limitations.append(f"patch content unavailable for {len(missing_patches)} file(s): {', '.join(missing_patches[:10])}")
+
+        final_base, _ = self._request(f"/repos/{repo_name}/commits/{base}")
+        final_head, _ = self._request(f"/repos/{repo_name}/commits/{head}")
+        require(isinstance(final_base, dict), "base-ref stabilization response must be object")
+        require(isinstance(final_head, dict), "target-ref stabilization response must be object")
+        final_base_sha = final_base.get("sha")
+        final_head_sha = final_head.get("sha")
+        target_stable = final_base_sha == base_sha and final_head_sha == head_sha
+        if not target_stable:
+            gaps.append("target_selector_moved_during_collection")
+
         evidence = self._evidence_record("EVD-COMPARE", "REF_COMPARISON", f"compare {target['base_ref']}...{target['target_ref']}", {
             "status": compare.get("status"), "ahead_by": compare.get("ahead_by"), "behind_by": compare.get("behind_by"),
             "files": [{"filename": item.get("filename"), "status": item.get("status"), "changes": item.get("changes"), "patch": item.get("patch")} for item in files],
         }, limitations=limitations)
+        stabilization = self._evidence_record(
+            "EVD-STABILIZATION",
+            "TARGET_STABILIZATION",
+            f"final ref re-resolution for {target['base_ref']}...{target['target_ref']}",
+            {
+                "initial": {"base_sha": base_sha, "head_sha": head_sha},
+                "final": {"base_sha": final_base_sha, "head_sha": final_head_sha},
+                "stable": target_stable,
+            },
+            limitations=[] if target_stable else ["base/target ref identity moved during evidence collection"],
+        )
         return finalize_evidence_bundle({
             "schema_version": 2,
             "collected_at_epoch": int(time.time()),
             "target": target,
             "review_intent": request["review_intent"],
             "identity": {"repository_id": str(repo["id"]), "base_ref": target["base_ref"], "base_sha": base_sha, "head_ref": target["target_ref"], "head_sha": head_sha, "merge_base_sha": merge_base_sha},
-            "freshness": "CURRENT",
-            "completeness": {"full_coverage": not gaps, "material_gaps": gaps, "surfaces": {"changed_file_inventory": inventory_complete, "diff_content": diff_content_complete}},
-            "evidence_records": [self._evidence_record("EVD-REPO", "REPOSITORY", f"GET /repos/{repo_name}", {"id": repo.get("id"), "full_name": repo.get("full_name")}), evidence],
+            "freshness": "CURRENT" if target_stable else "STALE",
+            "completeness": {
+                "full_coverage": not gaps,
+                "material_gaps": sorted(set(gaps)),
+                "surfaces": {
+                    "target_stabilization": target_stable,
+                    "changed_file_inventory": inventory_complete,
+                    "diff_content": diff_content_complete,
+                },
+            },
+            "evidence_records": [
+                self._evidence_record("EVD-REPO", "REPOSITORY", f"GET /repos/{repo_name}", {"id": repo.get("id"), "full_name": repo.get("full_name")}),
+                evidence,
+                stabilization,
+            ],
         })
-
 
 
     @staticmethod
@@ -642,6 +707,7 @@ class GitHubEvidenceCollector:
         source_complete = inventory_complete and not gaps
         return results, source_complete, sorted(set(gaps)), limitations
 
+
     def _collect_repository(self, request: dict[str, Any]) -> dict[str, Any]:
         target = canonical_target(request["target"])
         repo_name, requested_ref = target["repository"], target["ref"]
@@ -665,7 +731,18 @@ class GitHubEvidenceCollector:
                 inventory_complete=inventory_complete,
             )
         )
-        gaps = sorted(set(source_gaps + (["recursive_tree_truncated"] if truncated else [])))
+
+        final_commit, _ = self._request(f"/repos/{repo_name}/commits/{ref}")
+        require(isinstance(final_commit, dict), "repository-ref stabilization response must be object")
+        final_head_sha = final_commit.get("sha")
+        target_stable = final_head_sha == head_sha
+        gaps = list(source_gaps)
+        if truncated:
+            gaps.append("recursive_tree_truncated")
+        if not target_stable:
+            gaps.append("target_selector_moved_during_collection")
+        gaps = sorted(set(gaps))
+
         return finalize_evidence_bundle({
             "schema_version": 2,
             "collected_at_epoch": int(time.time()),
@@ -678,11 +755,12 @@ class GitHubEvidenceCollector:
                 "base_sha": None,
                 "merge_base_sha": None,
             },
-            "freshness": "CURRENT",
+            "freshness": "CURRENT" if target_stable else "STALE",
             "completeness": {
-                "full_coverage": inventory_complete and source_complete and not gaps,
+                "full_coverage": inventory_complete and source_complete and target_stable and not gaps,
                 "material_gaps": gaps,
                 "surfaces": {
+                    "target_stabilization": target_stable,
                     "repository_tree_inventory": inventory_complete,
                     "repository_source_content": source_complete,
                 },
@@ -728,6 +806,17 @@ class GitHubEvidenceCollector:
                         "items": source_items,
                     },
                     limitations=source_limitations,
+                ),
+                self._evidence_record(
+                    "EVD-STABILIZATION",
+                    "TARGET_STABILIZATION",
+                    f"final ref re-resolution for {requested_ref}",
+                    {
+                        "initial": {"head_sha": head_sha},
+                        "final": {"head_sha": final_head_sha},
+                        "stable": target_stable,
+                    },
+                    limitations=[] if target_stable else ["repository ref identity moved during evidence collection"],
                 ),
             ],
         })

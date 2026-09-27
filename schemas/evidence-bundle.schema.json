@@ -162,6 +162,9 @@
             },
             "repository_source_content": {
               "type": "boolean"
+            },
+            "target_stabilization": {
+              "type": "boolean"
             }
           }
         }
@@ -200,6 +203,7 @@
             "properties": {
               "surfaces": {
                 "required": [
+                  "target_stabilization",
                   "changed_file_inventory",
                   "diff_content",
                   "reviews",
@@ -236,6 +240,7 @@
             "properties": {
               "surfaces": {
                 "required": [
+                  "target_stabilization",
                   "changed_file_inventory",
                   "diff_content"
                 ]
@@ -266,6 +271,7 @@
             "properties": {
               "surfaces": {
                 "required": [
+                  "target_stabilization",
                   "repository_tree_inventory",
                   "repository_source_content"
                 ]

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .model import ContractError, expected_target_binding, require
-from .projection import project_action
+from .projection import _project_action_current, _project_action_live
 from .root_cause import validate_assessment
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -228,8 +228,11 @@ def _recovery_task(evidence: dict[str, Any], assessment: dict[str, Any], project
 
 
 
-def build_prompt_pipeline_intake(evidence: dict[str, Any], assessment: dict[str, Any]) -> dict[str, Any]:
-    projection = project_action(evidence, assessment)
+def _build_prompt_pipeline_intake_from_projection(
+    evidence: dict[str, Any],
+    assessment: dict[str, Any],
+    projection: dict[str, Any],
+) -> dict[str, Any]:
     require(projection["prompt_required"], "projected action does not require a prompt")
     lock = load_lock()
     if projection["action"] == "IMPLEMENT_REPAIR":
@@ -293,6 +296,34 @@ def build_prompt_pipeline_intake(evidence: dict[str, Any], assessment: dict[str,
         "human_review_required": True,
     }
 
+
+
+def _build_prompt_pipeline_intake_current(
+    evidence: dict[str, Any],
+    assessment: dict[str, Any],
+) -> dict[str, Any]:
+    """Pure fixture/test helper over evidence already treated as current."""
+    projection = _project_action_current(evidence, assessment)
+    return _build_prompt_pipeline_intake_from_projection(evidence, assessment, projection)
+
+
+def build_prompt_pipeline_intake(
+    evidence: dict[str, Any],
+    assessment: dict[str, Any],
+    *,
+    collector: Any | None = None,
+) -> dict[str, Any]:
+    """Authoritative handoff boundary: live GitHub evidence is required before serialization."""
+    live_evidence, projection = _project_action_live(
+        evidence,
+        assessment,
+        collector=collector,
+    )
+    return _build_prompt_pipeline_intake_from_projection(
+        live_evidence,
+        assessment,
+        projection,
+    )
 
 def write_intake(path: str | Path, intake: dict[str, Any]) -> Path:
     output = Path(path)

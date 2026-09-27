@@ -37,3 +37,9 @@ The runtime does not create new Findings or root causes during projection. Proje
 Before applying normal action precedence, projection validates the evidence contract and syntactic assessment binding. Valid binding drift or a non-current bundle projects RERUN_REVIEW; malformed/cross-target input fails closed. Only CURRENT_MATCH proceeds to full assessment validation.
 
 IMPLEMENT_REPAIR carries the canonical Finding-granular authorization mapping. Non-modifying actions carry no implementation authorization.
+
+## Live freshness authority boundary
+
+Persisted `evidence.freshness` is evidence metadata, not action-time authority. The public `project_action()` boundary reconstructs the canonical collection request from the reviewed target selectors and review intent, recollects through `GitHubEvidenceCollector`, and only then applies the deterministic projection to the live bundle. The pure `_project_action_current()` helper exists only for internal deterministic tests/fixture verification and is not an externally consumable modification-authority boundary.
+
+A successful live recollection whose material identity/digest differs from the reviewed assessment flows through the existing binding preflight and produces `RERUN_REVIEW`. GitHub collection failure propagates as a blocking contract failure, so no modification-capable projection is emitted. No TTL or Head-only shortcut is accepted because material same-Head evidence can change.

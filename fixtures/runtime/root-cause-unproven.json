@@ -26,7 +26,8 @@
         "inline_review_comments": true,
         "checks": true,
         "commit_statuses": true,
-        "review_threads": true
+        "review_threads": true,
+        "target_stabilization": true
       }
     },
     "evidence_records": [
@@ -38,7 +39,7 @@
         "limitations": []
       }
     ],
-    "evidence_digest": "sha256:42fe0f29bce991ed157784174788e5276040f6155f161a957a4a52213e066909",
+    "evidence_digest": "sha256:bb059d3b62856fceba52436a15c0e8fa0a8f82d6202bf288623e02ea11540f45",
     "review_intent": "Root-cause verification for the runtime diagnosis fixture.",
     "review_intent_digest": "sha256:f7d4ea4a64aa57fdbe6a02e38b72d5febbc1e4c8424aa37720b572991067b2a5"
   },
@@ -49,7 +50,7 @@
       "repository_id": "123",
       "kind": "PR_SCOPE",
       "head_sha": "dddddddddddddddddddddddddddddddddddddddd",
-      "evidence_digest": "sha256:42fe0f29bce991ed157784174788e5276040f6155f161a957a4a52213e066909",
+      "evidence_digest": "sha256:bb059d3b62856fceba52436a15c0e8fa0a8f82d6202bf288623e02ea11540f45",
       "pr_number": 7,
       "base_ref": "main",
       "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
