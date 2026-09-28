@@ -18,10 +18,7 @@
           "On timeout the current item remains in REQUESTING and is still visible after reload.",
           "A check named 'integration' passed on Head A, but its producer identity was not inspected and no exact-Head result exists for Head B.",
           "A prior external review says 'GREEN / safe to merge' but explicitly cites Head A and assumes provider retries are idempotent without evidence.",
-          "The changed workflow file on Head B has not yet been inspected; the earlier provider documentation remains identity-independent evidence.",
-          "The Engineering Compass reviewer package used to begin this review declares itself bound to accepted Engineering Compass repository revision EC-A; its internal structure and recorded source hashes remain valid for EC-A.",
-          "Engineering Compass canonical main has since advanced to accepted revision EC-B with additional merged semantics; no package rebuild or source-to-derived comparison against EC-B has been performed.",
-          "No production-like installation/use qualification or clean-context model evaluation has been executed for an EC-B-bound package, and no evidence establishes that the EC-A package contains the EC-B semantics."
+          "The changed workflow file on Head B has not yet been inspected; the earlier provider documentation remains identity-independent evidence."
         ],
         "owner_authority": [
           "The accepted product outcome is that every valid item eventually receives exactly one counter or reaches a recoverable operator-visible path.",
@@ -29,7 +26,7 @@
           "No Owner decision defines what business outcome to choose if the external provider cannot determine whether an uncertain request committed."
         ]
       },
-      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, timeout-after-acceptance behavior, and the reviewer package's declared repository binding. Identify which target-review conclusions and which reviewer-package claims remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
+      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, and timeout-after-acceptance behavior. Identify which conclusions remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
     },
     {
       "id": "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
