@@ -40,7 +40,9 @@
           "A previously selected repair method says to preserve the current remote endpoint/authority boundary and make requests idempotent by sending the provider's documented Idempotency-Key header.",
           "Fresh authoritative provider documentation proves that this endpoint ignores Idempotency-Key and offers no request lookup; the selected method depends on the endpoint honoring that header.",
           "The same provider documentation exposes a separate shipment-status lookup by stable client_reference, but using it requires persisting a durable request identity and changes the recovery flow from prevention to reconciliation.",
-          "Accepted product authority also permits an operator-visible uncertain/recovery state with manual reconciliation when the provider cannot prove commit outcome; that route changes workflow/failure semantics but preserves the accepted exactly-one-or-recoverable outcome."
+          "Accepted product authority also permits an operator-visible uncertain/recovery state with manual reconciliation when the provider cannot prove commit outcome; that route changes workflow/failure semantics but preserves the accepted exactly-one-or-recoverable outcome.",
+          "Automated reconciliation through stable client_reference can query provider status after timeout and distinguish a committed shipment from a non-committed request, materially reducing unresolved uncertainty and giving a directly testable reconciliation path; it requires durable request-identity persistence, workflow migration, and more implementation time.",
+          "Operator-visible uncertain-state recovery requires less migration and can be implemented sooner, but each ambiguous timeout remains dependent on a human reconciliation step and recurring operator work before the item can leave the uncertain state."
         ],
         "material_dimensions": [
           "network outcome: success, timeout before remote commit, timeout after remote commit",
@@ -49,7 +51,8 @@
           "role state: stable or revoked between attempts",
           "browser lifecycle: uninterrupted or reload after timeout",
           "selected-method conformance: provider idempotency mechanism available or proven unavailable",
-          "replacement repair family: automated reconciliation through stable client_reference or operator-visible uncertain-state recovery"
+          "replacement repair family: automated reconciliation through stable client_reference or operator-visible uncertain-state recovery",
+          "replacement tradeoff: automated reconciliation has stronger directly testable uncertainty resolution with higher persistence/migration/time cost, while manual recovery has lower implementation burden/time with recurring operator reconciliation"
         ]
       },
       "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions and identify any system-level failure that could change the engineering decision. Assess the fresh provider evidence against the previously selected method and the supplied replacement families, determine the appropriate method-selection state and repair route from the evidence, compare only materially distinct evidence-supported alternatives, and report Method Coverage for the methods materially activated."
