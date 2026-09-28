@@ -149,6 +149,28 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("Blocking is exceptional", reasoning)
         self.assertIn("decline the stronger blocking plan", combined)
 
+    def test_gravity_benchmark_requires_cross_manifestation_synthesis(self):
+        gravity = load_fixture("gravity-flow-version-coupling.json")
+        criteria = " ".join(
+            load_fixture("semantic-evaluation-rubric.json")["scenarios"][gravity["id"]]["criteria"]
+        )
+        self.assertIn("two prior admission failures occurred on different fingerprinted files", " ".join(gravity["scenario"]["implementation_decisions"]))
+        self.assertIn("same failure class", gravity["review_task"])
+        self.assertIn("Synthesizes the two independent fingerprint-mismatch manifestations", criteria)
+        self.assertIn("defect-class closure", criteria)
+
+    def test_full_route_requires_materially_distinct_methods(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        ec006 = next(row for row in gaps["scenarios"] if row["id"] == "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS")
+        criteria = " ".join(
+            load_fixture("semantic-evaluation-rubric.json")["scenarios"][ec006["id"]]["criteria"]
+        )
+        self.assertIn("Otherwise use `FULL`", reasoning)
+        self.assertIn("two materially distinct admissible replacement repair families", ec006["review_task"])
+        self.assertIn("uses FULL method selection", criteria)
+        self.assertIn("does not invent alternatives", criteria)
+
 
 if __name__ == "__main__":
     unittest.main()
