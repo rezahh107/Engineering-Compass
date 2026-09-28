@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts import verify_repo
 
@@ -55,6 +56,32 @@ class FinalGateSemanticFixtureContractTests(unittest.TestCase):
         errors: list[str] = []
         verify_repo.check_final_gate_strict_contract(errors)
         self.assertEqual(errors, [])
+
+    def test_final_gate_verification_boundary_marker_removal_fails_closed(self):
+        verification_path = ROOT / "docs" / "governance" / "VERIFICATION.md"
+        verification = verification_path.read_text(encoding="utf-8")
+        marker = verify_repo.FINAL_GATE_VERIFICATION_MARKERS[0]
+        self.assertIn(marker, verification)
+
+        original_read_text = Path.read_text
+
+        def read_text_with_marker_removed(path: Path, *args, **kwargs):
+            if path == verification_path:
+                return verification.replace(marker, "", 1)
+            return original_read_text(path, *args, **kwargs)
+
+        errors: list[str] = []
+        with patch.object(Path, "read_text", new=read_text_with_marker_removed):
+            verify_repo.check_final_gate_strict_contract(errors)
+
+        self.assertTrue(
+            any(
+                "final-gate strict verification-boundary marker missing" in error
+                and marker in error
+                for error in errors
+            ),
+            errors,
+        )
 
     def test_existing_ec_eval_001_through_010_ids_remain_present(self):
         gravity = self._load("gravity-flow-version-coupling.json")
