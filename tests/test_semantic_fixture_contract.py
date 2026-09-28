@@ -63,6 +63,24 @@ PR6_LEAKED_REVIEW_TASKS = {
     "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": "Review the repository-governance concern after incorporating all supplied authority, detectability/recovery, control-cost, and operational evidence. State the current disposition and bounded decision state, separate the policy question from possible enforcement mechanisms, and choose the minimum effective response. Do not invent numeric risk scores or stronger controls merely because they are technically available; identify the future material conditions that would justify re-evaluation.",
 }
 
+POST_PR7_PAYLOAD_LEAKAGE_MARKERS = {
+    "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": (
+        "non-capability-shaped contract/test-drift finding",
+        "manual-copy/co-change lifecycle mechanism",
+        "defect-class closure",
+    ),
+    "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": (
+        "does not request it ceremonially",
+        "stronger preventive control is justified before deployment",
+        "minimum effective forced control",
+        "stronger is always safer",
+    ),
+    "EC-EVAL-009_PACKAGE_REVISION_STALENESS": (
+        "historical/version-bound artifact",
+        "package rebuild/requalification",
+    ),
+}
+
 
 def load_fixture(name: str):
     return json.loads((ROOT / "fixtures" / name).read_text(encoding="utf-8"))
@@ -95,11 +113,41 @@ def reviewer_tasks() -> dict[str, str]:
     return tasks
 
 
+def reviewer_payloads(gravity=None, controls=None, gaps=None) -> dict[str, str]:
+    gravity = gravity if gravity is not None else load_fixture("gravity-flow-version-coupling.json")
+    controls = controls if controls is not None else load_fixture("control-boundary-semantics.json")
+    gaps = gaps if gaps is not None else load_fixture("scenario-driven-gap-discovery.json")
+    payloads = {
+        gravity["id"]: json.dumps(gravity, ensure_ascii=False, sort_keys=True).lower(),
+    }
+    for fixture in (controls, gaps):
+        for row in fixture["scenarios"]:
+            payloads[row["id"]] = json.dumps(
+                {
+                    "authority": fixture["authority"],
+                    "purpose": fixture["purpose"],
+                    "scenario": row,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+            ).lower()
+    return payloads
+
+
 def review_task_leakage_errors(tasks: dict[str, str]) -> list[str]:
     errors: list[str] = []
     for sid, markers in PR6_LEAKAGE_MARKERS.items():
         task = tasks.get(sid, "").lower()
         if any(marker in task for marker in markers):
+            errors.append(sid)
+    return errors
+
+
+def post_pr7_payload_leakage_errors(payloads: dict[str, str]) -> list[str]:
+    errors: list[str] = []
+    for sid, markers in POST_PR7_PAYLOAD_LEAKAGE_MARKERS.items():
+        payload = payloads.get(sid, "").lower()
+        if any(marker.lower() in payload for marker in markers):
             errors.append(sid)
     return errors
 
@@ -271,6 +319,19 @@ class SemanticFixtureContractTests(unittest.TestCase):
             set(PR6_LEAKED_REVIEW_TASKS),
         )
 
+    def test_post_pr7_evaluator_phrases_are_absent_from_complete_reviewer_payloads(self):
+        self.assertEqual(post_pr7_payload_leakage_errors(reviewer_payloads()), [])
+
+        controls = load_fixture("control-boundary-semantics.json")
+        package = next(row for row in controls["scenarios"] if row["id"] == "EC-EVAL-009_PACKAGE_REVISION_STALENESS")
+        package["input"]["package_state"].append(
+            "Evaluator conclusion: treat this as a historical/version-bound artifact."
+        )
+        self.assertIn(
+            "EC-EVAL-009_PACKAGE_REVISION_STALENESS",
+            post_pr7_payload_leakage_errors(reviewer_payloads(controls=controls)),
+        )
+
     def test_reviewer_facts_remain_sufficient_after_task_neutralization(self):
         gravity = load_fixture("gravity-flow-version-coupling.json")
         controls = load_fixture("control-boundary-semantics.json")
@@ -381,7 +442,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
         controls = load_fixture("control-boundary-semantics.json")
         gaps = load_fixture("scenario-driven-gap-discovery.json")
         rubric = load_fixture("semantic-evaluation-rubric.json")
-        tasks = reviewer_tasks()
+        payloads = reviewer_payloads(controls=controls, gaps=gaps)
         controls_by_id = {row["id"]: row for row in controls["scenarios"]}
         gaps_by_id = {row["id"]: row for row in gaps["scenarios"]}
 
@@ -400,31 +461,25 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("historical/version-bound artifact", ec009_criteria)
         self.assertIn("package structural/source-hash validity", ec009_criteria)
         self.assertIn("package rebuild/requalification", ec009_criteria)
-        self.assertNotIn("historical/version-bound artifact", tasks[ec009["id"]])
-        self.assertNotIn("package rebuild/requalification", tasks[ec009["id"]])
 
         self.assertIn("legacy test still requires JPG-only uploads", ec007_facts)
         self.assertIn("non-capability-shaped contract/test-drift finding", ec007_criteria)
-        self.assertNotIn("MISSING_CAPABILITY", tasks[ec007["id"]])
         self.assertIn("repeatedly co-change after contract updates", ec007_facts)
         self.assertIn("manual-copy/co-change lifecycle mechanism", ec007_criteria)
         self.assertIn("rejects synchronizing only today's visible status literals as defect-class closure", ec007_criteria)
         self.assertIn("mobile-client status behavior", ec007_criteria)
         self.assertIn("NOT_PROVEN", ec007_criteria)
-        self.assertNotIn("manual-copy/co-change lifecycle mechanism", tasks[ec007["id"]])
-        self.assertNotIn("defect-class closure", tasks[ec007["id"]])
 
         self.assertIn("No prior independent review has been performed", ec008_facts)
         self.assertIn("does not request it ceremonially", ec008_criteria)
         self.assertIn("does not generalize this into a rule to never seek independent review", ec008_criteria)
-        self.assertNotIn("ceremonially", tasks[ec008["id"]])
         self.assertIn("duplicate customer charges", ec008_facts)
         self.assertIn("next-day reconciliation", ec008_facts)
         self.assertIn("stronger preventive control is justified before deployment", ec008_criteria)
         self.assertIn("minimum effective forced control", ec008_criteria)
         self.assertIn("'stronger is always safer'", ec008_criteria)
-        self.assertNotIn("stronger preventive control", tasks[ec008["id"]])
-        self.assertNotIn("minimum effective forced control", tasks[ec008["id"]])
+
+        self.assertEqual(post_pr7_payload_leakage_errors(payloads), [])
 
     def test_method_comparison_priority_contract(self):
         reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
