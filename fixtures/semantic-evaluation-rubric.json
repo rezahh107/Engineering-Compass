@@ -144,6 +144,25 @@
         "When the final delegated route is `repair` or `repair_and_verify`, emits a separate copy-ready Executor prompt in the same response; when root cause or repair family is still materially NOT_PROVEN, emits the smallest copy-ready qualification/verification prompt instead of speculative code-changing instructions.",
         "For a code-changing delegated prompt, carries the confirmed root cause, selected method, correct enforcement boundary, applicable Selected Method Conformance Lock, falsification capable of distinguishing native provenance from decoy notification-like content, exact-target/freshness obligations, and planned-versus-actual deviation reporting using the canonical implementation/validation/post-implementation contracts."
       ]
+    },
+    "EC-EVAL-011_FINAL_GATE_SAME_ROOT_BYPASS_CLOSURE": {
+      "criteria": [
+        "Distinguishes current inspected production validity from final closure sufficiency: the canonical production selector being valid and no current violation being observed do not prove recurrence prevention or mechanical-control closure.",
+        "Identifies the shared causal mechanism beyond the demonstrated nested-rule syntax: native-root targeting semantics can be lost or fail to be recognized before the positive property contract is applied.",
+        "Performs an evidence-bounded same-root search for materially reachable equivalent representations instead of stopping after the demonstrated nested-context manifestation.",
+        "Discovers or correctly characterizes class-token attribute membership and mixed dot-class/attribute-token forms as a second materially equivalent native-root representation family, without claiming universal CSS/parser coverage.",
+        "Recognizes mixed valid+bypass masking: a canonical recognized selector can satisfy the global positive aggregate while a same-root differently represented selector remains unclassified in the same realistic stylesheet.",
+        "Applies the mechanical-control adversarial bypass question: a failing state may avoid the predicate, lose identity before the predicate, reach another path, or be masked by unrelated passing evidence; it does not call the control fail-closed while a materially reachable same-root bypass remains.",
+        "Requires one truthful representation outcome before strong closure: REPRESENTATION SET BOUNDED AND COVERED, UNSUPPORTED REPRESENTATION FAILS CLOSED, or broader representation closure remains NOT_PROVEN because the representation space is not sufficiently bounded.",
+        "Applies the closure-claim ceiling: evidence that current production is valid or that the known nested manifestation is repaired does not by itself justify `defect class closed` or `same-root future recurrence prevented`.",
+        "Keeps `BOUNDED` available when the additional manifestation shares the same causal mechanism, invariant, enforcement boundary, and sufficient repair family; does not escalate to `FULL` ceremonially when no materially distinct repair boundary or migration appears.",
+        "Expands falsification over the causal class: covers the demonstrated nested-context loss, the materially equivalent representation family, and a mixed valid+bypass masking case, plus appropriate positive/regression controls, without requiring a Cartesian-product syntax catalog.",
+        "Does not issue final GREEN/safe-to-proceed solely from absence of a current production violation when the requested decision includes strong defect-class/fail-closed closure and the same-root boundary remains unresolved.",
+        "Preserves PR Inspector projection authority: reports the supplied `YELLOW / repair_and_verify` as PR Inspector's controlled projection and describes Engineering Compass as contributing causal qualification, closure analysis, method selection/falsification, and handoff rather than owning that projection.",
+        "When delegated repair or repair_and_verify is justified, emits a separate copy-ready Executor prompt carrying the qualified cause, enforcement boundary, same-root and mixed-case falsification, exact-target/freshness obligations, and planned-versus-actual reporting; if the repair family remains materially unqualified, emits the smallest qualification/verification prompt instead.",
+        "Keeps the Owner result concise and Persian-first, distinguishing whether current behavior itself is broken from whether future protection/control or closure sufficiency remains incomplete, whether that blocks the requested decision, and what happens next.",
+        "Stops strict exploration when further materially reachable same-root search is unlikely to change the root cause, repair family, closure claim, blast radius, validation method, or readiness decision; if the space cannot be bounded enough, narrows the claim or retains NOT_PROVEN instead of pursuing exhaustive enumeration."
+      ]
     }
   }
 }
