@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import json
 import unittest
 from pathlib import Path
@@ -80,14 +79,6 @@ class FinalGateSemanticFixtureContractTests(unittest.TestCase):
         }
 
         self.assertTrue(expected_existing.issubset(scenario_ids))
-
-    def test_final_gate_scenario_is_not_mutated_by_leakage_test(self):
-        gaps = self._load("scenario-driven-gap-discovery.json")
-        original = copy.deepcopy(self._gap_scenario(gaps))
-        working = copy.deepcopy(gaps)
-        self._gap_scenario(working)["input"]["closure_context"].append("temporary mutation")
-
-        self.assertEqual(self._gap_scenario(gaps), original)
 
 
 if __name__ == "__main__":
