@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios containing control, evidence, authority, and lifecycle-stage cases without expected answers or evaluator verdicts.",
+  "purpose": "Clean reviewer-input scenarios containing control, evidence, authority, lifecycle-stage, and package-freshness cases without expected answers or evaluator verdicts.",
   "scenarios": [
     {
       "id": "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION",
@@ -48,6 +48,21 @@
         "claim_under_review": "Validator PASS plus evaluator-file consistency proves the assessment is semantically correct, the evaluator's branch-protection rule is canonical, the implementation is complete through release readiness, the implementation report is sufficient, and the dense technical report is sufficient communication to the Owner."
       },
       "review_task": "Assess the claims supported by the schema/validator result, evaluator-file consistency, focused tests, implementation report, and supplied audience context. Explain the authority role of the evaluator criterion, what semantic conclusions are supported or unsupported, which lifecycle stages have evidence, whether the supplied reporting and communication are sufficient for their purposes, and what additional evidence or delivery is required for stronger claims."
+    },
+    {
+      "id": "EC-EVAL-009_PACKAGE_REVISION_STALENESS",
+      "input": {
+        "package_state": [
+          "A versioned Engineering Compass reviewer package declares itself bound to accepted repository revision EC-A, and its archive structure plus recorded source hashes are valid for EC-A.",
+          "Engineering Compass canonical main has subsequently advanced to accepted revision EC-B with additional merged canonical semantics.",
+          "The EC-A package has not been rebuilt from EC-B and no source-to-derived comparison or other freshness qualification has established that it contains the EC-B semantics.",
+          "No production-like installation/use qualification has been executed for an EC-B-bound package.",
+          "No independent clean-context reviewer-model evaluation has been executed for an EC-B-bound package.",
+          "The historical EC-A package remains available and there is no evidence that its bytes or internal EC-A binding are corrupt."
+        ],
+        "claim_under_review": "Because the EC-A package is structurally valid and its recorded hashes still match EC-A, it can be treated as current Engineering Compass authority and assumed to include EC-B semantics and current package behavior."
+      },
+      "review_task": "Assess the package claim using the supplied revision, provenance, structural-validity, and execution evidence. State what remains valid about the existing package, which current-fidelity or behavior claims are supported or unsupported, and the smallest justified freshness or qualification action."
     }
   ]
 }
