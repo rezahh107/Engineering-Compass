@@ -136,6 +136,12 @@ FINAL_GATE_REASONING_BASE_MARKERS = (
     "Proof of mechanical control",
     "Falsification obligations",
 )
+FINAL_GATE_VERIFICATION_MARKERS = (
+    "final-gate strict canonical/exact-marker synchronization remains intact",
+    "complete reviewer-visible EC-EVAL-011 payload",
+    "does not detect paraphrased or semantically equivalent leakage",
+    "does not prove semantic engineering correctness, LLM compliance, successful clean-context semantic evaluation, or universal representation coverage",
+)
 
 REQUIRED = [
     "README.md",
@@ -153,6 +159,8 @@ REQUIRED = [
     EVALUATOR_RUBRIC,
     "scripts/verify_repo.py",
     "tests/test_semantic_fixture_contract.py",
+    "tests/final_gate/__init__.py",
+    "tests/final_gate/test_semantic_fixture_contract.py",
     ".github/workflows/verify.yml",
 ]
 
@@ -497,6 +505,7 @@ def check_review_to_handoff_contract(errors: list[str]) -> None:
 def check_final_gate_strict_contract(errors: list[str]) -> None:
     protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
     reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+    verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
 
     for marker in FINAL_GATE_PROTOCOL_MARKERS:
         if marker not in protocol:
@@ -504,6 +513,9 @@ def check_final_gate_strict_contract(errors: list[str]) -> None:
     for marker in FINAL_GATE_REASONING_BASE_MARKERS:
         if marker not in reasoning:
             fail(f"final-gate strict canonical reasoning base marker missing: {marker}", errors)
+    for marker in FINAL_GATE_VERIFICATION_MARKERS:
+        if marker not in verification:
+            fail(f"final-gate strict verification-boundary marker missing: {marker}", errors)
 
 
 def is_external_link(target: str) -> bool:
