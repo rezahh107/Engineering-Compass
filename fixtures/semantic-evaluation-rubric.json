@@ -55,7 +55,10 @@
         "Treats scenario/rubric structural parity as a synchronization predicate only, not semantic model correctness.",
         "Does not infer semantic engineering correctness, root-cause truth, architecture optimality, evidence completeness, or global LLM compliance from structural validity.",
         "Identifies clean-context model evaluation or other behavior-level evidence as the relevant boundary for observed semantic performance without inflating one run into a general guarantee.",
-        "Keeps implementation completed, selected-method conformance, focused tests, regression tests, exact-Head CI, fresh rereview, merge/release, and Owner authorization as separate stages; does not let one PASS imply the next."
+        "Keeps implementation completed, selected-method conformance, focused tests, regression tests, exact-Head CI, fresh rereview, merge/release, and Owner authorization as separate stages; does not let one PASS imply the next.",
+        "Separates the broader lifecycle chain request/intake, evidence, assessment, decision, validation, completion, and Owner delivery; recognizes that an earlier stage can feed the next without proving it complete.",
+        "Treats the supplied 'done' implementation report as incomplete for a material handoff because it omits the exact resulting target/Head, remaining blockers or unknowns, planned-versus-actual deviations, and the distinction between executed evidence and unavailable/unverified claims.",
+        "For the supplied non-technical Persian-speaking Owner audience, distinguishes supporting technical evidence from Owner-facing delivery and requires a concise Persian-first delivery that communicates bounded decision/readiness state, practical meaning, confirmed root cause in plain language, selected direction, remaining blocker/unknown when any, and exact next action without duplicating hashes/CI/diffs unless decision-critical."
       ]
     },
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": {
@@ -79,7 +82,8 @@
         "Recognizes that authoritative provider evidence disproves the selected method's required idempotency mechanism while the method's Conformance Lock requires that mechanism and remote authority boundary to remain unchanged.",
         "Reports SELECTED_METHOD_INFEASIBLE and returns to method selection rather than silently replacing the selected architecture, weakening the lock, or shipping a header-only surface patch.",
         "Recognizes that the supplied automated-reconciliation and operator-visible recovery methods are materially distinct in failure/workflow semantics and therefore uses FULL method selection after the original method becomes infeasible rather than incorrectly forcing BOUNDED.",
-        "Compares only the evidence-supported replacement methods supplied by the scenario and does not invent alternatives merely to fill a quota."
+        "Compares only the evidence-supported replacement methods supplied by the scenario and does not invent alternatives merely to fill a quota.",
+        "Applies the canonical order of consideration to the supplied tradeoff facts: evaluates correctness/truthfulness and defect-class closure/durability before lower-order implementation/migration burden and time, then considers the applicable authority/SSOT, falsifiability, proportionality, and Owner-operability implications without numeric weighting; it does not choose the faster/manual route solely because it is cheaper or quicker, and does not force a winner if the evidence cannot materially distinguish admissible methods on higher-order factors."
       ]
     },
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": {
