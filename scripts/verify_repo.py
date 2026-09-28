@@ -38,6 +38,9 @@ GAP_INPUT_KEYS = {
     "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": frozenset(
         {"scope", "initial_evidence", "fresh_owner_context", "possible_future_changes"}
     ),
+    "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY": frozenset(
+        {"scope", "review_context", "observed_evidence", "delivery_context"}
+    ),
 }
 GAP_LIST_FIELDS = {
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"change", "known_evidence", "owner_authority"}),
@@ -45,6 +48,9 @@ GAP_LIST_FIELDS = {
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": frozenset({"authority_and_surfaces", "uninspected_context"}),
     "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": frozenset(
         {"initial_evidence", "fresh_owner_context", "possible_future_changes"}
+    ),
+    "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY": frozenset(
+        {"review_context", "observed_evidence", "delivery_context"}
     ),
 }
 VALID_REVIEW_SCOPES = frozenset({"PR_SCOPE", "REPOSITORY_SCOPE"})
