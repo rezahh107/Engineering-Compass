@@ -27,6 +27,7 @@ CONTROL_INPUT_KEYS = {
     "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION": frozenset({"repository_state", "claim_under_review"}),
     "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH": frozenset({"workflow", "claim_under_review"}),
     "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": frozenset({"assessment", "claim_under_review"}),
+    "EC-EVAL-009_PACKAGE_REVISION_STALENESS": frozenset({"package_state", "claim_under_review"}),
 }
 GAP_FIXTURE_KEYS = frozenset({"authority", "purpose", "scenarios"})
 GAP_SCENARIO_KEYS = frozenset({"id", "input", "review_task"})
