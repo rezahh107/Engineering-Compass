@@ -155,7 +155,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
             load_fixture("semantic-evaluation-rubric.json")["scenarios"][gravity["id"]]["criteria"]
         )
         self.assertIn("two prior admission failures occurred on different fingerprinted files", " ".join(gravity["scenario"]["implementation_decisions"]))
-        self.assertIn("same failure class", gravity["review_task"])
+        self.assertIn("one failure class", gravity["review_task"])
         self.assertIn("Synthesizes the two independent fingerprint-mismatch manifestations", criteria)
         self.assertIn("defect-class closure", criteria)
 
