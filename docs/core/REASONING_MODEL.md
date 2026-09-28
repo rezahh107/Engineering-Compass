@@ -615,6 +615,16 @@ Do **not** force every local defect into architecture depth. Continue deeper cau
 
 A plausible architecture narrative is not causal proof. Use source/runtime evidence, history/co-change, differential cases, counterfactuals, or discriminating experiments when required to separate hypotheses.
 
+## Lifecycle stage separation
+
+Keep the review and delivery lifecycle semantically distinct:
+
+`request / intake ≠ evidence ≠ assessment ≠ decision ≠ validation ≠ completion ≠ Owner delivery`
+
+A prior stage may supply input to the next stage, but completion or PASS of one stage does not itself prove the next. Receiving a request is not evidence; collecting evidence is not assessment; assessment is not the final decision; selecting a decision is not validation; successful validation is not project/task completion; and technical completion is not Owner-facing delivery or Owner authorization.
+
+This is a reasoning/reporting boundary, not a lifecycle state machine or workflow engine. More detailed implementation/test/CI/rereview stages remain separate where applicable.
+
 ## Decision/readiness state
 
 For a material review output, end with one bounded decision-state headline:
@@ -675,6 +685,22 @@ Under `FULL`, separate unrelated root-cause groups, compare only materially dist
 
 Material distinction concerns enforcement boundary, authority/SSOT ownership, validation mechanism, failure semantics, defect-class closure, public contract/schema migration, runtime topology, or consumer migration—not helper names or refactoring style.
 
+#### Method-comparison priority
+
+When `FULL` or another material decision genuinely leaves more than one admissible evidence-supported method to compare, consider decision factors in this order:
+
+1. functional correctness / truthfulness;
+2. defect-class closure / durability;
+3. regression preservation / semantic blast radius;
+4. authority / SSOT coherence / drift resistance;
+5. falsifiability / proof strength;
+6. proportionality / minimum effective control;
+7. Owner operability / automation implications;
+8. implementation / migration burden;
+9. implementation time.
+
+This is an **order of consideration, not a weighted scoring model**. Do not assign weights or trade away a higher-order correctness property merely because a lower-order option is faster or cheaper. Do not perform comparison theater when one sufficient evidence-backed method exists, do not manufacture alternatives to exercise the order, and do not force a winner when available evidence cannot materially distinguish equivalent methods. Time remains relevant, but it must not silently outrank correctness or defect-class closure.
+
 ### Selected Method Conformance Lock
 
 Before a code-changing repair prompt, lock the material properties that define the selected method when applicable:
@@ -725,3 +751,18 @@ The Implementation Contract should preserve the bounded outcome, exact target id
 The Validation Contract should contain falsification, focused regressions, expected state outcomes, exact-target/freshness checks when applicable, and truthful `NOT_PROVEN` handling for unavailable environment/platform evidence.
 
 The Post-Implementation Report must keep lifecycle stages distinct: implementation completed ≠ selected-method conformance ≠ focused tests ≠ regression tests ≠ exact-Head CI ≠ fresh rereview ≠ merge/release/Owner authorization.
+
+When material, the Post-Implementation Report should state compactly:
+
+- what was actually implemented;
+- whether selected-method conformance is `PROVEN` or `NOT_PROVEN`;
+- focused falsification/test results;
+- affected regression results;
+- exact-Head CI/current verification status;
+- fresh rereview status where required;
+- remaining blockers or unknowns;
+- planned-versus-actual deviations;
+- the exact resulting target identity / resulting Head;
+- which claims are backed by executed evidence versus unavailable or unverified evidence.
+
+Implementation success does not imply validation success, and CI success does not imply rereview, merge/release, or Owner authorization. Keep the report as a bounded handoff, not a certificate system, evidence registry, Run-ID mechanism, or acceptance bureaucracy.
