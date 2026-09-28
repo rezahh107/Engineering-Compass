@@ -169,7 +169,7 @@
           "If engineering action is required, the next Executor receives a copy-ready prompt; the Owner-facing result should remain concise and practical in Persian and distinguish current production validity from any remaining protection/control issue."
         ]
       },
-      "review_task": "Perform the final engineering review of the supplied validator repair and closure claim. Reconcile the current production artifact, demonstrated bypass, proposed repair boundary, classifier contract, equivalent CSS semantics, aggregate fallback, PR Inspector projection, and final-gate context. Determine what causal scope and closure strength the evidence supports, whether additional same-root qualification or repair is required, and the exact next engineering action."
+      "review_task": "Review the supplied validator repair and closure claim as the final engineering gate. Reconcile the current production artifact, demonstrated bypass, proposed repair boundary, classifier contract, equivalent CSS semantics, aggregate fallback, PR Inspector projection, and final-gate context. Determine what causal scope and closure strength the evidence supports, whether additional same-root qualification or repair is required, and the exact next engineering action."
     }
   ]
 }
