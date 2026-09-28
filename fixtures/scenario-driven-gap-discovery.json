@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, drift, governance, and review-to-handoff cases without evaluator-only expectations.",
+  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, drift, governance, review-to-handoff, and final-gate closure cases without evaluator-only expectations.",
   "scenarios": [
     {
       "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
@@ -142,6 +142,34 @@
         ]
       },
       "review_task": "Review the current PR evidence path and handoff. Reconcile the supplied artifact, helper behavior, host/runtime identities, acceptance boundary, possible UI variation, and audience/authority context. Determine whether the current evidence is sufficient for the requested PR decision, what remains unproven, which action route is justified, and the exact next action."
+    },
+    {
+      "id": "EC-EVAL-011_FINAL_GATE_SAME_ROOT_BYPASS_CLOSURE",
+      "input": {
+        "scope": "PR_SCOPE",
+        "review_context": [
+          "This is the final meaningful technical review before a repair/defect-class closure decision becomes operational; no later independent engineering gate is expected.",
+          "The reviewed PR hardens a bounded CSS validator used to enforce a positive property contract on rules that target the Gravity Flow Inbox native root identified by the class tokens `gflow-inbox`, `gflow-grid`, and `gflow-common`.",
+          "A prior review demonstrated one bypass: when the native-root context appears on an outer CSS block and a nested child rule uses `&`, flat rule extraction can lose the outer semantic context before selector classification.",
+          "The proposed repair carries qualifying parent selector context into nested rules before classification and claims root-complete, fail-closed defect-class closure for native-root targeting.",
+          "The current inspected production stylesheet uses the canonical dot-class form for the native root and contains no observed production violation of the positive property contract."
+        ],
+        "control_evidence": [
+          "The classifier directly recognizes the native-root identity when all three class tokens are present in the selector's admitted dot-class representation.",
+          "CSS also permits class-token membership to be expressed through an attribute token-match representation, and selectors can combine dot-class and attribute-token forms while preserving the same class-membership meaning.",
+          "The supplied classifier contract does not yet establish whether those equivalent or mixed representations are recognized as native-root targets or deterministically rejected before a positive classification can be missed.",
+          "The validator's final positive-evidence fallback includes a global `native_target_members > 0` condition rather than requiring every semantically native-targeting rule in a stylesheet to be positively classified.",
+          "A stylesheet can contain more than one rule, so a recognized canonical native-root rule and another rule with a semantically equivalent but differently represented native-root identity can coexist in the same realistic validation context.",
+          "No supplied evidence claims universal CSS parser coverage or support for every theoretically legal selector representation."
+        ],
+        "closure_context": [
+          "The currently proposed code change is limited to preserving native-root context through nested-rule extraction; no authority/source-of-truth, public API/schema, persisted-state, runtime/topology, or external-consumer migration is described.",
+          "The requested final decision asks whether the repair can be accepted as safe to proceed and whether the same-root defect class and fail-closed mechanical enforcement can be considered closed.",
+          "For the exact reviewed Head, PR Inspector's controlled projection is `YELLOW / repair_and_verify`; Engineering Compass is being used to deepen causal/closure analysis and produce the engineering handoff, not to redefine PR Inspector projection semantics.",
+          "If engineering action is required, the next Executor receives a copy-ready prompt; the Owner-facing result should remain concise and practical in Persian and distinguish current production validity from any remaining protection/control issue."
+        ]
+      },
+      "review_task": "Perform the final engineering review of the supplied validator repair and closure claim. Reconcile the current production artifact, demonstrated bypass, proposed repair boundary, classifier contract, equivalent CSS semantics, aggregate fallback, PR Inspector projection, and final-gate context. Determine what causal scope and closure strength the evidence supports, whether additional same-root qualification or repair is required, and the exact next engineering action."
     }
   ]
 }
