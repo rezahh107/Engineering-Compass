@@ -36,7 +36,9 @@ A structural PASS does **not** prove:
 - a review will find every architecture defect;
 - a fixture has been successfully executed against any model;
 - production/runtime behavior of a reviewed external project;
-- platform controls beyond what the workflow actually runs.
+- platform controls beyond what the workflow actually runs;
+- a current PR review is still fresh after its Head changes;
+- a package/retrieved Source was actually loaded or activated by an LLM.
 
 Guidance is `prompt_level_influence`; deterministic validation proves only the predicates it actually executes. Mechanical-enforcement claims require evidence of an externally forced path and are limited to the exact predicates enforced on that path.
 
@@ -49,6 +51,14 @@ Scenario input and evaluator expectations are physically separated:
 - reviewer-model input comes from scenario fixtures such as `fixtures/gravity-flow-version-coupling.json`, `fixtures/control-boundary-semantics.json`, and `fixtures/scenario-driven-gap-discovery.json`;
 - evaluator expectations live in `fixtures/semantic-evaluation-rubric.json` and must not be shown to the reviewer model during a clean-context run.
 
+### Evaluator semantic-fidelity boundary
+
+The evaluator rubric is a **non-canonical test artifact**. It may test canonical Engineering Compass behavior, but it must not introduce a new normative rule, authority precedence, product policy, decision-state mapping, or reasoning obligation absent from canonical guidance.
+
+Every material evaluator criterion must be derivable from the applicable canonical guidance plus the scenario. When canonical semantics intentionally change, affected scenario/rubric expectations should migrate together.
+
+A small deterministic synchronization assertion may protect a known source/rubric relationship, but it proves only that exact consistency predicate. It does not prove that the evaluator's interpretation is semantically complete, that the reviewer will follow the guidance, or that an LLM judgment is correct.
+
 For an actual semantic comparison:
 
 1. give a fresh reviewer model the applicable canonical Engineering Compass guidance plus only the scenario input;
@@ -56,7 +66,8 @@ For an actual semantic comparison:
 3. only after that response is complete, evaluate it against the rubric;
 4. preserve per-scenario `PASS`, `FAIL`, or `NOT_PROVEN` evidence with concise criterion-level reasons;
 5. do not collapse the scenarios into an opaque numeric score;
-6. distinguish the observed run from any broader claim about model compliance.
+6. distinguish whether a rule existed, whether it activated, and whether activation materially improved the engineering decision;
+7. distinguish the observed run from any broader claim about model compliance.
 
 A clean-context model run proves only the behavior observed in that run. If no genuinely independent clean-context evaluation is available, report `SEMANTIC_EVAL_NOT_EXECUTED` rather than using already-informed reasoning as evidence of improvement.
 
@@ -80,6 +91,24 @@ For a repository change:
 4. do not call skipped/unavailable checks PASS;
 5. report structural verification separately from semantic reasoning evaluation.
 
+For `PR_SCOPE` review when current PR reality is decision-material, exact-target qualification should additionally preserve the reviewed repository/PR/Base/Head identity, changed-file inventory completeness, inspected diff/patch, and relevant check/review surfaces. A check display name is not sufficient producer identity when producer identity matters. Synthetic merge-ref evidence must not silently substitute for exact-Head evidence.
+
+Before reporting a current GREEN/completion state, recheck live Head/freshness. If the target moved, mark only identity-dependent evidence stale, preserve identity-independent evidence, and rerun affected stages. No stale GREEN.
+
+Missing access, pagination, producer identity, checks, or target freshness should block only conclusions that depend on that evidence. Preserve unaffected results and report the smallest recovery action. Never promote `UNKNOWN`, `MISSING`, `STALE`, `NOT_EXECUTED`, or unavailable checks to PASS.
+
+## Repair verification boundary
+
+For a selected root-correct repair, passing tests should be capable of falsifying the selected method rather than merely showing new code executes. Where material, include original-defect reproduction, repaired behavior, same-root/future-drift coverage, boundary/bypass discrimination, directly affected regressions, real consumer integration, and exact-target/exact-Head verification.
+
+A proposed test is not executed evidence. A conformance check is insufficient when a materially different nonconforming/surface repair could pass the same check without an observable distinction.
+
+Keep lifecycle stages separate in reporting:
+
+`implementation ≠ selected-method conformance ≠ focused tests ≠ regression tests ≠ exact-Head CI ≠ fresh rereview ≠ merge/release/Owner authorization`
+
+One stage does not imply the next.
+
 ## Definition of Done for Foundation changes
 
 A Foundation/document-governance change is structurally complete when:
@@ -88,5 +117,7 @@ A Foundation/document-governance change is structurally complete when:
 - internal links are valid;
 - machine-readable artifacts parse;
 - changed canonical semantics have been reflected in relevant evaluation scenarios/rubric or a reason is documented for no fixture change;
+- every material evaluator criterion remains derivable from canonical guidance plus scenario input;
+- reviewer/evaluator separation remains intact;
 - agent instructions remain concise pointers rather than duplicated manuals;
 - claims stay within the verification boundary.
