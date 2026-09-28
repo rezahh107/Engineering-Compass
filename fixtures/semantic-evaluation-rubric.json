@@ -19,6 +19,7 @@
     "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING": {
       "criteria": [
         "Identifies the repeated hash_file work as a real local symptom/performance detail without stopping there.",
+        "Synthesizes the two independent fingerprint-mismatch manifestations under the shared admission/coupling mechanism instead of treating them as unrelated local hashing defects.",
         "Identifies exact supported-version plus exact internal-file-fingerprint admission as implementation-identity coupling, and connects that decision to an independently evolving upstream lifecycle.",
         "Explains why hash caching may optimize cost but does not close the failure class when harmless upstream source reshaping can still reject behavior-compatible hosts.",
         "Uses the failure-class/surface-patch counterfactual and seeks the deepest evidence-supported causal boundary rather than manufacturing a deeper architecture story.",
@@ -73,11 +74,12 @@
       "criteria": [
         "Detects that retry-on-timeout plus a non-idempotent remote create operation can duplicate a shipment after timeout-after-remote-commit even though components are locally correct within their individual assumptions.",
         "Treats ownership, ordering, timing, and assumption interaction as the system-level failure boundary and activates the applicable partial-failure/idempotency reasoning rather than requiring an individually broken component.",
-        "Selects only decision-material combinations and does not enumerate the full Cartesian product; Method Coverage distinguishes methods that ran/found issues from not executed or blocked methods when materially reported.",
+        "Selects only decision-material combinations and does not enumerate the full Cartesian product; when Method Coverage is materially reported it keeps APPLIED_FINDING, APPLIED_NO_FINDING, NOT_EXECUTED, and BLOCKED semantically distinct.",
         "Does not claim complete real-world coverage from bounded pairwise/t-way exploration and keeps the possibility of a missing operational-model dimension explicit.",
         "Recognizes that authoritative provider evidence disproves the selected method's required idempotency mechanism while the method's Conformance Lock requires that mechanism and remote authority boundary to remain unchanged.",
         "Reports SELECTED_METHOD_INFEASIBLE and returns to method selection rather than silently replacing the selected architecture, weakening the lock, or shipping a header-only surface patch.",
-        "Requires any replacement method to be reselected from evidence-supported same-level methods; does not invent alternatives merely to fill a quota."
+        "Recognizes that the supplied automated-reconciliation and operator-visible recovery methods are materially distinct in failure/workflow semantics and therefore uses FULL method selection after the original method becomes infeasible rather than incorrectly forcing BOUNDED.",
+        "Compares only the evidence-supported replacement methods supplied by the scenario and does not invent alternatives merely to fill a quota."
       ]
     },
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": {
