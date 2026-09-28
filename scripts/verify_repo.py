@@ -55,6 +55,48 @@ GAP_LIST_FIELDS = {
 }
 VALID_REVIEW_SCOPES = frozenset({"PR_SCOPE", "REPOSITORY_SCOPE"})
 
+LEGACY_SEMANTIC_SCENARIO_IDS = frozenset(
+    {
+        "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING",
+        "EC-EVAL-002_REPOSITORY_CODE_IS_NOT_EXECUTION",
+        "EC-EVAL-003_MODEL_MEDIATED_IS_NOT_FORCED_PATH",
+        "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF",
+        "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
+        "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
+        "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP",
+        "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING",
+        "EC-EVAL-009_PACKAGE_REVISION_STALENESS",
+    }
+)
+REVIEW_TO_HANDOFF_SCENARIO_ID = "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY"
+REVIEW_TO_HANDOFF_LEAKAGE_MARKERS = (
+    "unique textual match ≠ native-control provenance",
+    "does not fabricate alternative repair families",
+    "emits a separate copy-ready executor prompt",
+    "uses `bounded` when the supplied facts support",
+)
+REVIEW_TO_HANDOFF_PROTOCOL_MARKERS = (
+    "A prompt-required delegated route is an incomplete handoff",
+    "same response",
+    "When `BOUNDED` is selected for a material repair",
+    "Do not invent alternatives.",
+    "Do not derive merge-blocking mechanically from finding severity",
+    "version-/runtime-bounded",
+    "three logically distinct surfaces",
+    "## پرامپت اقدام",
+    "[IMPLEMENTATION CONTRACT]",
+    "[VALIDATION CONTRACT]",
+    "[POST-IMPLEMENTATION REPORT]",
+)
+REVIEW_TO_HANDOFF_REASONING_MARKERS = (
+    "Finding → Root-Cause Anchor → Root-Cause Qualification",
+    "do not generate a repair prompt",
+    "Selected Method Conformance Lock",
+    "[IMPLEMENTATION CONTRACT]",
+    "[VALIDATION CONTRACT]",
+    "[POST-IMPLEMENTATION REPORT]",
+)
+
 REQUIRED = [
     "README.md",
     "AGENT_ENTRYPOINT.md",
@@ -299,6 +341,12 @@ def validate_gap_reviewer_fixture(gaps: dict, errors: list[str]) -> set[str]:
             fail(f"{label}.input.scope must be one of {sorted(VALID_REVIEW_SCOPES)}", errors)
         for field in GAP_LIST_FIELDS[sid]:
             _check_string_list(scenario_input.get(field), f"{label}.input.{field}", errors)
+
+        if sid == REVIEW_TO_HANDOFF_SCENARIO_ID:
+            reviewer_payload = json.dumps(row, ensure_ascii=False, sort_keys=True).lower()
+            for marker in REVIEW_TO_HANDOFF_LEAKAGE_MARKERS:
+                if marker.lower() in reviewer_payload:
+                    fail(f"{label} leaks evaluator-only answer marker: {marker}", errors)
     return scenario_ids
 
 
@@ -355,9 +403,27 @@ def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
                 fail(f"duplicate semantic scenario id: {sid}", errors)
             scenario_ids.add(sid)
 
+    missing_legacy = sorted(LEGACY_SEMANTIC_SCENARIO_IDS - scenario_ids)
+    if missing_legacy:
+        fail(f"existing EC-EVAL-001..009 scenarios must remain intact; missing={missing_legacy}", errors)
+    if REVIEW_TO_HANDOFF_SCENARIO_ID not in scenario_ids:
+        fail(f"review-to-handoff semantic scenario missing: {REVIEW_TO_HANDOFF_SCENARIO_ID}", errors)
+
     rubric = load_json(EVALUATOR_RUBRIC, errors)
     if isinstance(rubric, dict):
         validate_evaluator_rubric(rubric, scenario_ids, errors)
+
+
+def check_review_to_handoff_contract(errors: list[str]) -> None:
+    protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+    reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+
+    for marker in REVIEW_TO_HANDOFF_PROTOCOL_MARKERS:
+        if marker not in protocol:
+            fail(f"review-to-handoff protocol marker missing: {marker}", errors)
+    for marker in REVIEW_TO_HANDOFF_REASONING_MARKERS:
+        if marker not in reasoning:
+            fail(f"root-cause-to-prompt canonical marker missing: {marker}", errors)
 
 
 def is_external_link(target: str) -> bool:
@@ -400,6 +466,7 @@ def main() -> int:
     check_required(errors)
     check_manifest(errors)
     check_semantic_evaluation_fixtures(errors)
+    check_review_to_handoff_contract(errors)
     check_markdown_links(errors)
     check_agent_contract(errors)
 
@@ -414,6 +481,7 @@ def main() -> int:
     print("- repository.manifest.json: valid")
     print("- repository lifecycle metadata: consistent")
     print("- semantic scenario/rubric separation: valid")
+    print("- review-to-handoff canonical synchronization: valid")
     print("- local Markdown links: valid")
     return 0
 
