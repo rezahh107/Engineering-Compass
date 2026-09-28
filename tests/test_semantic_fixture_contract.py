@@ -100,10 +100,54 @@ class SemanticFixtureContractTests(unittest.TestCase):
         )
         self.assertIsNotNone(authority_criterion)
         normalized = authority_criterion.lower()
-        self.assertIn("owner acceptance may justify deviation from a rebuttable engineering presumption", normalized)
-        self.assertIn("does not manufacture facts", normalized)
-        self.assertIn("docs/governance/authority.md", normalized)
-        self.assertIn("without inventing a new precedence rule", normalized)
+        self.assertIn("owner acceptance may rebut an engineering presumption", normalized)
+        self.assertIn("does not manufacture", normalized)
+
+    def test_decision_state_semantics_are_not_severity_mapping(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+        self.assertIn("**GREEN**", reasoning)
+        self.assertIn("**YELLOW**", reasoning)
+        self.assertIn("**RED**", reasoning)
+        self.assertIn("not finding severity levels", reasoning.lower())
+        self.assertIn("Do not map severity mechanically to color", protocol)
+
+    def test_root_cause_pipeline_blocks_unqualified_repair_and_preserves_method_lock(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        self.assertIn("Finding → Root-Cause Anchor → Root-Cause Qualification", reasoning)
+        self.assertIn("do not generate a repair prompt", reasoning)
+        self.assertIn("Selected Method Conformance Lock", reasoning)
+        self.assertIn("SELECTED_METHOD_INFEASIBLE", reasoning)
+        self.assertIn("return to method selection", reasoning)
+
+    def test_freshness_and_partial_evidence_rules_forbid_stale_green(self):
+        protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+        verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        ec005 = " ".join(rubric["scenarios"]["EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME"]["criteria"])
+        self.assertIn("No stale GREEN", protocol)
+        self.assertIn("No stale GREEN", verification)
+        self.assertIn("invalidates the previous exact-target GREEN", ec005)
+        self.assertIn("Preserves identity-independent provider evidence", ec005)
+
+    def test_evaluator_fidelity_remains_non_canonical(self):
+        verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        self.assertIn("non-canonical test artifact", verification)
+        self.assertIn("must not introduce a new normative rule", verification)
+        self.assertEqual(rubric["authority"], "EVALUATOR_ONLY_NON_CANONICAL")
+        self.assertIn("cannot create new Engineering Compass authority", rubric["purpose"])
+
+    def test_control_proportionality_supports_declining_stronger_hardening(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        criteria = load_fixture("semantic-evaluation-rubric.json")["scenarios"][
+            "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"
+        ]["criteria"]
+        combined = " ".join(criteria)
+        self.assertIn("Named-failure first", reasoning)
+        self.assertIn("Minimum effective control", reasoning)
+        self.assertIn("Blocking is exceptional", reasoning)
+        self.assertIn("decline the stronger blocking plan", combined)
 
 
 if __name__ == "__main__":
