@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios for evaluating bounded Scenario-Driven Gap Discovery without exposing evaluator-only expectations.",
+  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, and governance cases without evaluator-only expectations.",
   "scenarios": [
     {
       "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
@@ -8,13 +8,17 @@
         "scope": "PR_SCOPE",
         "change": [
           "A PR adds an operator action that sends a one-shot request to an external counter service, records the returned counter, then marks the item complete.",
-          "The UI disables the action after click; the server rechecks assignment and workflow state before calling the service."
+          "The UI disables the action after click; the server rechecks assignment and workflow state before calling the service.",
+          "The review began on Head A; after the material assessment was drafted, the live PR moved to Head B with one additional workflow file changed."
         ],
         "known_evidence": [
-          "Happy-path runtime evidence shows one counter is recorded and the item completes.",
+          "Happy-path runtime evidence on Head A shows one counter is recorded and the item completes.",
           "Duplicate browser submissions that arrive before the first external call are rejected locally.",
           "The service can time out after accepting a request; no lookup-by-client-request-id or idempotency capability has been verified.",
-          "On timeout the current item remains in REQUESTING and is still visible after reload."
+          "On timeout the current item remains in REQUESTING and is still visible after reload.",
+          "A check named 'integration' passed on Head A, but its producer identity was not inspected and no exact-Head result exists for Head B.",
+          "A prior external review says 'GREEN / safe to merge' but explicitly cites Head A and assumes provider retries are idempotent without evidence.",
+          "The changed workflow file on Head B has not yet been inspected; the earlier provider documentation remains identity-independent evidence."
         ],
         "owner_authority": [
           "The accepted product outcome is that every valid item eventually receives exactly one counter or reaches a recoverable operator-visible path.",
@@ -22,7 +26,7 @@
           "No Owner decision defines what business outcome to choose if the external provider cannot determine whether an uncertain request committed."
         ]
       },
-      "review_task": "Review the change using the smallest useful operational model. Surface material gaps or missing decisions even when they were not explicitly requested, assign each material gap a useful disposition, bound claims to observed evidence, and stop when further exploration is unlikely to change the engineering decision."
+      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, and timeout-after-acceptance behavior. Identify which conclusions remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
     },
     {
       "id": "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
@@ -32,17 +36,23 @@
           "Retry middleware retries one POST after a network timeout and is documented as correct for idempotent operations.",
           "The external shipment endpoint creates one shipment for every accepted POST and exposes no verified idempotency key.",
           "The local order service records shipment_created only after receiving a successful response.",
-          "The server rechecks the current user's permission on every request, including retries after a refreshed session."
+          "The server rechecks the current user's permission on every request, including retries after a refreshed session.",
+          "A previously selected repair method says to preserve the current remote endpoint/authority boundary and make requests idempotent by sending the provider's documented Idempotency-Key header.",
+          "Fresh authoritative provider documentation proves that this endpoint ignores Idempotency-Key and offers no request lookup; the selected method depends on the endpoint honoring that header.",
+          "The same provider documentation exposes a separate shipment-status lookup by stable client_reference, but using it requires persisting a durable request identity and changes the recovery flow from prevention to reconciliation.",
+          "Accepted product authority also permits an operator-visible uncertain/recovery state with manual reconciliation when the provider cannot prove commit outcome; that route changes workflow/failure semantics but preserves the accepted exactly-one-or-recoverable outcome."
         ],
         "material_dimensions": [
           "network outcome: success, timeout before remote commit, timeout after remote commit",
           "retry: enabled or disabled",
           "remote idempotency: verified or absent",
           "role state: stable or revoked between attempts",
-          "browser lifecycle: uninterrupted or reload after timeout"
+          "browser lifecycle: uninterrupted or reload after timeout",
+          "selected-method conformance: provider idempotency mechanism available or proven unavailable",
+          "replacement repair family: automated reconciliation through stable client_reference or operator-visible uncertain-state recovery"
         ]
       },
-      "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions, identify any system-level failure that changes the engineering decision, state what remains outside the known model, and explain why further combinations would or would not be decision-material."
+      "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions and identify any system-level failure that could change the engineering decision. Assess the fresh provider evidence against the previously selected method and the supplied replacement families, determine the appropriate method-selection state and repair route from the evidence, compare only materially distinct evidence-supported alternatives, and report Method Coverage for the methods materially activated."
     },
     {
       "id": "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP",
@@ -54,35 +64,41 @@
           "Implementation enforces that contract; a dormant configuration enum also contains WEBP, but no current UI or validation path exposes or accepts WEBP.",
           "Current runtime evidence verifies JPG and PDF within 5 MB and rejects files over 5 MB.",
           "One legacy test still requires JPG-only uploads no larger than 2 MB.",
-          "A roadmap document labels an object-storage adapter as future capability, and no current runtime path references it."
+          "Direct inspection shows that this legacy assertion is local to that test; no generator, shared fixture, runtime validator, or second documentation source still owns the 2 MB rule.",
+          "A roadmap document labels an object-storage adapter as future capability, and no current runtime path references it.",
+          "An automated review confidently recommends adding a repository-wide upload-policy registry and CI gate because the dormant WEBP enum and legacy test differ from current production behavior."
         ],
         "uninspected_context": [
           "Persisted entries created under the earlier 2 MB-era configuration have not been examined.",
           "No inspected evidence yet shows whether those old entries are revalidated through the current upload validator when viewed or edited."
         ]
       },
-      "review_task": "Assess conformance and whether the review is sufficient to stop. Distinguish material drift from justified, retained-future, or obsolete differences; challenge whether an unmodeled state could materially change the conclusion; and do not expand into unrelated subsystems once both structural and discovery/materiality sufficiency are reached."
+      "review_task": "Assess conformance and whether the review is sufficient to stop. Reconcile the automated review with the supplied authority, documentation, implementation, runtime, test, future-capability, and uninspected persisted-state evidence. Determine which differences are material and causal, what additional evidence could change the decision, the appropriate repair scope if any, and the scope-bounded stop condition."
     },
     {
       "id": "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING",
       "input": {
         "scope": "REPOSITORY_SCOPE",
         "initial_evidence": [
-          "Repository governance says material reasoning/governance changes should normally flow through branch -> pull request -> exact candidate verification -> accepted merge to main.",
+          "Repository governance says material reasoning/governance changes should normally flow through branch -> pull request -> verification -> merge.",
           "GitHub currently permits ordinary direct pushes to main, and no repository Ruleset is configured.",
-          "Because direct push remains possible, the documented branch -> pull request -> verification -> merge path is not mechanically enforced."
+          "Because direct push remains possible, the documented branch -> pull request -> verification -> merge path is not mechanically enforced.",
+          "A proposed hardening plan would block all direct pushes, require two reviewers, signed commits, CODEOWNERS approval, and a merge queue."
         ],
         "fresh_owner_context": [
           "The repository currently has one writer: the Owner; no additional human writer or write-capable automation is part of the known operational model.",
           "The Owner explicitly accepts the risk of direct pushes and prefers to avoid mandatory pull-request/status-check friction while this single-writer model remains true.",
-          "No inspected evidence shows unauthorized writes, recurring accidental direct pushes, or another failure mode caused by the unprotected branch."
+          "No inspected evidence shows unauthorized writes, recurring accidental direct pushes, or another failure mode caused by the unprotected branch.",
+          "A direct-push mistake would be immediately visible in the small repository and is cheaply reversible from Git history; no material external, security, data, or money consequence has been evidenced.",
+          "The proposed controls would add recurring review friction and maintenance without a named current failure beyond the already accepted bypass possibility."
         ],
         "possible_future_changes": [
           "Additional human writers or write-capable automations may be introduced later.",
-          "Recurring accidental direct-push mistakes may become an evidenced failure mode later."
+          "Recurring accidental direct-push mistakes may become an evidenced failure mode later.",
+          "A future compliance, security, or external-commitment requirement may introduce stronger authority for branch controls."
         ]
       },
-      "review_task": "Review the repository-governance concern after incorporating all supplied authority and operational evidence. State the current disposition, any stronger constraint or evidence that would change it, and the bounded future conditions that should cause re-evaluation. Do not broaden the review beyond decision-material repository-governance concerns."
+      "review_task": "Review the repository-governance concern after incorporating the supplied authority, operational model, detectability/recovery evidence, control costs, and future-change conditions. State the current disposition and bounded decision state, explain whether any control change is justified and at what level, and identify the evidence or authority changes that would require re-evaluation."
     }
   ]
 }

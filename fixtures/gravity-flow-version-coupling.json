@@ -1,7 +1,7 @@
 {
   "id": "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING",
   "authority": "NON_CANONICAL_EVALUATION_SCENARIO",
-  "purpose": "Clean reviewer-input scenario for testing whether an LLM distinguishes a visible local symptom from the causal compatibility problem without seeing evaluator expectations.",
+  "purpose": "Clean reviewer-input benchmark describing a Gravity Flow compatibility/admission scenario without exposing evaluator expectations.",
   "scope": "PR_OR_REPOSITORY_REVIEW",
   "scenario": {
     "product": "A maintained WordPress integration plugin adds presentation behavior on top of Gravity Flow.",
@@ -11,16 +11,20 @@
         "externally maintained",
         "independently versioned",
         "updatable",
-        "implementation not controlled by the integration plugin"
+        "implementation not controlled by the integration plugin",
+        "comment, whitespace, and internal source reshaping may occur without changing the behavior the integration actually needs"
       ]
     },
     "implementation_decisions": [
       "use a Gravity Flow internal seam",
       "admit the host only when an exact supported version matches",
-      "hash several upstream files and require exact fingerprints",
-      "fail closed for unknown host implementations"
+      "hash several upstream internal files and require exact fingerprints before the presentation capability is admitted",
+      "fail closed for unknown host implementations",
+      "treat a fingerprint mismatch as compatibility failure even when the required host behavior has not been shown to differ",
+      "two prior admission failures occurred on different fingerprinted files after non-behavioral upstream source changes; bounded runtime probes still showed the presentation behavior required by the integration",
+      "no inspected evidence in this scenario establishes that a safer supported public hook/API, capability probe, or stable behavioral seam is available"
     ],
-    "local_performance_detail": "the same upstream files are hashed repeatedly across requests"
+    "local_performance_detail": "the same upstream files are hashed repeatedly across requests, making hash caching an obvious local optimization"
   },
-  "review_task": "Review the engineering decision. Identify the material system property, the relevant compatibility obligation, the likely causal level of any defect, what remains unproven, and the smallest next engineering action. Do not assume that a local performance optimization repairs an architecture-level problem."
+  "review_task": "Review the engineering decision using the supplied system, lifecycle, admission, failure, and runtime evidence. Explain the material causal relationships the evidence supports, identify any shared mechanism across the observed failures if warranted, compare only evidence-supported alternatives at an appropriate abstraction level, state what remains unproven, and recommend the smallest justified next engineering action together with evidence that would discriminate it from weaker alternatives."
 }

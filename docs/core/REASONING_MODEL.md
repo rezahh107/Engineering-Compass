@@ -557,3 +557,171 @@ Additional reasoning is justified only if it can plausibly:
 - change the exact next engineering action.
 
 Otherwise, stop.
+
+A sufficient stop is always **scope-bounded**. “Enough evidence to choose the requested next action” is not equivalent to “repository-wide defect completeness is proven.” State what bounded decision/review scope is resolved and preserve any material unverified area that prevents a broader completeness claim.
+
+## Control proportionality and anti-hardening overreach
+
+Treat a proposed control, gate, validator, policy, evidence requirement, or enforcement mechanism as an engineering decision with cost and lifecycle consequences.
+
+### Named-failure first
+
+Before recommending a durable control, identify the material failure it is intended to prevent, detect, contain, or recover from. A vague desire for stronger governance is not sufficient. If the failure is still materially uncertain, perform bounded qualification instead of installing a permanent mechanism.
+
+### Minimum effective control
+
+Prefer the smallest control that adequately addresses the named failure within accepted authority and evidence. Evaluate materially lighter alternatives at the same abstraction level before choosing a stronger or more durable mechanism. Residual risk may be acceptable.
+
+Keep the **policy question** (“why/when is control required?”) distinct from the **mechanism question** (“how is it applied?”). Correct policy does not automatically justify CI, a schema, a runtime guard, a registry, or another deterministic mechanism.
+
+Blocking is exceptional rather than the default. Stronger prevention may be justified when consequence is serious, detection is difficult or delayed, recovery is destructive or expensive, external effects are material, or authority/security/data/money are materially involved. For quickly detectable and cheaply recoverable failures, prefer guidance, warning, sampling, or bounded review when those are sufficient.
+
+Account for the control itself:
+
+- human friction and interruption;
+- runtime/token/context cost;
+- interaction with existing controls;
+- maintenance and change cost;
+- coupling/dependencies introduced;
+- disablement/removal cost.
+
+Evaluate a proposed control inside the existing control set. Local usefulness does not prove good system composition.
+
+Stop hardening when known material failures are adequately controlled, accepted, detectable, or recoverable and the next proposed control cannot justify its friction and lifecycle cost against a specific remaining material failure.
+
+Do not invent numeric risk precision or mandatory FMEA machinery to make this judgment appear deterministic.
+
+## Causal-core discovery and failure-class reasoning
+
+Strengthen root-cause analysis only when added causal depth can change the engineering decision.
+
+For a material finding, distinguish progressively when evidence supports it:
+
+`manifestation → immediate mechanism → shared causal mechanism → governing system property/boundary → causal core`
+
+The governing layer may be ownership, lifecycle, coupling, state, contract, composition, authority, or another system property that makes the failure class reachable. The causal core is the deepest material cause whose removal or containment would prevent, contain, or deterministically expose recurrence of that failure class.
+
+When several findings plausibly share one mechanism, search across files/surfaces for common ownership, lifecycle, composition, state, boundary, or coupling causes. Do not manufacture a grand unified theory; shared-cause claims remain evidence-bounded and may stay `NOT_PROVEN`.
+
+### Failure-class counterfactual
+
+Before calling a repair root-correct for a recurring/systemic issue, ask:
+
+> If this manifestation disappeared but the same underlying mechanism appeared at another reachable instance, would this repair still prevent, contain, or deterministically expose the defect class?
+
+If not, treat it as a local/surface repair unless evidence establishes that the instance itself is the causal boundary.
+
+Do **not** force every local defect into architecture depth. Continue deeper causal analysis only while the next layer can plausibly change the confirmed root cause, repair family, responsible owner/boundary, blast radius, verification method, recurrence risk, or exact next action. Otherwise stop.
+
+A plausible architecture narrative is not causal proof. Use source/runtime evidence, history/co-change, differential cases, counterfactuals, or discriminating experiments when required to separate hypotheses.
+
+## Decision/readiness state
+
+For a material review output, end with one bounded decision-state headline:
+
+- **GREEN** — current evidence is sufficient for the requested decision on the exact inspected target and no known material blocker remains for that action.
+- **YELLOW** — a bounded repair, verification, qualification, rerun, clarification, or other specific action remains before the requested action can safely proceed.
+- **RED** — do not proceed because a materially stronger stop condition exists, such as a serious confirmed blocker, invalid review identity, or failed required evidence/control boundary.
+
+These are **not finding severity levels** and must not be derived mechanically from severity. GREEN is scope-bounded technical readiness for the requested action; it does not certify production/deployment/security/organizational readiness, Owner authorization, or absence of all possible defects. YELLOW must name the decision-changing issue and exact next action. RED is reserved for stronger stop conditions than ordinary repair/verification work.
+
+Evidence maturity and finding classification/disposition remain separate dimensions.
+
+## Root-cause-to-prompt pipeline
+
+For a material actionable finding, do not move directly from Finding to a code-changing prompt.
+
+Canonical semantic flow:
+
+`Finding → Root-Cause Anchor → Root-Cause Qualification → Repair/Method Selection → Defect-Class Closure → Selected Method Conformance Lock → Falsification Obligations → Implementation / Verification Prompt`
+
+### Root-Cause Anchor
+
+Preserve only when material:
+
+- observed manifestation;
+- confirmed causal mechanism, or explicit `NOT_PROVEN`;
+- evidence supporting the cause;
+- affected invariant/obligation;
+- ownership/enforcement/lifecycle boundary;
+- same-root reachable instances or failure-class scope;
+- important unknowns;
+- the counterfactual explaining whether local repair is sufficient.
+
+Do not turn this into mandatory bureaucracy for trivial findings.
+
+### Root-Cause Qualification
+
+If the repair family materially depends on a causal theory that remains unproven, do not generate a repair prompt. Generate the smallest discriminating qualification/verification prompt instead.
+
+Finding ≠ Root Cause, and Root Cause ≠ Repair until the causal boundary is sufficiently qualified.
+
+### Repair route: `BOUNDED` versus `FULL`
+
+Use `BOUNDED` only when all material conditions hold:
+
+- one bounded confirmed root cause covers the repair findings;
+- one evidence-supported repair method is sufficient;
+- no authority owner or source-of-truth migration is required;
+- no public API/contract/schema/persisted-state migration is required;
+- no runtime/process/isolation/topology migration is required;
+- no coordinated external-consumer migration is required;
+- no materially distinct evidence-supported competing method requires comparison;
+- focused falsification can close the repair.
+
+Otherwise use `FULL`.
+
+Under `FULL`, separate unrelated root-cause groups, compare only materially distinct evidence-supported methods at the same abstraction level, do not invent alternatives to satisfy a quota, reject symptom-only methods when root-complete repair is feasible, and do not force a winner when evidence remains insufficient or methods are genuinely equivalent.
+
+Material distinction concerns enforcement boundary, authority/SSOT ownership, validation mechanism, failure semantics, defect-class closure, public contract/schema migration, runtime topology, or consumer migration—not helper names or refactoring style.
+
+### Selected Method Conformance Lock
+
+Before a code-changing repair prompt, lock the material properties that define the selected method when applicable:
+
+- enforcement boundary;
+- authority owner;
+- source-of-truth model;
+- defect-class closure mechanism;
+- failure semantics;
+- API/schema/contract migration strategy;
+- runtime/process/topology boundary;
+- consumer migration boundary.
+
+The implementer retains local freedom only where those properties do not change.
+
+If implementation evidence shows the selected method cannot be implemented while preserving the lock, report `SELECTED_METHOD_INFEASIBLE` and return to method selection. Do not silently substitute another architecture or surface patch.
+
+### Falsification obligations
+
+Repair evidence must be capable of disproving the selected method, not merely proving that new code executes. When applicable include:
+
+- original-defect reproduction;
+- repaired behavior;
+- same-root/future-drift instance;
+- enforcement-boundary bypass;
+- nonconforming-method distinction;
+- positive control;
+- directly affected regression control;
+- real consumer integration when a real consumer exists;
+- exact-target/exact-Head re-verification.
+
+Proposed tests are not executed evidence. A conformance check is weak if both the selected method and a materially different nonconforming method can pass without an observable distinction.
+
+### Executor handoff contract
+
+For code-changing repair handoffs, default to these top-level sections unless the target executor requires an equivalent structure:
+
+```text
+[IMPLEMENTATION CONTRACT]
+[VALIDATION CONTRACT]
+[POST-IMPLEMENTATION REPORT]
+```
+
+The prompt is an execution artifact, not new authority.
+
+The Implementation Contract should preserve the bounded outcome, exact target identity when known, confirmed root cause/invariants, selected method and correct boundary, applicable Conformance Lock, scope/prohibited changes, and stop behavior if the lock cannot be preserved.
+
+The Validation Contract should contain falsification, focused regressions, expected state outcomes, exact-target/freshness checks when applicable, and truthful `NOT_PROVEN` handling for unavailable environment/platform evidence.
+
+The Post-Implementation Report must keep lifecycle stages distinct: implementation completed ≠ selected-method conformance ≠ focused tests ≠ regression tests ≠ exact-Head CI ≠ fresh rereview ≠ merge/release/Owner authorization.
