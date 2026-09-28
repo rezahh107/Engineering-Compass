@@ -237,7 +237,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertEqual(rubric["authority"], "EVALUATOR_ONLY_NON_CANONICAL")
         self.assertIn("cannot create new Engineering Compass authority", rubric["purpose"])
 
-    def test_control_proportionality_supports_declining_stronger_hardening(self):
+    def test_control_proportionality_supports_both_lighter_and_stronger_control(self):
         reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
         criteria = load_fixture("semantic-evaluation-rubric.json")["scenarios"][
             "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"
@@ -247,6 +247,8 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("Minimum effective control", reasoning)
         self.assertIn("Blocking is exceptional", reasoning)
         self.assertIn("decline the stronger blocking plan", combined)
+        self.assertIn("stronger preventive control is justified before deployment", combined)
+        self.assertIn("minimum effective forced control", combined)
 
     def test_all_pr6_reviewer_tasks_are_neutralized(self):
         tasks = reviewer_tasks()
@@ -290,6 +292,10 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("does not state the exact resulting Head", control_facts)
         self.assertIn("stronger directly testable uncertainty resolution", gap_facts)
         self.assertIn("lower implementation burden/time", gap_facts)
+        self.assertIn("accepted Engineering Compass repository revision EC-A", gap_facts)
+        self.assertIn("No prior independent review has been performed", gap_facts)
+        self.assertIn("duplicate customer charges", gap_facts)
+        self.assertIn("repeatedly co-change after contract updates", gap_facts)
 
     def test_evaluator_outcomes_remain_evaluator_only(self):
         tasks = reviewer_tasks()
@@ -362,6 +368,53 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("without numeric weighting", ec006_criteria)
         self.assertNotIn("order of consideration", ec006["review_task"])
         self.assertNotIn("weighted scoring", ec006["review_task"])
+
+    def test_post_pr7_remaining_coverage_gaps_are_falsifiable_without_answer_leakage(self):
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        tasks = reviewer_tasks()
+        by_id = {row["id"]: row for row in gaps["scenarios"]}
+
+        ec005 = by_id["EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME"]
+        ec007 = by_id["EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP"]
+        ec008 = by_id["EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"]
+        ec005_facts = " ".join(ec005["input"]["known_evidence"])
+        ec007_facts = " ".join(ec007["input"]["authority_and_surfaces"] + ec007["input"]["uninspected_context"])
+        ec008_facts = " ".join(ec008["input"]["initial_evidence"] + ec008["input"]["fresh_owner_context"] + ec008["input"]["possible_future_changes"])
+        ec005_criteria = " ".join(rubric["scenarios"][ec005["id"]]["criteria"])
+        ec007_criteria = " ".join(rubric["scenarios"][ec007["id"]]["criteria"])
+        ec008_criteria = " ".join(rubric["scenarios"][ec008["id"]]["criteria"])
+
+        self.assertIn("accepted Engineering Compass repository revision EC-A", ec005_facts)
+        self.assertIn("canonical main has since advanced to accepted revision EC-B", ec005_facts)
+        self.assertIn("historical/version-bound artifact", ec005_criteria)
+        self.assertIn("package structural/source-hash validity", ec005_criteria)
+        self.assertIn("package rebuild/requalification", ec005_criteria)
+        self.assertNotIn("historical/version-bound artifact", tasks[ec005["id"]])
+        self.assertNotIn("package rebuild/requalification", tasks[ec005["id"]])
+
+        self.assertIn("legacy test still requires JPG-only uploads", ec007_facts)
+        self.assertIn("non-capability-shaped contract/test-drift finding", ec007_criteria)
+        self.assertNotIn("MISSING_CAPABILITY", tasks[ec007["id"]])
+        self.assertIn("repeatedly co-change after contract updates", ec007_facts)
+        self.assertIn("manual-copy/co-change lifecycle mechanism", ec007_criteria)
+        self.assertIn("rejects synchronizing only today's visible status literals as defect-class closure", ec007_criteria)
+        self.assertIn("mobile-client status behavior", ec007_criteria)
+        self.assertIn("NOT_PROVEN", ec007_criteria)
+        self.assertNotIn("manual-copy/co-change lifecycle mechanism", tasks[ec007["id"]])
+        self.assertNotIn("defect-class closure", tasks[ec007["id"]])
+
+        self.assertIn("No prior independent review has been performed", ec008_facts)
+        self.assertIn("does not request it ceremonially", ec008_criteria)
+        self.assertIn("does not generalize this into a rule to never seek independent review", ec008_criteria)
+        self.assertNotIn("ceremonially", tasks[ec008["id"]])
+        self.assertIn("duplicate customer charges", ec008_facts)
+        self.assertIn("next-day reconciliation", ec008_facts)
+        self.assertIn("stronger preventive control is justified before deployment", ec008_criteria)
+        self.assertIn("minimum effective forced control", ec008_criteria)
+        self.assertIn("'stronger is always safer'", ec008_criteria)
+        self.assertNotIn("stronger preventive control", tasks[ec008["id"]])
+        self.assertNotIn("minimum effective forced control", tasks[ec008["id"]])
 
     def test_method_comparison_priority_contract(self):
         reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
