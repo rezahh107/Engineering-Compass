@@ -83,7 +83,6 @@ REVIEW_TO_HANDOFF_PROTOCOL_MARKERS = (
     "Do not derive merge-blocking mechanically from finding severity",
     "version-/runtime-bounded",
     "three logically distinct surfaces",
-    "## پرامپت اقدام",
     "[IMPLEMENTATION CONTRACT]",
     "[VALIDATION CONTRACT]",
     "[POST-IMPLEMENTATION REPORT]",
