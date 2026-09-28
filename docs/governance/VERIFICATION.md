@@ -21,10 +21,13 @@ The current structural verifier checks:
 - semantic evaluation scenario fixtures and the evaluator-only rubric are valid JSON, use unique scenario IDs, and remain structurally separated;
 - every evaluator-rubric scenario corresponds to an available reviewer-input scenario and vice versa;
 - review-to-handoff canonical/exact-marker synchronization remains intact: required canonical protocol/root-cause markers are present, EC-EVAL-010 stays synchronized with its evaluator-rubric ID, and exact protected evaluator-only markers are rejected anywhere in the complete reviewer-visible EC-EVAL-010 payload (applicable fixture-level `authority`/`purpose` plus scenario content);
+- final-gate strict canonical/exact-marker synchronization remains intact: required `FINAL_GATE_STRICT` protocol/reasoning-base markers are present, EC-EVAL-011 stays synchronized with its evaluator-rubric ID, and exact protected evaluator-only markers are rejected anywhere in the complete reviewer-visible EC-EVAL-011 payload (applicable fixture-level `authority`/`purpose` plus scenario content);
 - local Markdown links resolve to repository files/directories;
 - the agent entrypoints point to the canonical verification command.
 
 The review-to-handoff predicate above is deliberately deterministic and exact-marker based. Its PASS proves only that the required canonical strings are present, the admitted scenario/rubric identities remain synchronized, and the protected exact markers are absent from the defined reviewer-visible payload. It does not detect paraphrased or semantically equivalent leakage and does not prove semantic engineering correctness, LLM compliance, or successful clean-context semantic evaluation.
+
+The final-gate strict predicate above is likewise deliberately deterministic and exact-marker based. Its PASS proves only that the required `FINAL_GATE_STRICT` canonical strings are present, EC-EVAL-011 remains admitted and synchronized with its evaluator-rubric identity, and the protected exact evaluator-only markers are absent from the complete reviewer-visible EC-EVAL-011 payload. It does not detect paraphrased or semantically equivalent leakage and does not prove semantic engineering correctness, LLM compliance, successful clean-context semantic evaluation, or universal representation coverage.
 
 ## What it does not prove
 

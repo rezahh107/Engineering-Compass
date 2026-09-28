@@ -17,6 +17,22 @@ Classify the review:
 
 For `PR_SCOPE`, when current PR reality is decision-material, bind the review to the exact repository, PR, Base/Head identity, changed-file inventory/completeness, inspected diff/patch, and relevant check/review surfaces. A display-name check alone is not producer-identity proof. A synthetic merge ref must not silently substitute for exact-Head evidence when that distinction matters.
 
+### `FINAL_GATE_STRICT` reasoning profile
+
+`FINAL_GATE_STRICT` is a reasoning-depth profile applied inside this review protocol. It is not a runtime, workflow engine, new authority, persistent state machine, registry, separate tool, or mandatory artifact.
+
+Activate `FINAL_GATE_STRICT` when any materially relevant condition holds:
+
+- the Owner/caller or supplied context establishes that Engineering Compass is the final meaningful technical quality gate;
+- the requested decision is final merge-readiness, final acceptance, or final review;
+- the reviewer is about to make a strong closure claim such as `defect-class closed`, `root-complete`, `fail-closed`, mechanical-enforcement sufficiency, or no materially reachable bypass remaining;
+- the selected repair is intended to prevent recurrence of a failure class rather than only fix one known instance;
+- no credible downstream independent technical review is expected before the decision becomes operational.
+
+Do not activate this profile merely because a task is technically interesting, a PR is large, additional analysis is possible, or the reviewer wants more confidence. Ordinary/local findings remain governed by the normal proportionality and stop-at-sufficiency rules.
+
+When active, the objective is the **smallest strict review depth that materially reduces the risk of a same-root defect or enforcement bypass escaping the final gate**. It does not authorize exhaustive analysis, Cartesian-product testing, ceremonial enterprise controls, or generic “analyze everything” behavior.
+
 ## 1. Build the intent model
 
 Before rationalizing local implementation, extract:
@@ -145,6 +161,8 @@ Useful dispositions include:
 
 External reviewer confidence, fluency, or severity is not authority. A suggested repair must connect to a legitimate finding/root-cause group. Disagreement can be useful evidence when it reveals an authority, evidence, causal, or scope ambiguity.
 
+When Engineering Compass is used with `PR_INSPECTOR_RUNTIME_SNAPSHOT_v1.13.1`, preserve the authority boundary. PR Inspector remains authority for its controlled review projection where applicable, including review-evidence identity, reason/status projection, freshness/completion, blocking/projection semantics, and controlled `next_action`. Engineering Compass may deepen causal analysis, same-root/failure-class reasoning, method selection, proportionality, closure confidence, falsification, and Executor-prompt quality; it must not imply ownership of PR Inspector's `YELLOW`, reason codes, or controlled projection. Prefer explicit attribution such as `PR Inspector projection: YELLOW / repair_and_verify` followed by `Engineering Compass contribution: root-cause qualification, failure-class closure analysis, method selection, falsification, and implementation handoff`.
+
 ## 12. Synthesize findings into root causes/risk themes
 
 Prefer:
@@ -156,6 +174,40 @@ over a flat list of local complaints.
 Use the canonical [Causal-core discovery and failure-class reasoning](../core/REASONING_MODEL.md#causal-core-discovery-and-failure-class-reasoning) for material findings when added depth can change the repair. Do not manufacture deeper architecture for a genuinely local causal boundary.
 
 For an actionable material finding, form a bounded [Root-Cause Anchor](../core/REASONING_MODEL.md#root-cause-anchor). If the causal theory remains decision-material and `NOT_PROVEN`, route to the smallest discriminating verification instead of a repair prompt.
+
+### `FINAL_GATE_STRICT` same-root closure
+
+For a material `FINAL_GATE_STRICT` finding, deepen the causal statement only as far as evidence and decision value justify:
+
+`manifestation → immediate mechanism → shared causal mechanism → governing property / ownership / lifecycle / state / contract / representation boundary → causal core`
+
+The Root-Cause Anchor must distinguish the observed manifestation, confirmed causal mechanism, correct enforcement boundary, affected invariant, same-root reachable scope, valid behavior that must be preserved, and explicit unknowns. Do not upgrade a candidate Root Cause merely because it explains the first observed example; before a strong closure claim, require evidence that the proposed Root Cause explains the materially relevant observed manifestations.
+
+Before accepting `root-complete`, `defect-class closed`, same-root closure, `fail-closed`, durable-control sufficiency, or equivalent strong closure, perform an adversarial evidence-bounded same-root manifestation sweep. Ask:
+
+> If this manifestation disappeared, through what other materially reachable representation, composition, ordering, state, lifecycle path, or equivalent semantic form could the same causal mechanism recur?
+
+Choose dimensions from the actual causal mechanism—for example equivalent input representation, alternate syntax with the same semantics, ordering/permutation, grouped/composed or nested/wrapped form, mixed representation, alternate lifecycle entry, retry/duplicate/reordered state, alternate consumer, fallback/compatibility path, private/internal representation, or partial-success/ambiguous-outcome form. Do not enumerate categories mechanically, manufacture variants without a plausible causal link, or perform Cartesian-product testing. The sweep is sufficient when further reachable same-root exploration is unlikely to change the Root Cause, repair family, closure claim, blast radius, falsification, validation method, or readiness decision.
+
+When a validator, control, or classifier recognizes a semantic concept through syntax or representation, explicitly test representation equivalence. Materially equivalent representations must lead truthfully to one of three outcomes:
+
+1. **REPRESENTATION SET BOUNDED AND COVERED** — the accepted representation grammar is bounded and sufficiently proven;
+2. **UNSUPPORTED REPRESENTATION FAILS CLOSED** — input outside the admitted grammar is deterministically rejected before it can become a false positive;
+3. **REPRESENTATION SPACE NOT SUFFICIENTLY BOUNDED** — broader defect-class closure remains `NOT_PROVEN` and the claim must be narrowed.
+
+Do not equate “the tested examples pass” with “all semantically equivalent reachable representations are closed,” and do not require support for every theoretically legal representation.
+
+For a mechanical-control closure claim, preserve the canonical failure/predicate/executor/consumer-or-gate/bypass interrogation and additionally ask:
+
+> Can a failing state avoid the predicate, lose its identity before the predicate, reach a different consumer path, or be masked by unrelated passing evidence?
+
+Inspect pre-classification or representation loss, fallback masking, global counters/sentinels, partial validation, alternate execution paths, unrelated positive evidence, stale cached classification, default/fallback success, and unsupported syntax treated as none/no-op rather than failure only when the actual mechanism makes them relevant. A mechanical-control claim is not root-complete while a materially reachable same-root bypass remains.
+
+When aggregate/fallback behavior can hide a bypass, require at least one realistic mixed-case falsification containing both a valid/recognized instance and a bypass/invalid same-root instance in the same artifact or execution context. This applies especially to aggregate counts, “at least one valid target” logic, fallback checks, first-/unique-match logic, partial success, mixed collections, or state carried across instances.
+
+Apply a closure-claim ceiling: evidence sufficient for “no current production violation was observed” is not automatically sufficient for “the defect class is closed,” and evidence that repairs one known instance is not automatically sufficient for “same-root future recurrence is prevented.” Stronger closure claims require correspondingly stronger falsification over the causal boundary and materially reachable same-root manifestations. If the reachable representation/failure space cannot be bounded sufficiently, narrow the claim or retain `NOT_PROVEN` rather than continuing indefinitely.
+
+`BOUNDED` remains valid under `FINAL_GATE_STRICT` when one causal group, invariant, enforcement boundary, and sufficient repair family cover all discovered materially reachable manifestations. A second manifestation does not itself require `FULL`; expand the bounded defect-class definition and falsification obligations when the same root/repair boundary still covers it. Escalate to `FULL` only for the existing reasons: diverging root causes or repair boundaries, a materially distinct repair method that requires comparison, authority/SSOT/runtime/schema/consumer migration, or uncertainty that materially prevents safe bounded selection.
 
 ## 13. Search same-level alternatives and choose repair route
 
@@ -183,6 +235,8 @@ For the leading improvement:
 
 When applicable, falsification should distinguish the selected method from a nonconforming/surface repair and cover same-root reachable instances, boundary bypass, affected regressions, real consumers, and exact-target/exact-Head identity.
 
+Under `FINAL_GATE_STRICT`, the falsification package must cover the causal class strongly enough for the closure claim, not only the first observed manifestation. Where aggregate/fallback masking is part of the suspected mechanism, include the mixed valid+bypass case defined above.
+
 ## 15. Qualify evidence, findings, and decision state
 
 Each material conclusion should use one qualification state:
@@ -197,6 +251,8 @@ When the conclusion is specifically a capability-shape issue, record the applica
 Keep evidence maturity separate from finding qualification and from the final decision state.
 
 End material review output with one scope-bounded decision state using the canonical [GREEN / YELLOW / RED](../core/REASONING_MODEL.md#decisionreadiness-state) semantics. Do not map severity mechanically to color.
+
+When `FINAL_GATE_STRICT` is active, absence of discovered defects is not by itself enough for GREEN when the requested decision depends on strong closure. GREEN additionally requires: exact target/freshness adequate for the decision; material findings dispositioned; causal depth sufficient for the decision; no unresolved materially reachable same-root bypass from the bounded sweep; control/closure claims matched by falsification strength; no material `NOT_PROVEN` item that defeats the requested action; honest bounding of private/internal/version-sensitive seams; and a final decision proportional to actual evidence. If the required closure boundary cannot be established, use an existing bounded non-GREEN route such as YELLOW, `NOT_PROVEN`, qualification required, `repair_and_verify`, or rereview required; do not invent a new color/status taxonomy.
 
 When a review says a finding is merge-blocking or says “do not merge,” include a concise decision-critical justification: identify the requested-action/PR acceptance boundary the unresolved finding defeats, why the defect is material to that boundary, and why a lighter disposition such as accepted residual risk, follow-up, warning, bounded later verification, or non-blocking repair is insufficient under the supplied authority/evidence. Do not derive merge-blocking mechanically from finding severity, and do not make a merely imaginable low-probability failure merge-blocking without connecting it to the actual requested decision and product/evidence contract.
 
@@ -239,6 +295,8 @@ Stop when additional review is unlikely to change:
 - or the exact next action.
 
 The stop reason must distinguish “the requested bounded decision is sufficiently resolved” from “repository-wide defect completeness is proven.” Name any material unverified area that prevents a broader completeness claim.
+
+Under `FINAL_GATE_STRICT`, stop when the causal mechanism is sufficiently established, materially reachable same-root representation/failure dimensions have been explored enough that further search is unlikely to change Root Cause, repair family, closure claim, blast radius, validation/falsification, or readiness, and remaining theoretical possibilities are outside the admitted/authoritative boundary or correctly fail closed. If that boundary cannot be established, do not search forever: narrow the claim or retain `NOT_PROVEN`.
 
 ## Recommended review output
 
@@ -287,5 +345,7 @@ Owner-facing delivery is **Persian-first by default** and should be concise enou
 4. the selected direction;
 5. any remaining blocker or unknown;
 6. the exact next action.
+
+Under `FINAL_GATE_STRICT`, make the practical distinction explicit when it matters: whether current behavior itself is broken, whether the remaining issue is future protection/control or closure sufficiency, whether that issue blocks the requested decision, and what must happen next. Keep internal protocol names out of the Owner result unless decision-critical.
 
 Keep hashes, CI details, diffs, test inventories, and implementation contracts in supporting technical evidence unless one is decision-critical to the Owner. Repository/product identifiers may remain unchanged, and technical Executor prompts may remain English. Do not force Persian into source code, APIs, file names, or technical artifacts, and do not duplicate the full technical review merely to localize it.

@@ -41,6 +41,9 @@ GAP_INPUT_KEYS = {
     "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY": frozenset(
         {"scope", "review_context", "observed_evidence", "delivery_context"}
     ),
+    "EC-EVAL-011_FINAL_GATE_SAME_ROOT_BYPASS_CLOSURE": frozenset(
+        {"scope", "review_context", "control_evidence", "closure_context"}
+    ),
 }
 GAP_LIST_FIELDS = {
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": frozenset({"change", "known_evidence", "owner_authority"}),
@@ -51,6 +54,9 @@ GAP_LIST_FIELDS = {
     ),
     "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY": frozenset(
         {"review_context", "observed_evidence", "delivery_context"}
+    ),
+    "EC-EVAL-011_FINAL_GATE_SAME_ROOT_BYPASS_CLOSURE": frozenset(
+        {"review_context", "control_evidence", "closure_context"}
     ),
 }
 VALID_REVIEW_SCOPES = frozenset({"PR_SCOPE", "REPOSITORY_SCOPE"})
@@ -69,11 +75,19 @@ LEGACY_SEMANTIC_SCENARIO_IDS = frozenset(
     }
 )
 REVIEW_TO_HANDOFF_SCENARIO_ID = "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY"
+FINAL_GATE_SCENARIO_ID = "EC-EVAL-011_FINAL_GATE_SAME_ROOT_BYPASS_CLOSURE"
 REVIEW_TO_HANDOFF_LEAKAGE_MARKERS = (
     "unique textual match ≠ native-control provenance",
     "does not fabricate alternative repair families",
     "emits a separate copy-ready executor prompt",
     "uses `bounded` when the supplied facts support",
+)
+FINAL_GATE_LEAKAGE_MARKERS = (
+    "representation set bounded and covered",
+    "unsupported representation fails closed",
+    "mixed valid+bypass masking",
+    "keeps `bounded` available when the additional manifestation shares",
+    "broader representation closure remains not_proven",
 )
 REVIEW_TO_HANDOFF_PROTOCOL_MARKERS = (
     "A prompt-required delegated route is an incomplete handoff",
@@ -101,6 +115,33 @@ REVIEW_TO_HANDOFF_VERIFICATION_MARKERS = (
     "does not detect paraphrased or semantically equivalent leakage",
     "does not prove semantic engineering correctness, LLM compliance, or successful clean-context semantic evaluation",
 )
+FINAL_GATE_PROTOCOL_MARKERS = (
+    "`FINAL_GATE_STRICT` is a reasoning-depth profile",
+    "smallest strict review depth that materially reduces the risk",
+    "same-root manifestation sweep",
+    "REPRESENTATION SET BOUNDED AND COVERED",
+    "UNSUPPORTED REPRESENTATION FAILS CLOSED",
+    "REPRESENTATION SPACE NOT SUFFICIENTLY BOUNDED",
+    "mixed-case falsification",
+    "closure-claim ceiling",
+    "A second manifestation does not itself require `FULL`",
+    "absence of discovered defects is not by itself enough for GREEN",
+    "PR Inspector projection: YELLOW / repair_and_verify",
+    "narrow the claim or retain `NOT_PROVEN`",
+)
+FINAL_GATE_REASONING_BASE_MARKERS = (
+    "Causal-core discovery and failure-class reasoning",
+    "Root-Cause Anchor",
+    "Repair route: `BOUNDED` versus `FULL`",
+    "Proof of mechanical control",
+    "Falsification obligations",
+)
+FINAL_GATE_VERIFICATION_MARKERS = (
+    "final-gate strict canonical/exact-marker synchronization remains intact",
+    "complete reviewer-visible EC-EVAL-011 payload",
+    "does not detect paraphrased or semantically equivalent leakage",
+    "does not prove semantic engineering correctness, LLM compliance, successful clean-context semantic evaluation, or universal representation coverage",
+)
 
 REQUIRED = [
     "README.md",
@@ -118,6 +159,8 @@ REQUIRED = [
     EVALUATOR_RUBRIC,
     "scripts/verify_repo.py",
     "tests/test_semantic_fixture_contract.py",
+    "tests/final_gate/__init__.py",
+    "tests/final_gate/test_semantic_fixture_contract.py",
     ".github/workflows/verify.yml",
 ]
 
@@ -331,6 +374,11 @@ def validate_gap_reviewer_fixture(gaps: dict, errors: list[str]) -> set[str]:
         fail("gap-discovery scenarios must be a non-empty list", errors)
         return scenario_ids
 
+    leakage_by_scenario = {
+        REVIEW_TO_HANDOFF_SCENARIO_ID: REVIEW_TO_HANDOFF_LEAKAGE_MARKERS,
+        FINAL_GATE_SCENARIO_ID: FINAL_GATE_LEAKAGE_MARKERS,
+    }
+
     for index, row in enumerate(rows):
         label = f"gap-discovery scenario[{index}]"
         if not isinstance(row, dict):
@@ -360,9 +408,10 @@ def validate_gap_reviewer_fixture(gaps: dict, errors: list[str]) -> set[str]:
         for field in GAP_LIST_FIELDS[sid]:
             _check_string_list(scenario_input.get(field), f"{label}.input.{field}", errors)
 
-        if sid == REVIEW_TO_HANDOFF_SCENARIO_ID:
+        leakage_markers = leakage_by_scenario.get(sid, ())
+        if leakage_markers:
             reviewer_payload = _complete_reviewer_payload_text(gaps, row)
-            for marker in REVIEW_TO_HANDOFF_LEAKAGE_MARKERS:
+            for marker in leakage_markers:
                 if marker.lower() in reviewer_payload:
                     fail(
                         f"{label} complete reviewer-visible payload leaks evaluator-only answer marker: {marker}",
@@ -429,6 +478,8 @@ def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
         fail(f"existing EC-EVAL-001..009 scenarios must remain intact; missing={missing_legacy}", errors)
     if REVIEW_TO_HANDOFF_SCENARIO_ID not in scenario_ids:
         fail(f"review-to-handoff semantic scenario missing: {REVIEW_TO_HANDOFF_SCENARIO_ID}", errors)
+    if FINAL_GATE_SCENARIO_ID not in scenario_ids:
+        fail(f"final-gate semantic scenario missing: {FINAL_GATE_SCENARIO_ID}", errors)
 
     rubric = load_json(EVALUATOR_RUBRIC, errors)
     if isinstance(rubric, dict):
@@ -449,6 +500,22 @@ def check_review_to_handoff_contract(errors: list[str]) -> None:
     for marker in REVIEW_TO_HANDOFF_VERIFICATION_MARKERS:
         if marker not in verification:
             fail(f"review-to-handoff verification-boundary marker missing: {marker}", errors)
+
+
+def check_final_gate_strict_contract(errors: list[str]) -> None:
+    protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+    reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+    verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
+
+    for marker in FINAL_GATE_PROTOCOL_MARKERS:
+        if marker not in protocol:
+            fail(f"final-gate strict protocol marker missing: {marker}", errors)
+    for marker in FINAL_GATE_REASONING_BASE_MARKERS:
+        if marker not in reasoning:
+            fail(f"final-gate strict canonical reasoning base marker missing: {marker}", errors)
+    for marker in FINAL_GATE_VERIFICATION_MARKERS:
+        if marker not in verification:
+            fail(f"final-gate strict verification-boundary marker missing: {marker}", errors)
 
 
 def is_external_link(target: str) -> bool:
@@ -492,6 +559,7 @@ def main() -> int:
     check_manifest(errors)
     check_semantic_evaluation_fixtures(errors)
     check_review_to_handoff_contract(errors)
+    check_final_gate_strict_contract(errors)
     check_markdown_links(errors)
     check_agent_contract(errors)
 
@@ -507,6 +575,7 @@ def main() -> int:
     print("- repository lifecycle metadata: consistent")
     print("- semantic scenario/rubric separation: valid")
     print("- review-to-handoff canonical/exact-marker synchronization: valid")
+    print("- final-gate strict canonical/exact-marker synchronization: valid")
     print("- local Markdown links: valid")
     return 0
 
