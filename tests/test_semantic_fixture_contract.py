@@ -195,6 +195,48 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertEqual(semantic_errors(), [])
         self.assertTrue(all("criteria" in spec for spec in rubric["scenarios"].values()))
 
+    def test_review_to_handoff_unmodified_reviewer_fixture_passes(self):
+        self.assertEqual(semantic_errors(), [])
+
+    def test_review_to_handoff_marker_in_fixture_purpose_fails_closed(self):
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        marker = verify_repo.REVIEW_TO_HANDOFF_LEAKAGE_MARKERS[0]
+        gaps["purpose"] = f"{gaps['purpose']} {marker}"
+
+        errors = semantic_errors(gaps=gaps)
+
+        self.assertTrue(
+            any("complete reviewer-visible payload leaks evaluator-only answer marker" in error and marker in error for error in errors),
+            errors,
+        )
+
+    def test_review_to_handoff_marker_in_scenario_input_fails_closed(self):
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        marker = verify_repo.REVIEW_TO_HANDOFF_LEAKAGE_MARKERS[1]
+        scenario = next(row for row in gaps["scenarios"] if row["id"] == verify_repo.REVIEW_TO_HANDOFF_SCENARIO_ID)
+        scenario["input"]["review_context"].append(f"Injected evaluator text: {marker}")
+
+        errors = semantic_errors(gaps=gaps)
+
+        self.assertTrue(any(marker in error for error in errors), errors)
+
+    def test_review_to_handoff_marker_in_review_task_fails_closed(self):
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        marker = verify_repo.REVIEW_TO_HANDOFF_LEAKAGE_MARKERS[2]
+        scenario = next(row for row in gaps["scenarios"] if row["id"] == verify_repo.REVIEW_TO_HANDOFF_SCENARIO_ID)
+        scenario["review_task"] = f"{scenario['review_task']} {marker}"
+
+        errors = semantic_errors(gaps=gaps)
+
+        self.assertTrue(any(marker in error for error in errors), errors)
+
+    def test_review_to_handoff_marker_may_remain_in_evaluator_only_rubric(self):
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        marker = verify_repo.REVIEW_TO_HANDOFF_LEAKAGE_MARKERS[0]
+        rubric["scenarios"][verify_repo.REVIEW_TO_HANDOFF_SCENARIO_ID]["criteria"].append(marker)
+
+        self.assertEqual(semantic_errors(rubric=rubric), [])
+
     def test_gravity_top_level_criteria_makes_verifier_fail(self):
         gravity = load_fixture("gravity-flow-version-coupling.json")
         gravity["criteria"] = ["evaluator-only"]
@@ -244,6 +286,23 @@ class SemanticFixtureContractTests(unittest.TestCase):
         errors = semantic_errors(rubric=rubric)
         self.assertTrue(any("semantic scenario/rubric ids differ" in error for error in errors), errors)
 
+    def test_review_to_handoff_scenario_and_rubric_id_parity_fails_closed(self):
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        rubric["scenarios"].pop(verify_repo.REVIEW_TO_HANDOFF_SCENARIO_ID)
+        errors = semantic_errors(rubric=rubric)
+        self.assertTrue(any("semantic scenario/rubric ids differ" in error for error in errors), errors)
+
+    def test_legacy_scenarios_001_through_009_remain_protected(self):
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        legacy_id = "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"
+        gaps["scenarios"] = [row for row in gaps["scenarios"] if row["id"] != legacy_id]
+        rubric["scenarios"].pop(legacy_id)
+
+        errors = semantic_errors(gaps=gaps, rubric=rubric)
+
+        self.assertTrue(any("existing EC-EVAL-001..009 scenarios must remain intact" in error and legacy_id in error for error in errors), errors)
+
     def test_owner_context_rubric_tracks_canonical_authority_order(self):
         rubric = load_fixture("semantic-evaluation-rubric.json")
         self.assertEqual(authority_alignment_errors(rubric), [])
@@ -291,6 +350,16 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("must not introduce a new normative rule", verification)
         self.assertEqual(rubric["authority"], "EVALUATOR_ONLY_NON_CANONICAL")
         self.assertIn("cannot create new Engineering Compass authority", rubric["purpose"])
+
+    def test_review_to_handoff_verification_documentation_bounds_structural_claim(self):
+        verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
+        self.assertIn("review-to-handoff canonical/exact-marker synchronization remains intact", verification)
+        self.assertIn("complete reviewer-visible EC-EVAL-010 payload", verification)
+        self.assertIn("does not detect paraphrased or semantically equivalent leakage", verification)
+        self.assertIn(
+            "does not prove semantic engineering correctness, LLM compliance, or successful clean-context semantic evaluation",
+            verification,
+        )
 
     def test_control_proportionality_supports_both_lighter_and_stronger_control(self):
         reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
