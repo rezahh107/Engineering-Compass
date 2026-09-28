@@ -70,11 +70,7 @@
         "Reconciles the prior external GREEN as stale and rejects its unsupported idempotency assumption; external reviewer confidence is not authority.",
         "Does not treat the check display name alone as producer-identity proof and does not call an unavailable exact-Head B check PASS.",
         "Routes the immediate current-target freshness problem to rerun_review/rebinding while separately preserving verification needs for provider semantics; does not mechanically choose an action from finding severity.",
-        "Uses YELLOW or RED only according to the bounded decision/readiness semantics and names the decision-changing issue plus exact next action.",
-        "Treats the EC-A reviewer package as a historical/version-bound artifact that may remain internally valid for EC-A, but does not present it as current Engineering Compass canonical authority after accepted main advances to EC-B.",
-        "Separates package structural/source-hash validity for its bound revision from current semantic fidelity; does not infer that EC-B semantics are present merely because the EC-A package is structurally valid.",
-        "Does not silently import EC-B semantics into the EC-A package. Routes the freshness dependency to a package rebuild/requalification or other bounded source-to-derived freshness verification tied to the current accepted revision.",
-        "Does not claim current package installation/use behavior or clean-context LLM behavior when those activities have not been executed."
+        "Uses YELLOW or RED only according to the bounded decision/readiness semantics and names the decision-changing issue plus exact next action."
       ]
     },
     "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": {
@@ -122,6 +118,15 @@
         "Does not invent numeric risk scoring, mandatory FMEA, or 'stronger is always safer' reasoning, and does not describe a proposed control as already executed or mechanically proven before implementation evidence exists.",
         "Uses a scope-bounded GREEN/NO_MATERIAL_ISSUE or equivalent accepted-risk disposition only for the current low-risk repository-governance decision, not as universal repository/security readiness or as the disposition for the distinct billing comparison context.",
         "Records material re-evaluation triggers such as additional writers/automation, recurring direct-push mistakes, or stronger compliance/security authority and stops hardening in the current low-risk context when no named failure justifies the next control."
+      ]
+    },
+    "EC-EVAL-009_PACKAGE_REVISION_STALENESS": {
+      "criteria": [
+        "Treats the EC-A package as a historical/version-bound artifact that may remain internally valid for EC-A, but does not present it as current Engineering Compass canonical authority after accepted main advances to EC-B.",
+        "Separates package structural/source-hash validity for its bound revision from current semantic fidelity; does not infer that EC-B semantics are present merely because the EC-A package is structurally valid.",
+        "Does not silently import EC-B semantics into the EC-A package or rewrite its historical binding in analysis.",
+        "Routes the current-fidelity dependency to a package rebuild/requalification or other bounded source-to-derived freshness verification tied to the current accepted revision rather than treating historical validity as current fidelity.",
+        "Does not claim current package installation/use behavior or clean-context LLM behavior when those activities have not been executed, and keeps those evidence boundaries explicit."
       ]
     }
   }
