@@ -96,6 +96,12 @@ REVIEW_TO_HANDOFF_REASONING_MARKERS = (
     "[VALIDATION CONTRACT]",
     "[POST-IMPLEMENTATION REPORT]",
 )
+REVIEW_TO_HANDOFF_VERIFICATION_MARKERS = (
+    "review-to-handoff canonical/exact-marker synchronization remains intact",
+    "complete reviewer-visible EC-EVAL-010 payload",
+    "does not detect paraphrased or semantically equivalent leakage",
+    "does not prove semantic engineering correctness, LLM compliance, or successful clean-context semantic evaluation",
+)
 
 REQUIRED = [
     "README.md",
@@ -161,6 +167,19 @@ def _check_string_list(value, label: str, errors: list[str]) -> bool:
         fail(f"{label} must be a non-empty list of non-empty strings", errors)
         return False
     return True
+
+
+def _complete_reviewer_payload_text(fixture: dict, scenario: dict) -> str:
+    """Serialize exactly the reviewer-visible fixture metadata plus one scenario row."""
+    return json.dumps(
+        {
+            "authority": fixture.get("authority"),
+            "purpose": fixture.get("purpose"),
+            "scenario": scenario,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    ).lower()
 
 
 def check_lifecycle(data: dict, errors: list[str]) -> None:
@@ -343,10 +362,13 @@ def validate_gap_reviewer_fixture(gaps: dict, errors: list[str]) -> set[str]:
             _check_string_list(scenario_input.get(field), f"{label}.input.{field}", errors)
 
         if sid == REVIEW_TO_HANDOFF_SCENARIO_ID:
-            reviewer_payload = json.dumps(row, ensure_ascii=False, sort_keys=True).lower()
+            reviewer_payload = _complete_reviewer_payload_text(gaps, row)
             for marker in REVIEW_TO_HANDOFF_LEAKAGE_MARKERS:
                 if marker.lower() in reviewer_payload:
-                    fail(f"{label} leaks evaluator-only answer marker: {marker}", errors)
+                    fail(
+                        f"{label} complete reviewer-visible payload leaks evaluator-only answer marker: {marker}",
+                        errors,
+                    )
     return scenario_ids
 
 
@@ -417,6 +439,7 @@ def check_semantic_evaluation_fixtures(errors: list[str]) -> None:
 def check_review_to_handoff_contract(errors: list[str]) -> None:
     protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
     reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+    verification = (ROOT / "docs" / "governance" / "VERIFICATION.md").read_text(encoding="utf-8")
 
     for marker in REVIEW_TO_HANDOFF_PROTOCOL_MARKERS:
         if marker not in protocol:
@@ -424,6 +447,9 @@ def check_review_to_handoff_contract(errors: list[str]) -> None:
     for marker in REVIEW_TO_HANDOFF_REASONING_MARKERS:
         if marker not in reasoning:
             fail(f"root-cause-to-prompt canonical marker missing: {marker}", errors)
+    for marker in REVIEW_TO_HANDOFF_VERIFICATION_MARKERS:
+        if marker not in verification:
+            fail(f"review-to-handoff verification-boundary marker missing: {marker}", errors)
 
 
 def is_external_link(target: str) -> bool:
@@ -481,7 +507,7 @@ def main() -> int:
     print("- repository.manifest.json: valid")
     print("- repository lifecycle metadata: consistent")
     print("- semantic scenario/rubric separation: valid")
-    print("- review-to-handoff canonical synchronization: valid")
+    print("- review-to-handoff canonical/exact-marker synchronization: valid")
     print("- local Markdown links: valid")
     return 0
 
