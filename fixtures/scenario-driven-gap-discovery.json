@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, drift, and governance cases without evaluator-only expectations.",
+  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, drift, governance, and review-to-handoff cases without evaluator-only expectations.",
   "scenarios": [
     {
       "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
@@ -115,6 +115,33 @@
         ]
       },
       "review_task": "Review the current repository-governance concern after incorporating the supplied authority, operational model, detectability/recovery evidence, control costs, proposed extra-review step, and the separate high-consequence comparison context. For each context, assess what control or additional evidence/review has decision value, what level is justified by the supplied facts, and which future evidence or authority changes would require re-evaluation."
+    },
+    {
+      "id": "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY",
+      "input": {
+        "scope": "PR_SCOPE",
+        "review_context": [
+          "A PR changes only the diagnostic evidence infrastructure used to qualify how a Gravity Flow Inbox settings flyout is observed; no production GPP rendering or workflow behavior is changed by the PR.",
+          "The PR acceptance boundary requires evidence that the host-owned Push Notification setting remains the authoritative native control and that the diagnostic cannot pass merely because unrelated notification-like content appears in the same flyout.",
+          "The evidence helper currently marks the setting as found when one visible textual match for the expected notification label is present in the settings flyout.",
+          "The helper does not currently require the matched text to be associated with the host-owned input element or another proven native-control provenance signal."
+        ],
+        "observed_evidence": [
+          "The current authentic browser artifact contains one visible expected notification label and the reviewed run records that observation successfully.",
+          "The pinned Gravity Flow 3.1.0 runtime/source currently contains the flyout identity `.gform-flyout--inbox-settings` and the input identity `input[data-js=\"inbox-setting\"][name=\"inbox-setting--push-enabled\"]` for the native Push Notification setting.",
+          "The supplied evidence establishes those exact identities for the pinned runtime but does not establish that they are public or stable extension contracts across independently evolving host versions.",
+          "A future or variant flyout can contain an unrelated notification-like notice, browser-permission message, helper row, or decoy control whose visible wording can overlap the expected notification wording.",
+          "Direct inspection can determine whether the helper's current predicate is based only on unique visible text and a controlled decoy case can test whether unrelated notification-like content can satisfy that predicate.",
+          "No supplied evidence shows a second production defect, a host-ownership defect, or a need to change Gravity Flow behavior itself."
+        ],
+        "delivery_context": [
+          "The final audience includes a non-technical Persian-speaking Owner who needs the decision and next action without dense hashes or CI mechanics in the primary explanation.",
+          "Standard bounded technical repair and verification are delegated to engineering when the causal boundary and method are sufficiently qualified; no product/business meaning needs an Owner choice in the supplied facts.",
+          "Any delegated implementation must use the exact fresh PR target, preserve host ownership, include evidence capable of distinguishing the intended repair from a superficially passing predicate, and report material planned-versus-actual deviation.",
+          "The review is expected to identify the exact next action needed to progress the PR rather than merely describe possible work."
+        ]
+      },
+      "review_task": "Review the current PR evidence path and handoff. Reconcile the supplied artifact, helper behavior, host/runtime identities, acceptance boundary, possible UI variation, and audience/authority context. Determine whether the current evidence is sufficient for the requested PR decision, what remains unproven, which action route is justified, and the exact next action."
     }
   ]
 }

@@ -128,6 +128,22 @@
         "Routes the current-fidelity dependency to a package rebuild/requalification or other bounded source-to-derived freshness verification tied to the current accepted revision rather than treating historical validity as current fidelity.",
         "Does not claim current package installation/use behavior or clean-context LLM behavior when those activities have not been executed, and keeps those evidence boundaries explicit."
       ]
+    },
+    "EC-EVAL-010_REVIEW_TO_HANDOFF_FIDELITY": {
+      "criteria": [
+        "Preserves the validity of the current authentic artifact observation while identifying that the evidence-capture predicate can still be defective for future or variant cases; it does not retroactively invalidate the observed run merely because the predicate is underqualified.",
+        "Identifies a causal statement equivalent to `unique textual match ≠ native-control provenance`: uniqueness of visible wording alone does not prove that the matched evidence belongs to the host-owned Push Notification control.",
+        "Keeps the repair at the diagnostic/evidence-infrastructure boundary unless new evidence expands the causal scope; does not modify production GPP or Gravity Flow behavior merely to make the diagnostic pass.",
+        "Uses `BOUNDED` when the supplied facts support one qualified local root cause, one sufficient evidence-backed method, no material authority/SSOT, public contract/schema/persisted-state, runtime/topology, or coordinated-consumer migration, and no materially distinct admissible competing method; otherwise uses `FULL` for a real material reason.",
+        "Does not fabricate alternative repair families or force comparison theater; if a real same-abstraction-level alternative becomes material, compares it or explains the evidence/authority reason it is not an admissible root-complete alternative.",
+        "When exact selectors, classes, data attributes, DOM identity, or exact host/source identity become part of the proposed method, activates boundary/stability/compatibility reasoning instead of treating the current markup identity as automatically stable.",
+        "Distinguishes a current-version-qualified native identity from a stable supported seam: the supplied `.gform-flyout--inbox-settings` and `input[data-js=\"inbox-setting\"][name=\"inbox-setting--push-enabled\"]` identities may be used only with claims bounded to the pinned runtime unless stronger support evidence is established.",
+        "If the review calls the issue merge-blocking or says do not merge, ties that conclusion to the actual PR acceptance boundary, explains materiality, and explains why lighter accepted-risk/follow-up/warning/later-verification/non-blocking dispositions are insufficient; it does not derive blocking mechanically from severity or a merely imaginable failure.",
+        "Preserves `NOT_PROVEN` for any unsupported claim about public/stable host seams, future-host compatibility, or runtime behavior not actually exercised, while preserving unaffected confirmed facts.",
+        "Separates a concise Persian-first Owner result from the evidence-dense technical review and keeps hashes, exact selectors, CI mechanics, and implementation-contract details out of the Owner summary unless decision-critical.",
+        "When the final delegated route is `repair` or `repair_and_verify`, emits a separate copy-ready Executor prompt in the same response; when root cause or repair family is still materially NOT_PROVEN, emits the smallest copy-ready qualification/verification prompt instead of speculative code-changing instructions.",
+        "For a code-changing delegated prompt, carries the confirmed root cause, selected method, correct enforcement boundary, applicable Selected Method Conformance Lock, falsification capable of distinguishing native provenance from decoy notification-like content, exact-target/freshness obligations, and planned-versus-actual deviation reporting using the canonical implementation/validation/post-implementation contracts."
+      ]
     }
   }
 }

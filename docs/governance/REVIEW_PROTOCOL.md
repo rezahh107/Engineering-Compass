@@ -165,7 +165,11 @@ Compare materially distinct repair families at the abstraction level of the root
 
 After root cause is sufficiently qualified, choose the lightest root-complete route using the canonical [`BOUNDED` versus `FULL`](../core/REASONING_MODEL.md#repair-route-bounded-versus-full) criteria. Do not invent competing methods merely to satisfy a quota.
 
+When `BOUNDED` is selected for a material repair, state a compact admissibility rationale where relevant: one qualified bounded root cause covers the repair findings; one evidence-supported method is sufficient; no material authority/source-of-truth migration, public contract/schema/persisted-state migration, runtime/process/topology migration, or coordinated external-consumer migration is required; and no materially distinct evidence-supported competing method requires `FULL` comparison. Do not invent alternatives. If a real same-abstraction-level alternative exists, compare it when materially admissible or state the evidence/authority reason it is not an admissible root-complete alternative. Two merely imaginable textual implementation ideas do not by themselves force `FULL`.
+
 If a code-changing method is selected, preserve its [Selected Method Conformance Lock](../core/REASONING_MODEL.md#selected-method-conformance-lock). If repository evidence later shows that the selected method cannot be implemented while preserving the lock, report `SELECTED_METHOD_INFEASIBLE` and return to method selection rather than silently substituting a different architecture or surface patch.
+
+If the selected method materially depends on a private/internal API, exact selector/class/data attribute, internal DOM identity, exact host/source identity, or another independently evolving implementation detail, activate boundary/stability/compatibility reasoning. Do not describe that identity as a stable supported seam without evidence. If the internal identity is nevertheless the smallest justified method for a pinned runtime, describe it as version-/runtime-bounded, preserve host ownership, and include relevant future-drift/falsification evidence without silently broadening the support claim.
 
 ## 14. Evaluate depth, blast radius, adoption cost, and falsification
 
@@ -194,6 +198,8 @@ Keep evidence maturity separate from finding qualification and from the final de
 
 End material review output with one scope-bounded decision state using the canonical [GREEN / YELLOW / RED](../core/REASONING_MODEL.md#decisionreadiness-state) semantics. Do not map severity mechanically to color.
 
+When a review says a finding is merge-blocking or says “do not merge,” include a concise decision-critical justification: identify the requested-action/PR acceptance boundary the unresolved finding defeats, why the defect is material to that boundary, and why a lighter disposition such as accepted residual risk, follow-up, warning, bounded later verification, or non-blocking repair is insufficient under the supplied authority/evidence. Do not derive merge-blocking mechanically from finding severity, and do not make a merely imaginable low-probability failure merge-blocking without connecting it to the actual requested decision and product/evidence contract.
+
 Before a current GREEN/completion claim in `PR_SCOPE`, recheck live Head/freshness. If Head changed, invalidate only evidence/results whose validity depends on the old identity, preserve identity-independent evidence, and rerun only the affected stages. **No stale GREEN.**
 
 ## 16. Recover proportionately from incomplete evidence
@@ -217,7 +223,9 @@ Route the final decision to the actor/action actually required by authority and 
 
 Do not route mechanically from severity.
 
-When a code-changing repair prompt is justified, follow the canonical [Root-cause-to-prompt pipeline](../core/REASONING_MODEL.md#root-cause-to-prompt-pipeline) and use the default three-contract Executor handoff. The prompt is an execution artifact, not new authority.
+A prompt-required delegated route is an incomplete handoff until the corresponding copy-ready prompt is emitted in the same response. For delegated `repair` or `repair_and_verify`, when root cause and repair method are sufficiently qualified, emit a separate copy-ready implementation prompt. If root cause or the repair family remains materially `NOT_PROVEN`, do not emit a speculative code-changing prompt; emit the smallest copy-ready qualification/verification prompt instead. For delegated `verify` or `rerun_review`, emit the appropriate copy-ready verification or rereview prompt when another model/Executor must perform that action. Do not invent an Executor prompt for a genuine Owner-only decision merely to satisfy this rule.
+
+Keep the action prompt separate from Owner-facing explanation and technical evidence. Default implementation-prompt language is English. For user-facing delivery, prefer the heading `## پرامپت اقدام`. When a code-changing repair prompt is justified, follow the canonical [Root-cause-to-prompt pipeline](../core/REASONING_MODEL.md#root-cause-to-prompt-pipeline) and preserve the default three-contract Executor handoff: `[IMPLEMENTATION CONTRACT]`, `[VALIDATION CONTRACT]`, and `[POST-IMPLEMENTATION REPORT]`. The prompt is an execution artifact, not new authority.
 
 ## 18. Stop at sufficiency
 
@@ -234,7 +242,15 @@ The stop reason must distinguish “the requested bounded decision is sufficient
 
 ## Recommended review output
 
-Keep output compact but auditable:
+Keep output compact but auditable.
+
+For a material review, keep three logically distinct surfaces when all are applicable; do not force all three for trivial or no-action reviews:
+
+1. **OWNER RESULT** — Persian-first and concise: bounded decision/readiness, practical meaning, plain-language root cause, selected direction, blocker/unknown if any, and exact next action.
+2. **TECHNICAL REVIEW** — evidence-dense details such as exact identities/hashes/checks, findings, causal/evidence qualification, `BOUNDED`/`FULL` rationale, falsification, and blast radius.
+3. **ACTION PROMPT** — the separate copy-ready prompt when the controlled route requires delegated action.
+
+A compact technical-review shape is:
 
 ```text
 Decision state: GREEN | YELLOW | RED
