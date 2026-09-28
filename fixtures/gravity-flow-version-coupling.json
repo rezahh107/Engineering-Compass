@@ -1,7 +1,7 @@
 {
   "id": "EC-EVAL-001_GRAVITY_FLOW_VERSION_COUPLING",
   "authority": "NON_CANONICAL_EVALUATION_SCENARIO",
-  "purpose": "Clean reviewer-input benchmark for testing whether an LLM moves from a visible local hashing symptom to the deepest evidence-supported compatibility/coupling boundary and a falsifiable root-complete repair direction without seeing evaluator expectations.",
+  "purpose": "Clean reviewer-input benchmark describing a Gravity Flow compatibility/admission scenario without exposing evaluator expectations.",
   "scope": "PR_OR_REPOSITORY_REVIEW",
   "scenario": {
     "product": "A maintained WordPress integration plugin adds presentation behavior on top of Gravity Flow.",
@@ -26,4 +26,5 @@
     ],
     "local_performance_detail": "the same upstream files are hashed repeatedly across requests, making hash caching an obvious local optimization"
   },
-  "review_task": "Review the engineering decision at causal depth. Identify the local symptom, synthesize the separate fingerprint-mismatch manifestations when evidence supports one failure class, identify the exact-version/internal-source coupling and independently evolving lifecycle property, and seek the deepest evidence-supported causal boundary while preserving what remains NOT_PROVEN. Reject a local hash-cache optimization as defect-class closure if the same coupling survives elsewhere. Compare only materially distinct evidence-supported root-correct directions at the same abstraction level; do not invent a supported seam. State whether repair selection is ready or verification is required, and define success/falsification criteria that would distinguish a root-complete repair from a superficially passing surface patch."}
+  "review_task": "Review the engineering decision using the supplied system, lifecycle, admission, failure, and runtime evidence. Explain the material causal relationships the evidence supports, identify any shared mechanism across the observed failures if warranted, compare only evidence-supported alternatives at an appropriate abstraction level, state what remains unproven, and recommend the smallest justified next engineering action together with evidence that would discriminate it from weaker alternatives."
+}
