@@ -165,6 +165,13 @@ class SemanticFixtureContractTests(unittest.TestCase):
         errors = semantic_errors(controls=controls)
         self.assertTrue(any("unsupported fields" in error and "expected_result" in error for error in errors), errors)
 
+    def test_package_staleness_input_unknown_structure_makes_verifier_fail(self):
+        controls = load_fixture("control-boundary-semantics.json")
+        package = next(row for row in controls["scenarios"] if row["id"] == "EC-EVAL-009_PACKAGE_REVISION_STALENESS")
+        package["input"]["assumed_current"] = True
+        errors = semantic_errors(controls=controls)
+        self.assertTrue(any("unsupported fields" in error and "assumed_current" in error for error in errors), errors)
+
     def test_unknown_reviewer_structure_is_fail_closed(self):
         gravity = load_fixture("gravity-flow-version-coupling.json")
         gravity["scenario"]["future_unvalidated_field"] = "would make admission permissive"
@@ -252,7 +259,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
 
     def test_all_pr6_reviewer_tasks_are_neutralized(self):
         tasks = reviewer_tasks()
-        self.assertEqual(set(tasks), set(PR6_LEAKAGE_MARKERS))
+        self.assertTrue(set(PR6_LEAKAGE_MARKERS).issubset(tasks), set(PR6_LEAKAGE_MARKERS) - set(tasks))
         self.assertEqual(review_task_leakage_errors(tasks), [])
         for sid, task in tasks.items():
             self.assertGreater(len(task), 120, sid)
@@ -292,7 +299,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("does not state the exact resulting Head", control_facts)
         self.assertIn("stronger directly testable uncertainty resolution", gap_facts)
         self.assertIn("lower implementation burden/time", gap_facts)
-        self.assertIn("accepted Engineering Compass repository revision EC-A", gap_facts)
+        self.assertIn("accepted repository revision EC-A", control_facts)
         self.assertIn("No prior independent review has been performed", gap_facts)
         self.assertIn("duplicate customer charges", gap_facts)
         self.assertIn("repeatedly co-change after contract updates", gap_facts)
@@ -308,6 +315,7 @@ class SemanticFixtureContractTests(unittest.TestCase):
             "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": "SELECTED_METHOD_INFEASIBLE",
             "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": "BOUNDED repair route",
             "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": "GREEN/NO_MATERIAL_ISSUE",
+            "EC-EVAL-009_PACKAGE_REVISION_STALENESS": "historical/version-bound artifact",
         }
         for sid, evaluator_only_fragment in checks.items():
             criteria = " ".join(rubric["scenarios"][sid]["criteria"])
@@ -370,28 +378,30 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertNotIn("weighted scoring", ec006["review_task"])
 
     def test_post_pr7_remaining_coverage_gaps_are_falsifiable_without_answer_leakage(self):
+        controls = load_fixture("control-boundary-semantics.json")
         gaps = load_fixture("scenario-driven-gap-discovery.json")
         rubric = load_fixture("semantic-evaluation-rubric.json")
         tasks = reviewer_tasks()
-        by_id = {row["id"]: row for row in gaps["scenarios"]}
+        controls_by_id = {row["id"]: row for row in controls["scenarios"]}
+        gaps_by_id = {row["id"]: row for row in gaps["scenarios"]}
 
-        ec005 = by_id["EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME"]
-        ec007 = by_id["EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP"]
-        ec008 = by_id["EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"]
-        ec005_facts = " ".join(ec005["input"]["known_evidence"])
+        ec009 = controls_by_id["EC-EVAL-009_PACKAGE_REVISION_STALENESS"]
+        ec007 = gaps_by_id["EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP"]
+        ec008 = gaps_by_id["EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING"]
+        ec009_facts = " ".join(ec009["input"]["package_state"])
         ec007_facts = " ".join(ec007["input"]["authority_and_surfaces"] + ec007["input"]["uninspected_context"])
         ec008_facts = " ".join(ec008["input"]["initial_evidence"] + ec008["input"]["fresh_owner_context"] + ec008["input"]["possible_future_changes"])
-        ec005_criteria = " ".join(rubric["scenarios"][ec005["id"]]["criteria"])
+        ec009_criteria = " ".join(rubric["scenarios"][ec009["id"]]["criteria"])
         ec007_criteria = " ".join(rubric["scenarios"][ec007["id"]]["criteria"])
         ec008_criteria = " ".join(rubric["scenarios"][ec008["id"]]["criteria"])
 
-        self.assertIn("accepted Engineering Compass repository revision EC-A", ec005_facts)
-        self.assertIn("canonical main has since advanced to accepted revision EC-B", ec005_facts)
-        self.assertIn("historical/version-bound artifact", ec005_criteria)
-        self.assertIn("package structural/source-hash validity", ec005_criteria)
-        self.assertIn("package rebuild/requalification", ec005_criteria)
-        self.assertNotIn("historical/version-bound artifact", tasks[ec005["id"]])
-        self.assertNotIn("package rebuild/requalification", tasks[ec005["id"]])
+        self.assertIn("accepted repository revision EC-A", ec009_facts)
+        self.assertIn("canonical main has subsequently advanced to accepted revision EC-B", ec009_facts)
+        self.assertIn("historical/version-bound artifact", ec009_criteria)
+        self.assertIn("package structural/source-hash validity", ec009_criteria)
+        self.assertIn("package rebuild/requalification", ec009_criteria)
+        self.assertNotIn("historical/version-bound artifact", tasks[ec009["id"]])
+        self.assertNotIn("package rebuild/requalification", tasks[ec009["id"]])
 
         self.assertIn("legacy test still requires JPG-only uploads", ec007_facts)
         self.assertIn("non-capability-shaped contract/test-drift finding", ec007_criteria)
