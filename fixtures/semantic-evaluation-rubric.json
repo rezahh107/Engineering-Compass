@@ -90,12 +90,18 @@
       "criteria": [
         "Identifies the legacy 2 MB JPG-only test as obsolete/drifted relative to current Owner authority, documentation, implementation, and runtime evidence instead of treating conforming production behavior as the defect.",
         "Uses the supplied direct inspection to recognize that the legacy test is a genuinely local causal boundary unless contrary evidence appears; stops causal deepening instead of manufacturing a repository-wide architecture cause.",
+        "Preserves that confirmed legacy-test issue as a non-capability-shaped contract/test-drift finding; does not force MISSING_CAPABILITY, MISFIT_CAPABILITY, or EXCESS_CAPABILITY onto a defect whose evidenced shape is local drift.",
         "Does not label the dormant WEBP enum or future object-storage adapter as current defects merely because they differ from the active contract.",
         "Reconciles the automated registry/CI recommendation as unsupported/false-positive or disproportionate where no named recurring failure justifies that control; reviewer confidence does not create authority.",
         "Challenges the uninspected old persisted-entry state only for the conclusions it could materially change and routes that area to qualification if needed without blocking the confirmed local test repair.",
         "Applies the two-key stop rule and explicitly separates sufficiency for the current decision from repository-wide defect completeness.",
         "Selects a BOUNDED repair route for the one confirmed local root cause when the given conditions support it; does not force FULL or invent competing methods to create comparison theater.",
-        "Stops once the material drift, bounded repair, unverified persisted-entry area, and dispositions are clear rather than expanding into unrelated subsystems."
+        "For the separate status-contract comparison context, synthesizes the repeated documentation/fixture/export manifestations under the evidenced manual-copy/co-change lifecycle mechanism rather than treating each current mismatch as an unrelated local typo.",
+        "Asks why the inspected status surfaces repeatedly diverge and identifies the deepest evidence-supported causal boundary in their duplicated ownership/derivation lifecycle; rejects synchronizing only today's visible status literals as defect-class closure when the same recurrence mechanism would remain reachable.",
+        "Does not promote a particular generator/codegen design to a proven repair merely because derivation is missing; if the root-correct mechanism or consumer migration is not sufficiently qualified, keeps method selection or that implementation direction NOT_PROVEN and requests the smallest discriminating verification.",
+        "Keeps the uninspected mobile-client status behavior and any claim that it shares the inspected manual-copy mechanism NOT_PROVEN rather than expanding the evidenced shared cause beyond inspected surfaces.",
+        "Preserves both causal-depth boundaries in one review: the evidenced local upload-test drift stays local, while the evidenced recurring status drift justifies deeper shared-cause reasoning.",
+        "Stops once the material drift, bounded repair, recurring-drift causal boundary, unverified areas, and dispositions are clear rather than expanding into unrelated subsystems."
       ]
     },
     "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING": {
@@ -105,9 +111,22 @@
         "Preserves the canonical authority/evidence boundary: Owner acceptance may rebut an engineering presumption or accept residual risk but does not manufacture mechanical protection or erase the observed bypass.",
         "Separates the policy question of whether stronger control is currently required from mechanism choices such as branch protection, reviewer quotas, signed commits, CODEOWNERS, or merge queues.",
         "Applies named-failure-first and minimum-effective-control reasoning, accounts for friction/maintenance/control interaction, and can legitimately decline the stronger blocking plan when it does not close a named material remaining failure proportional to its cost.",
-        "Does not invent numeric risk scoring, mandatory FMEA, or a new governance subsystem to make the decision appear rigorous.",
-        "Uses a scope-bounded GREEN/NO_MATERIAL_ISSUE or equivalent accepted-risk disposition only for the current repository-governance decision, not as universal repository/security readiness.",
-        "Records material re-evaluation triggers such as additional writers/automation, recurring direct-push mistakes, or stronger compliance/security authority and stops hardening when no current named failure justifies the next control."
+        "Applies the Evidence Value Test to the proposed extra independent review: because the supplied facts identify no unresolved question, higher-authority requirement, alternative repair family, or exact next action that such a review could change, does not request it ceremonially merely because no prior independent review exists; preserves the bounded scope and does not generalize this into a rule to never seek independent review when review could change a material decision.",
+        "Distinguishes the current low-consequence/high-detectability/cheap-recovery branch-governance case from the supplied billing comparison context where customer/external effects occur before detection and recovery requires credits/accounting correction.",
+        "In the billing comparison context, concludes that guidance plus post-deploy monitoring is not proportionate to the named failure and that a stronger preventive control is justified before deployment, without converting blocking into a universal default for unrelated repositories or changes.",
+        "Prefers the minimum effective forced control at the relevant deployment-consumer boundary, such as requiring the existing deterministic billing-invariant result before deployment, over the broader two-human-approval requirement for every documentation-only change unless stronger authority/evidence justifies that wider control.",
+        "Does not invent numeric risk scoring, mandatory FMEA, or 'stronger is always safer' reasoning, and does not describe a proposed control as already executed or mechanically proven before implementation evidence exists.",
+        "Uses a scope-bounded GREEN/NO_MATERIAL_ISSUE or equivalent accepted-risk disposition only for the current low-risk repository-governance decision, not as universal repository/security readiness or as the disposition for the distinct billing comparison context.",
+        "Records material re-evaluation triggers such as additional writers/automation, recurring direct-push mistakes, or stronger compliance/security authority and stops hardening in the current low-risk context when no named failure justifies the next control."
+      ]
+    },
+    "EC-EVAL-009_PACKAGE_REVISION_STALENESS": {
+      "criteria": [
+        "Treats the EC-A package as a historical/version-bound artifact that may remain internally valid for EC-A, but does not present it as current Engineering Compass canonical authority after accepted main advances to EC-B.",
+        "Separates package structural/source-hash validity for its bound revision from current semantic fidelity; does not infer that EC-B semantics are present merely because the EC-A package is structurally valid.",
+        "Does not silently import EC-B semantics into the EC-A package or rewrite its historical binding in analysis.",
+        "Routes the current-fidelity dependency to a package rebuild/requalification or other bounded source-to-derived freshness verification tied to the current accepted revision rather than treating historical validity as current fidelity.",
+        "Does not claim current package installation/use behavior or clean-context LLM behavior when those activities have not been executed, and keeps those evidence boundaries explicit."
       ]
     }
   }
