@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, and governance cases without evaluator-only expectations.",
+  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, drift, and governance cases without evaluator-only expectations.",
   "scenarios": [
     {
       "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
@@ -18,7 +18,10 @@
           "On timeout the current item remains in REQUESTING and is still visible after reload.",
           "A check named 'integration' passed on Head A, but its producer identity was not inspected and no exact-Head result exists for Head B.",
           "A prior external review says 'GREEN / safe to merge' but explicitly cites Head A and assumes provider retries are idempotent without evidence.",
-          "The changed workflow file on Head B has not yet been inspected; the earlier provider documentation remains identity-independent evidence."
+          "The changed workflow file on Head B has not yet been inspected; the earlier provider documentation remains identity-independent evidence.",
+          "The Engineering Compass reviewer package used to begin this review declares itself bound to accepted Engineering Compass repository revision EC-A; its internal structure and recorded source hashes remain valid for EC-A.",
+          "Engineering Compass canonical main has since advanced to accepted revision EC-B with additional merged semantics; no package rebuild or source-to-derived comparison against EC-B has been performed.",
+          "No production-like installation/use qualification or clean-context model evaluation has been executed for an EC-B-bound package, and no evidence establishes that the EC-A package contains the EC-B semantics."
         ],
         "owner_authority": [
           "The accepted product outcome is that every valid item eventually receives exactly one counter or reaches a recoverable operator-visible path.",
@@ -26,7 +29,7 @@
           "No Owner decision defines what business outcome to choose if the external provider cannot determine whether an uncertain request committed."
         ]
       },
-      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, and timeout-after-acceptance behavior. Identify which conclusions remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
+      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, timeout-after-acceptance behavior, and the reviewer package's declared repository binding. Identify which target-review conclusions and which reviewer-package claims remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
     },
     {
       "id": "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
@@ -69,14 +72,20 @@
           "One legacy test still requires JPG-only uploads no larger than 2 MB.",
           "Direct inspection shows that this legacy assertion is local to that test; no generator, shared fixture, runtime validator, or second documentation source still owns the 2 MB rule.",
           "A roadmap document labels an object-storage adapter as future capability, and no current runtime path references it.",
-          "An automated review confidently recommends adding a repository-wide upload-policy registry and CI gate because the dormant WEBP enum and legacy test differ from current production behavior."
+          "An automated review confidently recommends adding a repository-wide upload-policy registry and CI gate because the dormant WEBP enum and legacy test differ from current production behavior.",
+          "Separate recurring-drift comparison context: an order-status contract was renamed twice during the last year; after each accepted change, public documentation, an integration fixture, and an export mapping drifted at different times.",
+          "Direct inspection of that comparison context shows those three surfaces each manually duplicate status strings instead of deriving them from the canonical runtime enum/schema.",
+          "Commit history shows the same status surfaces repeatedly co-change after contract updates, and the previous repair synchronized only the visible literals; a later rename produced another mismatch across the same surface family.",
+          "The current visible status mismatch again spans documentation, the integration fixture, and the export mapping while the canonical runtime status source is correct.",
+          "No inspected evidence yet proves that a specific generator/codegen approach is feasible or that every status consumer can share one derivation mechanism."
         ],
         "uninspected_context": [
           "Persisted entries created under the earlier 2 MB-era configuration have not been examined.",
-          "No inspected evidence yet shows whether those old entries are revalidated through the current upload validator when viewed or edited."
+          "No inspected evidence yet shows whether those old entries are revalidated through the current upload validator when viewed or edited.",
+          "A mobile client may also consume the order-status vocabulary, but its repository/runtime has not been inspected and no evidence shows that it shares the same manual-copy mechanism as the inspected status surfaces."
         ]
       },
-      "review_task": "Assess conformance and whether the review is sufficient to stop. Reconcile the automated review with the supplied authority, documentation, implementation, runtime, test, future-capability, and uninspected persisted-state evidence. Determine which differences are material and causal, what additional evidence could change the decision, the appropriate repair scope if any, and the scope-bounded stop condition."
+      "review_task": "Assess conformance and whether the review is sufficient to stop across both supplied drift contexts. Reconcile the automated review with the supplied authority, documentation, implementation, runtime, test, history/co-change, future-capability, and uninspected evidence. Determine which differences are material and causal, whether the evidence supports a local or shared causal boundary in each context, what additional evidence could change the decision, the appropriate repair scope if any, and the scope-bounded stop condition."
     },
     {
       "id": "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING",
@@ -93,15 +102,22 @@
           "The Owner explicitly accepts the risk of direct pushes and prefers to avoid mandatory pull-request/status-check friction while this single-writer model remains true.",
           "No inspected evidence shows unauthorized writes, recurring accidental direct pushes, or another failure mode caused by the unprotected branch.",
           "A direct-push mistake would be immediately visible in the small repository and is cheaply reversible from Git history; no material external, security, data, or money consequence has been evidenced.",
-          "The proposed controls would add recurring review friction and maintenance without a named current failure beyond the already accepted bypass possibility."
+          "The proposed controls would add recurring review friction and maintenance without a named current failure beyond the already accepted bypass possibility.",
+          "No prior independent review has been performed for this exact branch-governance decision.",
+          "A suggested process step says to require one additional independent review solely because none has occurred; no unresolved evidence question, higher-authority requirement, alternative repair family, or exact next action has been identified that such a review could change."
         ],
         "possible_future_changes": [
           "Additional human writers or write-capable automations may be introduced later.",
           "Recurring accidental direct-push mistakes may become an evidenced failure mode later.",
-          "A future compliance, security, or external-commitment requirement may introduce stronger authority for branch controls."
+          "A future compliance, security, or external-commitment requirement may introduce stronger authority for branch controls.",
+          "Separate high-consequence comparison context: a billing-rules repository has four human writers and a write-capable release bot; merges to main automatically deploy billing rules within minutes.",
+          "In that comparison context, a malformed rule can create duplicate customer charges and external invoices before post-deploy monitoring exposes the problem.",
+          "A prior accidental billing-rule change was detected only by next-day reconciliation; reversal required customer credits and corrections to external accounting records, so reverting Git history alone did not undo the effects.",
+          "That comparison repository currently relies on contributor guidance and post-deploy monitoring; an existing deterministic billing-invariant test can detect the malformed rule before deployment, but the deployment job does not currently require that result.",
+          "A proposed alternative for the comparison repository would require two human approvals for every repository change, including documentation-only changes."
         ]
       },
-      "review_task": "Review the repository-governance concern after incorporating the supplied authority, operational model, detectability/recovery evidence, control costs, and future-change conditions. State the current disposition and bounded decision state, explain whether any control change is justified and at what level, and identify the evidence or authority changes that would require re-evaluation."
+      "review_task": "Review the current repository-governance concern after incorporating the supplied authority, operational model, detectability/recovery evidence, control costs, proposed extra-review step, and the separate high-consequence comparison context. For each context, assess what control or additional evidence/review has decision value, what level is justified by the supplied facts, and which future evidence or authority changes would require re-evaluation."
     }
   ]
 }
