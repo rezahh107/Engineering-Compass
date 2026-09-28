@@ -40,11 +40,14 @@
           "The validator does not independently determine whether the proposed root cause is true, whether the selected architecture is best, or whether relevant evidence was omitted.",
           "A non-canonical evaluator rubric additionally contains a criterion saying every repository must use mandatory branch protection, even though the applicable canonical guidance contains no such universal rule.",
           "A deterministic test confirms that the rubric file parses and that reviewer/rubric scenario IDs match.",
-          "Focused tests for a proposed implementation have passed, but no fresh exact-Head CI result, fresh rereview, merge, release, or Owner authorization evidence is supplied."
+          "A request was received, source evidence was collected, an assessment was drafted, a repair decision was selected, and focused implementation tests passed; no evidence says those distinct stages collapse into one another.",
+          "Focused tests for the proposed implementation have passed, but no fresh exact-Head CI result, fresh rereview, merge, release, or Owner authorization evidence is supplied.",
+          "The implementation report says the work is 'done' but does not state the exact resulting Head, remaining blockers or unknowns, planned-versus-actual deviations, or which claims are executed evidence versus unavailable/unverified.",
+          "The final decision/progress audience is a non-technical Persian-speaking Owner. The only prepared communication is a dense English technical report containing hashes, CI/test inventory, diff details, and implementation-contract material; no separate Owner-facing summary has been prepared."
         ],
-        "claim_under_review": "Validator PASS plus evaluator-file consistency proves the assessment is semantically correct, the evaluator's branch-protection rule is canonical, and the implementation is complete through release readiness."
+        "claim_under_review": "Validator PASS plus evaluator-file consistency proves the assessment is semantically correct, the evaluator's branch-protection rule is canonical, the implementation is complete through release readiness, the implementation report is sufficient, and the dense technical report is sufficient communication to the Owner."
       },
-      "review_task": "Assess the claims supported by the schema/validator result, evaluator-file consistency, and focused tests. Explain the authority role of the evaluator criterion, what semantic conclusions are supported or unsupported, which lifecycle stages have evidence, and what additional evidence would be required for stronger claims."
+      "review_task": "Assess the claims supported by the schema/validator result, evaluator-file consistency, focused tests, implementation report, and supplied audience context. Explain the authority role of the evaluator criterion, what semantic conclusions are supported or unsupported, which lifecycle stages have evidence, whether the supplied reporting and communication are sufficient for their purposes, and what additional evidence or delivery is required for stronger claims."
     }
   ]
 }

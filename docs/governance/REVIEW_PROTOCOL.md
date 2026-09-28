@@ -6,6 +6,8 @@ Use the model's existing engineering knowledge in a disciplined, context-sensiti
 
 This protocol is not a universal checklist. Steps may stay compact when they are not decision-material, but no material finding should skip the authority/evidence boundary.
 
+Keep the review lifecycle semantically separated according to the canonical [lifecycle stage separation](../core/REASONING_MODEL.md#lifecycle-stage-separation). A prior stage may supply input to the next, but completion or PASS of one stage does not itself prove the next.
+
 ## 0. Scope
 
 Classify the review:
@@ -256,3 +258,18 @@ Stop reason + scope/completeness boundary:
 ```
 
 Do not expose private chain-of-thought. Report conclusions, evidence, derivations, and concise rationale.
+
+## Owner-facing delivery
+
+When communicating a review decision, progress state, or engineering outcome to a non-technical Owner, keep that delivery distinct from the evidence-dense technical review and from any Executor prompt.
+
+Owner-facing delivery is **Persian-first by default** and should be concise enough to understand without programming, repository, architecture, DevOps, or CI expertise. When material, communicate:
+
+1. the bounded decision/readiness state;
+2. the practical meaning — what changed or what the result means;
+3. the confirmed root cause in plain language;
+4. the selected direction;
+5. any remaining blocker or unknown;
+6. the exact next action.
+
+Keep hashes, CI details, diffs, test inventories, and implementation contracts in supporting technical evidence unless one is decision-critical to the Owner. Repository/product identifiers may remain unchanged, and technical Executor prompts may remain English. Do not force Persian into source code, APIs, file names, or technical artifacts, and do not duplicate the full technical review merely to localize it.

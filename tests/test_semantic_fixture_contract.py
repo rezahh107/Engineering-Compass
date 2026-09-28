@@ -26,6 +26,9 @@ PR6_LEAKAGE_MARKERS = {
     "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": (
         "determine whether a non-canonical evaluator may introduce the stated policy",
         "keep implementation, selected-method conformance, focused tests, regression tests, exact-head ci, fresh rereview, merge/release, and owner authorization as separate stages",
+        "persian-first",
+        "request/intake",
+        "exact resulting head",
     ),
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": (
         "reconcile the stale external green",
@@ -35,6 +38,9 @@ PR6_LEAKAGE_MARKERS = {
     "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": (
         "report the correct infeasibility behavior and return to method selection",
         "requires full rather than bounded comparison",
+        "order of consideration",
+        "weighted scoring",
+        "correctness/truthfulness",
     ),
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": (
         "if the legacy test is the confirmed local causal boundary",
@@ -280,6 +286,10 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("ignores Idempotency-Key", gap_facts)
         self.assertIn("stable client_reference", gap_facts)
         self.assertIn("operator-visible uncertain/recovery state", gap_facts)
+        self.assertIn("non-technical Persian-speaking Owner", control_facts)
+        self.assertIn("does not state the exact resulting Head", control_facts)
+        self.assertIn("stronger directly testable uncertainty resolution", gap_facts)
+        self.assertIn("lower implementation burden/time", gap_facts)
 
     def test_evaluator_outcomes_remain_evaluator_only(self):
         tasks = reviewer_tasks()
@@ -326,6 +336,100 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertNotIn("SELECTED_METHOD_INFEASIBLE", ec006["review_task"])
         self.assertIn("uses FULL method selection", criteria)
         self.assertIn("does not invent alternatives", criteria)
+
+    def test_post_pr6_fidelity_behaviors_have_clean_scenario_and_evaluator_coverage(self):
+        controls = load_fixture("control-boundary-semantics.json")
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        ec004 = next(row for row in controls["scenarios"] if row["id"] == "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF")
+        ec006 = next(row for row in gaps["scenarios"] if row["id"] == "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS")
+        ec004_facts = " ".join(ec004["input"]["assessment"])
+        ec006_facts = " ".join(ec006["input"]["components"] + ec006["input"]["material_dimensions"])
+        ec004_criteria = " ".join(rubric["scenarios"][ec004["id"]]["criteria"])
+        ec006_criteria = " ".join(rubric["scenarios"][ec006["id"]]["criteria"])
+
+        self.assertIn("non-technical Persian-speaking Owner", ec004_facts)
+        self.assertIn("does not state the exact resulting Head", ec004_facts)
+        self.assertIn("request/intake", ec004_criteria)
+        self.assertIn("planned-versus-actual deviations", ec004_criteria)
+        self.assertIn("Persian-first delivery", ec004_criteria)
+        self.assertNotIn("Persian-first", ec004["review_task"])
+        self.assertNotIn("request/intake", ec004["review_task"])
+
+        self.assertIn("stronger directly testable uncertainty resolution", ec006_facts)
+        self.assertIn("lower implementation burden/time", ec006_facts)
+        self.assertIn("canonical order of consideration", ec006_criteria)
+        self.assertIn("without numeric weighting", ec006_criteria)
+        self.assertNotIn("order of consideration", ec006["review_task"])
+        self.assertNotIn("weighted scoring", ec006["review_task"])
+
+    def test_method_comparison_priority_contract(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        ordered = (
+            "functional correctness / truthfulness",
+            "defect-class closure / durability",
+            "regression preservation / semantic blast radius",
+            "authority / SSOT coherence / drift resistance",
+            "falsifiability / proof strength",
+            "proportionality / minimum effective control",
+            "Owner operability / automation implications",
+            "implementation / migration burden",
+            "implementation time",
+        )
+        positions = [reasoning.index(fragment) for fragment in ordered]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("order of consideration, not a weighted scoring model", reasoning)
+        self.assertIn("do not manufacture alternatives", reasoning.lower())
+        self.assertIn("do not force a winner", reasoning)
+        self.assertIn("Time remains relevant, but it must not silently outrank correctness or defect-class closure", reasoning)
+
+    def test_post_implementation_report_contract_is_complete(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        required = (
+            "what was actually implemented",
+            "selected-method conformance is `PROVEN` or `NOT_PROVEN`",
+            "focused falsification/test results",
+            "affected regression results",
+            "exact-Head CI/current verification status",
+            "fresh rereview status where required",
+            "remaining blockers or unknowns",
+            "planned-versus-actual deviations",
+            "exact resulting target identity / resulting Head",
+            "executed evidence versus unavailable or unverified evidence",
+        )
+        for fragment in required:
+            self.assertIn(fragment, reasoning)
+        self.assertIn("Implementation success does not imply validation success", reasoning)
+        self.assertIn("CI success does not imply rereview, merge/release, or Owner authorization", reasoning)
+
+    def test_full_lifecycle_stage_separation_is_canonical(self):
+        reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
+        protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "request / intake ≠ evidence ≠ assessment ≠ decision ≠ validation ≠ completion ≠ Owner delivery",
+            reasoning,
+        )
+        self.assertIn("Receiving a request is not evidence", reasoning)
+        self.assertIn("technical completion is not Owner-facing delivery or Owner authorization", reasoning)
+        self.assertIn("not a lifecycle state machine or workflow engine", reasoning)
+        self.assertIn("completion or PASS of one stage does not itself prove the next", protocol)
+
+    def test_owner_facing_delivery_contract_is_distinct_and_persian_first(self):
+        protocol = (ROOT / "docs" / "governance" / "REVIEW_PROTOCOL.md").read_text(encoding="utf-8")
+        self.assertIn("## Owner-facing delivery", protocol)
+        self.assertIn("Persian-first by default", protocol)
+        self.assertIn("distinct from the evidence-dense technical review and from any Executor prompt", protocol)
+        for fragment in (
+            "bounded decision/readiness state",
+            "practical meaning",
+            "confirmed root cause in plain language",
+            "selected direction",
+            "remaining blocker or unknown",
+            "exact next action",
+        ):
+            self.assertIn(fragment, protocol)
+        self.assertIn("technical Executor prompts may remain English", protocol)
+        self.assertIn("do not duplicate the full technical review", protocol)
 
 
 if __name__ == "__main__":
