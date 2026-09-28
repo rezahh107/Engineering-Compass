@@ -26,6 +26,9 @@ PR6_LEAKAGE_MARKERS = {
     "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF": (
         "determine whether a non-canonical evaluator may introduce the stated policy",
         "keep implementation, selected-method conformance, focused tests, regression tests, exact-head ci, fresh rereview, merge/release, and owner authorization as separate stages",
+        "persian-first",
+        "request/intake",
+        "exact resulting head",
     ),
     "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME": (
         "reconcile the stale external green",
@@ -35,6 +38,9 @@ PR6_LEAKAGE_MARKERS = {
     "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS": (
         "report the correct infeasibility behavior and return to method selection",
         "requires full rather than bounded comparison",
+        "order of consideration",
+        "weighted scoring",
+        "correctness/truthfulness",
     ),
     "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP": (
         "if the legacy test is the confirmed local causal boundary",
@@ -280,6 +286,10 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertIn("ignores Idempotency-Key", gap_facts)
         self.assertIn("stable client_reference", gap_facts)
         self.assertIn("operator-visible uncertain/recovery state", gap_facts)
+        self.assertIn("non-technical Persian-speaking Owner", control_facts)
+        self.assertIn("does not state the exact resulting Head", control_facts)
+        self.assertIn("stronger directly testable uncertainty resolution", gap_facts)
+        self.assertIn("lower implementation burden/time", gap_facts)
 
     def test_evaluator_outcomes_remain_evaluator_only(self):
         tasks = reviewer_tasks()
@@ -326,6 +336,32 @@ class SemanticFixtureContractTests(unittest.TestCase):
         self.assertNotIn("SELECTED_METHOD_INFEASIBLE", ec006["review_task"])
         self.assertIn("uses FULL method selection", criteria)
         self.assertIn("does not invent alternatives", criteria)
+
+    def test_post_pr6_fidelity_behaviors_have_clean_scenario_and_evaluator_coverage(self):
+        controls = load_fixture("control-boundary-semantics.json")
+        gaps = load_fixture("scenario-driven-gap-discovery.json")
+        rubric = load_fixture("semantic-evaluation-rubric.json")
+        ec004 = next(row for row in controls["scenarios"] if row["id"] == "EC-EVAL-004_VALIDATOR_PASS_IS_NOT_SEMANTIC_PROOF")
+        ec006 = next(row for row in gaps["scenarios"] if row["id"] == "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS")
+        ec004_facts = " ".join(ec004["input"]["assessment"])
+        ec006_facts = " ".join(ec006["input"]["components"] + ec006["input"]["material_dimensions"])
+        ec004_criteria = " ".join(rubric["scenarios"][ec004["id"]]["criteria"])
+        ec006_criteria = " ".join(rubric["scenarios"][ec006["id"]]["criteria"])
+
+        self.assertIn("non-technical Persian-speaking Owner", ec004_facts)
+        self.assertIn("does not state the exact resulting Head", ec004_facts)
+        self.assertIn("request/intake", ec004_criteria)
+        self.assertIn("planned-versus-actual deviations", ec004_criteria)
+        self.assertIn("Persian-first delivery", ec004_criteria)
+        self.assertNotIn("Persian-first", ec004["review_task"])
+        self.assertNotIn("request/intake", ec004["review_task"])
+
+        self.assertIn("stronger directly testable uncertainty resolution", ec006_facts)
+        self.assertIn("lower implementation burden/time", ec006_facts)
+        self.assertIn("canonical order of consideration", ec006_criteria)
+        self.assertIn("without numeric weighting", ec006_criteria)
+        self.assertNotIn("order of consideration", ec006["review_task"])
+        self.assertNotIn("weighted scoring", ec006["review_task"])
 
     def test_method_comparison_priority_contract(self):
         reasoning = (ROOT / "docs" / "core" / "REASONING_MODEL.md").read_text(encoding="utf-8")
