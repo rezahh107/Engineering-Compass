@@ -1,6 +1,6 @@
 {
   "authority": "NON_CANONICAL_EVALUATION_SCENARIOS",
-  "purpose": "Clean reviewer-input scenarios for evaluating bounded Scenario-Driven Gap Discovery, freshness, evidence recovery, control proportionality, causal depth, repair routing, and conformance behavior without exposing evaluator-only expectations.",
+  "purpose": "Clean reviewer-input scenarios containing workflow, review-freshness, repair-selection, and governance cases without evaluator-only expectations.",
   "scenarios": [
     {
       "id": "EC-EVAL-005_WORKFLOW_UNCERTAIN_OUTCOME",
@@ -26,7 +26,7 @@
           "No Owner decision defines what business outcome to choose if the external provider cannot determine whether an uncertain request committed."
         ]
       },
-      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the stale external GREEN and unsupported idempotency claim, distinguish Head-dependent from identity-independent evidence, and do not inherit GREEN from Head A. Surface the timeout-after-acceptance gap, decide which conclusions remain valid versus stale, and route the exact next action among verification, repair, or rerun_review without turning local missing evidence into a global failure."
+      "review_task": "Review the current PR using the smallest useful operational model. Reconcile the Head change, prior external review, provider evidence, check evidence, and timeout-after-acceptance behavior. Identify which conclusions remain current or require refresh, any material product/workflow gaps, and the smallest justified next action."
     },
     {
       "id": "EC-EVAL-006_INTERACTION_FAILURE_AND_BOUNDED_COMBINATORICS",
@@ -38,7 +38,7 @@
           "The local order service records shipment_created only after receiving a successful response.",
           "The server rechecks the current user's permission on every request, including retries after a refreshed session.",
           "A previously selected repair method says to preserve the current remote endpoint/authority boundary and make requests idempotent by sending the provider's documented Idempotency-Key header.",
-          "Fresh authoritative provider documentation now proves that this endpoint ignores Idempotency-Key and offers no request lookup; adding a local header cannot preserve the selected method's defect-closure mechanism.",
+          "Fresh authoritative provider documentation proves that this endpoint ignores Idempotency-Key and offers no request lookup; the selected method depends on the endpoint honoring that header.",
           "The same provider documentation exposes a separate shipment-status lookup by stable client_reference, but using it requires persisting a durable request identity and changes the recovery flow from prevention to reconciliation.",
           "Accepted product authority also permits an operator-visible uncertain/recovery state with manual reconciliation when the provider cannot prove commit outcome; that route changes workflow/failure semantics but preserves the accepted exactly-one-or-recoverable outcome."
         ],
@@ -52,7 +52,7 @@
           "replacement repair family: automated reconciliation through stable client_reference or operator-visible uncertain-state recovery"
         ]
       },
-      "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions, identify any system-level failure that changes the engineering decision, and keep method coverage explicit for the methods actually activated. Then assess the fresh provider evidence against the selected method's locked closure mechanism: if the method is no longer implementable as selected, report the correct infeasibility behavior and return to method selection rather than silently degrading to a header-only surface patch. Because the scenario supplies two materially distinct admissible replacement repair families with different failure/workflow semantics, determine whether the repair decision now requires FULL rather than BOUNDED comparison, and compare only those evidence-supported methods without inventing quota alternatives."
+      "review_task": "Review the change as a system rather than as isolated components. Exercise only materially interacting dimensions and identify any system-level failure that could change the engineering decision. Assess the fresh provider evidence against the previously selected method and the supplied replacement families, determine the appropriate method-selection state and repair route from the evidence, compare only materially distinct evidence-supported alternatives, and report Method Coverage for the methods materially activated."
     },
     {
       "id": "EC-EVAL-007_DRIFT_MODEL_COMPLETENESS_AND_STOP",
@@ -73,7 +73,7 @@
           "No inspected evidence yet shows whether those old entries are revalidated through the current upload validator when viewed or edited."
         ]
       },
-      "review_task": "Assess conformance and whether the review is sufficient to stop. Reconcile the automated review rather than accepting its confidence as authority. Distinguish material drift from retained-future/non-active differences, and challenge whether old persisted entries can change the decision. If the legacy test is the confirmed local causal boundary, keep the repair route proportionate and avoid inventing a registry, competing architecture, or repository-wide completeness claim; state any unverified area that blocks only a broader claim."
+      "review_task": "Assess conformance and whether the review is sufficient to stop. Reconcile the automated review with the supplied authority, documentation, implementation, runtime, test, future-capability, and uninspected persisted-state evidence. Determine which differences are material and causal, what additional evidence could change the decision, the appropriate repair scope if any, and the scope-bounded stop condition."
     },
     {
       "id": "EC-EVAL-008_OWNER_CONTEXT_RECLASSIFICATION_AND_ANTI_OVERENGINEERING",
@@ -98,7 +98,7 @@
           "A future compliance, security, or external-commitment requirement may introduce stronger authority for branch controls."
         ]
       },
-      "review_task": "Review the repository-governance concern after incorporating all supplied authority, detectability/recovery, control-cost, and operational evidence. State the current disposition and bounded decision state, separate the policy question from possible enforcement mechanisms, and choose the minimum effective response. Do not invent numeric risk scores or stronger controls merely because they are technically available; identify the future material conditions that would justify re-evaluation."
+      "review_task": "Review the repository-governance concern after incorporating the supplied authority, operational model, detectability/recovery evidence, control costs, and future-change conditions. State the current disposition and bounded decision state, explain whether any control change is justified and at what level, and identify the evidence or authority changes that would require re-evaluation."
     }
   ]
 }
